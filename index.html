@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Control TCC - v24</title>
+  <title>Control TCC - Allan Pro v25</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -37,7 +37,7 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
           </div>
           <div>
-            <h1 class="text-base font-bold tracking-tight">Sistema TCC Pro v24</h1>
+            <h1 class="text-base font-bold tracking-tight">Sistema TCC Pro v25</h1>
             <p id="headerSubtitle" class="text-[11px] text-slate-500 dark:text-slate-400">Gemini IA Conectada</p>
           </div>
         </div>
@@ -288,7 +288,7 @@
       </div>
     </section>
 
-    <!-- ==================== PESTAÑA 6: AJUSTES & CÁLCULO DE MACROS CON IA ==================== -->
+    <!-- ==================== PESTAÑA 6: AJUSTES & CÁLCULO DE MACROS Y CALORÍAS CON IA ==================== -->
     <section id="tab-settings" class="space-y-4 hidden">
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
         <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Configuración & Token Gemini</h2>
@@ -307,10 +307,10 @@
         <button onclick="saveSettings()" class="w-full py-2.5 bg-blue-500 text-white font-bold text-xs rounded-xl transition">Guardar Token y Modelo</button>
       </div>
 
-      <!-- Apartado de Cálculo IA de Calorías y Macros con Objetivos Completos -->
+      <!-- Apartado de Cálculo IA de Calorías, Agua y Macros -->
       <div class="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-2xl p-4 text-white shadow-md space-y-3">
-        <h2 class="font-bold text-sm">✨ Calcular Calorías y Macros con IA</h2>
-        <p class="text-xs text-indigo-100">Introduce tus datos actuales para que Gemini calcule tus metas exactas.</p>
+        <h2 class="font-bold text-sm">✨ Calcular Calorías, Agua y Macros con IA</h2>
+        <p class="text-xs text-indigo-100">Introduce tus datos para que Gemini calcule tus metas exactas y las sincronice con tu nutrición.</p>
         
         <div class="grid grid-cols-2 gap-2">
           <div>
@@ -420,11 +420,11 @@
       DEFAULT_STATE.days[d.id] = { water: 0, meals: [], habitsState: {} };
     });
 
-    let appState = JSON.parse(localStorage.getItem('allan_tcc_app_v24')) || DEFAULT_STATE;
+    let appState = JSON.parse(localStorage.getItem('allan_tcc_app_v25')) || DEFAULT_STATE;
     let currentUploadedImageBase64 = null;
 
     function saveState() {
-      localStorage.setItem('allan_tcc_app_v24', JSON.stringify(appState));
+      localStorage.setItem('allan_tcc_app_v25', JSON.stringify(appState));
       renderAll();
     }
 
@@ -657,7 +657,7 @@
       }
     }
 
-    // CÁLCULO AUTOMÁTICO DE MACROS CON OBJETIVOS COMPLETOS
+    // CÁLCULO DE CALORÍAS, AGUA Y MACROS CON IA
     async function calculateMacrosWithGemini() {
       const apiKey = appState.apiKey;
       if(!apiKey) { alert("Configura tu API Key en Ajustes."); switchTab('settings'); return; }
@@ -670,11 +670,11 @@
 
       const btn = document.getElementById('calcBtn');
       const originalText = btn.innerHTML;
-      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner inline-block"></div><span>Calculando Metas...</span>`;
+      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner inline-block"></div><span>Calculando Metas y Macros...</span>`;
       btn.disabled = true;
 
       try {
-        const prompt = `Calcula las calorías diarias y agua para una persona de ${weight}kg, ${height}cm, ${age} años, nivel de actividad: "${activity}", objetivo principal: "${goal}".
+        const prompt = `Calcula las calorías diarias, el agua y los macros (proteína, carbohidratos, grasas) en base a las necesidades para una persona de ${weight}kg, ${height}cm, ${age} años, nivel de actividad: "${activity}", objetivo principal: "${goal}".
         Devuelve ÚNICAMENTE un JSON válido sin texto extra:
         {
           "targetKcal": número_calorías,
@@ -687,7 +687,7 @@
         appState.targetKcal = parsed.targetKcal || 2100;
         appState.targetWater = parsed.targetWater || 4000;
         saveState();
-        alert(`¡Metas instaladas con éxito!\n• Calorías: ${appState.targetKcal} kcal\n• Agua: ${appState.targetWater} ml`);
+        alert(`¡Metas y Macros ajustados con éxito!\n• Calorías: ${appState.targetKcal} kcal\n• Agua: ${appState.targetWater} ml`);
         switchTab('nutrition');
       } catch (err) {
         alert("Error al calcular metas: " + err.message);
