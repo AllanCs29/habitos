@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Control TCC - Allan Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 500: '#3b82f6', 600: '#2563eb' },
+            accent: { 500: '#10b981', 600: '#059669' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { -webkit-tap-highlight-color: transparent; font-family: system-ui, -apple-system, sans-serif; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen pb-24 transition-colors duration-200">
+
+  <!-- HEADER & CONTROLES SUPERIORES -->
+  <header class="sticky top-0 z-30 bg-white/90 dark:bg-slate-800/90 backdrop-blur border-b border-slate-200 dark:border-slate-700 px-4 py-3 shadow-sm">
+    <div class="max-w-md mx-auto">
+      <div class="flex justify-between items-center mb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-brand-500/10 dark:bg-brand-500/20 flex items-center justify-center text-brand-500">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+          </div>
+          <div>
+            <h1 class="text-base font-bold tracking-tight">Sistema TCC & Metas</h1>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">120 kg ➔ Quema de Grasa</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="copyDailyReport()" class="text-xs bg-brand-500 hover:bg-brand-600 text-white px-3 py-1.5 rounded-xl font-medium shadow-sm active:scale-95 transition flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+            Reporte
+          </button>
+          <button onclick="toggleTheme()" id="themeBtn" class="p-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-sm">🌙</button>
+        </div>
+      </div>
+
+      <!-- SELECTOR DE CALENDARIO (10 DÍAS) -->
+      <div id="calendarBar" class="flex gap-2 overflow-x-auto no-scrollbar py-1"></div>
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="max-w-md mx-auto px-4 pt-4 space-y-5">
+
+    <!-- ==================== PESTAÑA 1: NUTRICIÓN Y AGUA ==================== -->
+    <section id="tab-nutrition" class="space-y-4">
+      
+      <!-- Tarjeta de Calorías y Gráficas Circulares -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+        <div class="flex justify-between items-center mb-3">
+          <div class="flex items-center gap-2">
+            <div class="p-2 rounded-lg bg-blue-500/10 text-blue-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            </div>
+            <h2 class="font-bold text-sm">Balance Energético</h2>
+          </div>
+          <span id="kcalText" class="text-xs font-extrabold text-brand-500 bg-brand-500/10 px-2.5 py-1 rounded-full">0 / 2100 kcal</span>
+        </div>
+
+        <!-- Barra General Calorías -->
+        <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden mb-4">
+          <div id="kcalBar" class="bg-brand-500 h-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+
+        <!-- Gráficas Circulares (Donut Charts) para Macros -->
+        <div class="grid grid-cols-3 gap-3 text-center">
+          <!-- Proteína -->
+          <div class="bg-slate-50 dark:bg-slate-700/40 p-3 rounded-xl flex flex-col items-center">
+            <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Proteína</span>
+            <div class="relative w-14 h-14 flex items-center justify-center my-1">
+              <svg class="w-14 h-14 transform -rotate-90">
+                <circle cx="28" cy="28" r="24" stroke="currentColor" stroke-width="5" class="text-slate-200 dark:text-slate-600 fill-none"></circle>
+                <circle id="protRing" cx="28" cy="28" r="24" stroke="currentColor" stroke-width="5" stroke-dasharray="150.7" stroke-dashoffset="150.7" stroke-linecap="round" class="text-rose-500 fill-none transition-all duration-500"></circle>
+              </svg>
+              <div class="absolute inset-0 flex items-center justify-center text-[11px] font-bold" id="protPercent">0%</div>
+            </div>
+            <span id="protText" class="text-xs font-bold mt-1">0/170g</span>
+          </div>
+
+          <!-- Carbos -->
+          <div class="bg-slate-50 dark:bg-slate-700/40 p-3 rounded-xl flex flex-col items-center">
+            <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Carbos</span>
+            <div class="relative w-14 h-14 flex items-center justify-center my-1">
+              <svg class="w-14 h-14 transform -rotate-90">
+                <circle cx="28" cy="28" r="24" stroke="currentColor" stroke-width="5" class="text-slate-200 dark:text-slate-600 fill-none"></circle>
+                <circle id="carbRing" cx="28" cy="28" r="24" stroke="currentColor" stroke-width="5" stroke-dasharray="150.7" stroke-dashoffset="150.7" stroke-linecap="round" class="text-amber-500 fill-none transition-all duration-500"></circle>
+              </svg>
+              <div class="absolute inset-0 flex items-center justify-center text-[11px] font-bold" id="carbPercent">0%</div>
+            </div>
+            <span id="carbText" class="text-xs font-bold mt-1">0/160g</span>
+          </div>
+
+          <!-- Grasas -->
+          <div class="bg-slate-50 dark:bg-slate-700/40 p-3 rounded-xl flex flex-col items-center">
+            <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Grasas</span>
+            <div class="relative w-14 h-14 flex items-center justify-center my-1">
+              <svg class="w-14 h-14 transform -rotate-90">
+                <circle cx="28" cy="28" r="24" stroke="currentColor" stroke-width="5" class="text-slate-200 dark:text-slate-600 fill-none"></circle>
+                <circle id="fatRing" cx="28" cy="28" r="24" stroke="currentColor" stroke-width="5" stroke-dasharray="150.7" stroke-dashoffset="150.7" stroke-linecap="round" class="text-emerald-500 fill-none transition-all duration-500"></circle>
+              </svg>
+              <div class="absolute inset-0 flex items-center justify-center text-[11px] font-bold" id="fatPercent">0%</div>
+            </div>
+            <span id="fatText" class="text-xs font-bold mt-1">0/85g</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tarjeta de Hidratación con Vaso Visual -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4">
+        <!-- Vaso Animado -->
+        <div class="relative w-16 h-24 bg-slate-100 dark:bg-slate-700/60 rounded-b-2xl border-2 border-t-0 border-sky-400 overflow-hidden flex flex-col justify-end shadow-inner">
+          <div id="waterLiquid" class="w-full bg-sky-500 transition-all duration-500" style="height: 0%"></div>
+          <div class="absolute inset-0 flex items-center justify-center text-xs font-extrabold text-slate-700 dark:text-white drop-shadow">
+            <span id="waterPercentText">0%</span>
+          </div>
+        </div>
+        <div class="flex-1">
+          <div class="flex justify-between items-center mb-1">
+            <h2 class="font-bold text-sm">Hidratación (Meta 4L)</h2>
+            <span id="waterText" class="text-sm font-extrabold text-sky-500">0.00 L</span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Suma agua para limpiar toxinas y acelerar metabolismo.</p>
+          <div class="grid grid-cols-4 gap-1.5">
+            <button onclick="addWater(250)" class="py-1.5 bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-300 rounded-lg text-xs font-bold border border-sky-200 dark:border-sky-800 active:scale-95">+250</button>
+            <button onclick="addWater(500)" class="py-1.5 bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-300 rounded-lg text-xs font-bold border border-sky-200 dark:border-sky-800 active:scale-95">+500</button>
+            <button onclick="addWater(1000)" class="py-1.5 bg-sky-500 text-white rounded-lg text-xs font-bold active:scale-95">+1L</button>
+            <button onclick="addWater(-250)" class="py-1.5 bg-slate-100 dark:bg-slate-700 text-slate-500 rounded-lg text-xs font-bold active:scale-95">-250</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Menú del Día -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+          <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+          Menú del Día (Plan 10 Días)
+        </h2>
+        <div id="mealsList" class="space-y-2.5"></div>
+      </div>
+
+      <!-- Registro Manual Extra -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+          <svg class="w-4 h-4 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          Agregar Comida Manual
+        </h2>
+        <div class="space-y-2">
+          <input id="customFoodName" type="text" placeholder="Ej. Comida fuera, snack..." class="w-full px-3 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-700/60 border-none outline-none focus:ring-2 focus:ring-brand-500">
+          <div class="grid grid-cols-4 gap-2">
+            <input id="customKcal" type="number" placeholder="Kcal" class="px-2 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none text-center">
+            <input id="customProt" type="number" placeholder="Prot" class="px-2 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none text-center">
+            <input id="customCarb" type="number" placeholder="Carb" class="px-2 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none text-center">
+            <input id="customFat" type="number" placeholder="Grasa" class="px-2 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none text-center">
+          </div>
+          <button onclick="addCustomFood()" class="w-full py-2.5 bg-accent-500 hover:bg-accent-600 text-white font-bold text-sm rounded-xl shadow-sm active:scale-98 transition">
+            + Registrar en mis Macros
+          </button>
+        </div>
+        <div id="customMealsList" class="mt-3 space-y-2"></div>
+      </div>
+    </section>
+
+    <!-- ==================== PESTAÑA 2: ENFOQUE Y TAREAS ==================== -->
+    <section id="tab-focus" class="space-y-4 hidden">
+      <!-- Temporizador 10 Minutos -->
+      <div class="bg-gradient-to-r from-indigo-600 to-brand-600 rounded-2xl p-4 text-white shadow-md flex justify-between items-center">
+        <div>
+          <span class="text-[10px] uppercase font-bold tracking-wider bg-white/20 px-2 py-0.5 rounded">Técnica Anti-Parálisis</span>
+          <h2 class="text-base font-bold mt-1">Regla de 10 Minutos</h2>
+          <p class="text-xs text-indigo-100">Rompe la resistencia inicial de tus tareas.</p>
+        </div>
+        <div class="text-right">
+          <div id="timerDisplay" class="text-2xl font-mono font-extrabold">10:00</div>
+          <div class="flex gap-1 mt-1 justify-end">
+            <button onclick="toggleTimer()" id="timerBtn" class="bg-white text-indigo-700 px-3 py-1 rounded-lg text-xs font-bold">Iniciar</button>
+            <button onclick="resetTimer()" class="bg-indigo-800/60 text-white px-2 py-1 rounded-lg text-xs">↺</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tareas Manuales -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+          <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+          Objetivos y Entregables
+        </h2>
+        <div class="flex gap-2 mb-4">
+          <input id="newTaskInput" type="text" placeholder="Nueva tarea..." class="flex-1 px-3 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
+          <select id="newTaskTag" class="px-2 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none font-semibold">
+            <option value="Trabajo">Trabajo</option>
+            <option value="Rutina">Casa</option>
+            <option value="Escuela">Escuela</option>
+          </select>
+          <button onclick="addTask()" class="bg-brand-500 text-white px-3 py-2 rounded-xl font-bold text-sm">+</button>
+        </div>
+        <div id="tasksList" class="space-y-2"></div>
+      </div>
+    </section>
+
+    <!-- ==================== PESTAÑA 3: HÁBITOS TCC ==================== -->
+    <section id="tab-habits" class="space-y-4 hidden">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-2">
+          <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+          Hábitos del Día
+        </h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Marca tus victorias conductuales cotidianas.</p>
+        <div id="dailyHabitsList" class="space-y-2.5"></div>
+      </div>
+
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 overflow-x-auto">
+        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400 mb-3">Racha de 10 Días</h2>
+        <table class="w-full text-left border-collapse text-xs">
+          <thead><tr id="habitGridHeader" class="border-b border-slate-200 dark:border-slate-700 text-slate-400"></tr></thead>
+          <tbody id="habitGridBody" class="divide-y divide-slate-200 dark:divide-slate-700"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ==================== PESTAÑA 4: DESPENSA 3B ==================== -->
+    <section id="tab-grocery" class="space-y-4 hidden">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+        <div class="flex justify-between items-center mb-3">
+          <div>
+            <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Despensa 3B ($1,500 MXN)</h2>
+            <p class="text-xs text-emerald-500 font-medium">Presupuesto optimizado para 10 días</p>
+          </div>
+        </div>
+        <div class="flex gap-2 mb-4">
+          <input id="newGroceryInput" type="text" placeholder="Artículo a comprar..." class="flex-1 px-3 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
+          <button onclick="addGrocery()" class="bg-brand-500 text-white px-4 py-2 rounded-xl font-bold text-sm">+</button>
+        </div>
+        <div id="groceryList" class="space-y-2"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- BARRA DE NAVEGACIÓN INFERIOR -->
+  <nav class="fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-2 py-1.5">
+    <div class="max-w-md mx-auto grid grid-cols-4 gap-1">
+      <button onclick="switchTab('nutrition')" id="nav-nutrition" class="flex flex-col items-center py-1 rounded-xl text-brand-500 font-bold">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg>
+        <span class="text-[10px]">Nutrición</span>
+      </button>
+      <button onclick="switchTab('focus')" id="nav-focus" class="flex flex-col items-center py-1 rounded-xl text-slate-400 font-medium">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        <span class="text-[10px]">Enfoque</span>
+      </button>
+      <button onclick="switchTab('habits')" id="nav-habits" class="flex flex-col items-center py-1 rounded-xl text-slate-400 font-medium">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+        <span class="text-[10px]">Hábitos</span>
+      </button>
+      <button onclick="switchTab('grocery')" id="nav-grocery" class="flex flex-col items-center py-1 rounded-xl text-slate-400 font-medium">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+        <span class="text-[10px]">Despensa</span>
+      </button>
+    </div>
+  </nav>
+
+  <script>
+    const DAYS_CONFIG = [
+      { id: '2026-10-19', label: 'Lun 19', short: 'L19' },
+      { id: '2026-10-20', label: 'Mar 20', short: 'M20' },
+      { id: '2026-10-21', label: 'Mié 21', short: 'X21' },
+      { id: '2026-10-22', label: 'Jue 22', short: 'J22' },
+      { id: '2026-10-23', label: 'Vie 23', short: 'V23' },
+      { id: '2026-10-24', label: 'Sáb 24', short: 'S24' },
+      { id: '2026-10-25', label: 'Dom 25', short: 'D25' },
+      { id: '2026-10-26', label: 'Lun 26', short: 'L26' },
+      { id: '2026-10-27', label: 'Mar 27', short: 'M27' },
+      { id: '2026-10-28', label: 'Mié 28', short: 'X28' }
+    ];
+
+    const HABITS_LIST = [
+      { id: 'no_tortilla', name: 'Cero tortillas y harinas blancas' },
+      { id: 'gym_move', name: 'Entrenamiento de fuerza / Gimnasio' },
+      { id: 'tics_barrier', name: 'Control de tics (Bálsamo labial / Cintas)' },
+      { id: 'work_stop', name: 'Entrega de pendientes y cierre a tiempo' },
+      { id: 'no_alcohol', name: 'Cero alcohol / Cuidado de finanzas' },
+      { id: 'sleep_time', name: 'En cama antes de las 11:30 PM s/pantallas' }
+    ];
+
+    const PRESET_MEALS = [
+      { id: 'm_des_hoy', name: 'Desayuno: Pierna de pollo asada, 2 zanahorias, jitomate y aguacate', kcal: 460, p: 42, c: 18, f: 24 },
+      { id: 'm_des_huevos', name: 'Desayuno Opción A: 4 Huevos con jitomate, panela y aguacate', kcal: 510, p: 38, c: 9, f: 35 },
+      { id: 'm_des_yogurt', name: 'Desayuno Opción B: Yogurt natural s/azúcar + manzana + nueces', kcal: 290, p: 15, c: 28, f: 13 },
+      { id: 'm_com_hoy', name: 'Comida Lunes: Tortitas de pollo con sopa de verduras (Sin tortillas)', kcal: 560, p: 46, c: 34, f: 25 },
+      { id: 'm_com_tupper', name: 'Comida Tupper: Bistec pollo + brócoli/zanahoria + arroz + aguacate', kcal: 670, p: 58, c: 44, f: 27 },
+      { id: 'm_cen_atun', name: 'Cena Opción A: Ensalada 2 latas atún + lechuga + aderezo yogurt', kcal: 360, p: 54, c: 10, f: 9 },
+      { id: 'm_cen_pollo', name: 'Cena Opción B: Bistec pollo asado + panela + lechuga', kcal: 430, p: 50, c: 7, f: 21 }
+    ];
+
+    const DEFAULT_STATE = {
+      theme: 'dark',
+      currentDay: '2026-10-19',
+      days: {},
+      tasks: [
+        { id: 1, text: 'Avanzar entregables de trabajo para el jueves', tag: 'Trabajo', done: false },
+        { id: 2, text: 'Hacer Meal Prep de la semana en casa', tag: 'Rutina', done: false },
+        { id: 3, text: 'Comprar faltantes en Tiendas 3B', tag: 'Rutina', done: false }
+      ],
+      groceries: [
+        { id: 1, text: 'Piernas de pollo en bistec (En casa)', checked: true },
+        { id: 2, text: 'Brócoli, zanahoria, lechuga y aguacate (En casa)', checked: true },
+        { id: 3, text: 'Cono de 30 huevos (Comprar en 3B)', checked: false },
+        { id: 4, text: '6 Latas de atún en agua (Comprar en 3B)', checked: false },
+        { id: 5, text: 'Queso Panela bajo en grasa (Comprar en 3B)', checked: false },
+        { id: 6, text: 'Yogurt natural SIN azúcar (Comprar en 3B)', checked: false }
+      ]
+    };
+
+    DAYS_CONFIG.forEach((d, idx) => {
+      DEFAULT_STATE.days[d.id] = {
+        water: idx === 0 ? 1000 : 0,
+        checkedMeals: idx === 0 ? ['m_des_hoy'] : [],
+        customMeals: [],
+        habits: {}
+      };
+    });
+
+    let appState = JSON.parse(localStorage.getItem('allan_tcc_app_v2')) || DEFAULT_STATE;
+
+    function saveState() {
+      localStorage.setItem('allan_tcc_app_v2', JSON.stringify(appState));
+      renderAll();
+    }
+
+    function applyTheme() {
+      const html = document.documentElement;
+      const btn = document.getElementById('themeBtn');
+      if (appState.theme === 'dark') {
+        html.classList.add('dark');
+        btn.textContent = '☀️';
+      } else {
+        html.classList.remove('dark');
+        btn.textContent = '🌙';
+      }
+    }
+
+    function toggleTheme() {
+      appState.theme = appState.theme === 'dark' ? 'light' : 'dark';
+      applyTheme();
+      saveState();
+    }
+
+    function switchTab(tabName) {
+      ['nutrition', 'focus', 'habits', 'grocery'].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.add('hidden');
+        const navBtn = document.getElementById(`nav-${t}`);
+        navBtn.classList.remove('text-brand-500', 'font-bold');
+        navBtn.classList.add('text-slate-400', 'font-medium');
+      });
+      document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`nav-${tabName}`);
+      activeBtn.classList.remove('text-slate-400', 'font-medium');
+      activeBtn.classList.add('text-brand-500', 'font-bold');
+    }
+
+    function renderCalendar() {
+      const bar = document.getElementById('calendarBar');
+      bar.innerHTML = DAYS_CONFIG.map(d => {
+        const isSelected = d.id === appState.currentDay;
+        return `
+          <button onclick="selectDay('${d.id}')" class="px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition ${
+            isSelected ? 'bg-brand-500 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300'
+          }">
+            ${d.label}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectDay(dayId) {
+      appState.currentDay = dayId;
+      saveState();
+    }
+
+    function setCircleProgress(ringId, percentTextId, current, max) {
+      const ring = document.getElementById(ringId);
+      const text = document.getElementById(percentTextId);
+      const radius = ring.r.baseVal.value;
+      const circumference = 2 * Math.PI * radius;
+      const pct = Math.min(100, Math.round((current / max) * 100));
+      const offset = circumference - (pct / 100) * circumference;
+      ring.style.strokeDasharray = `${circumference} ${circumference}`;
+      ring.style.strokeDashoffset = offset;
+      text.textContent = `${pct}%`;
+    }
+
+    function renderNutrition() {
+      const dayData = appState.days[appState.currentDay];
+      let totKcal = 0, totP = 0, totC = 0, totF = 0;
+      
+      PRESET_MEALS.forEach(m => {
+        if (dayData.checkedMeals.includes(m.id)) {
+          totKcal += m.kcal; totP += m.p; totC += m.c; totF += m.f;
+        }
+      });
+      dayData.customMeals.forEach(cm => {
+        totKcal += cm.kcal; totP += cm.p; totC += cm.c; totF += cm.f;
+      });
+
+      document.getElementById('kcalText').textContent = `${totKcal} / 2100 kcal`;
+      document.getElementById('kcalBar').style.width = `${Math.min(100, (totKcal / 2100) * 100)}%`;
+
+      document.getElementById('protText').textContent = `${totP}/170g`;
+      document.getElementById('carbText').textContent = `${totC}/160g`;
+      document.getElementById('fatText').textContent = `${totF}/85g`;
+
+      setCircleProgress('protRing', 'protPercent', totP, 170);
+      setCircleProgress('carbRing', 'carbPercent', totC, 160);
+      setCircleProgress('fatRing', 'fatPercent', totF, 85);
+
+      // Agua con Vaso Visual
+      const waterMl = dayData.water;
+      const waterLiters = (waterMl / 1000).toFixed(2);
+      const waterPct = Math.min(100, Math.round((waterMl / 4000) * 100));
+      document.getElementById('waterText').textContent = `${waterLiters} L`;
+      document.getElementById('waterLiquid').style.height = `${waterPct}%`;
+      document.getElementById('waterPercentText').textContent = `${waterPct}%`;
+
+      // Menú
+      document.getElementById('mealsList').innerHTML = PRESET_MEALS.map(m => {
+        const checked = dayData.checkedMeals.includes(m.id);
+        return `
+          <label class="flex items-start gap-3 p-3 rounded-xl border transition cursor-pointer ${
+            checked ? 'bg-emerald-50/60 dark:bg-emerald-950/30 border-emerald-400 dark:border-emerald-700' : 'bg-slate-50 dark:bg-slate-700/40 border-slate-200 dark:border-slate-700'
+          }">
+            <input type="checkbox" ${checked ? 'checked' : ''} onchange="togglePresetMeal('${m.id}')" class="mt-1 w-4 h-4 accent-emerald-500 rounded">
+            <div class="flex-1 text-xs">
+              <p class="font-semibold ${checked ? 'line-through text-slate-400' : ''}">${m.name}</p>
+              <p class="text-slate-500 dark:text-slate-400 mt-0.5">${m.kcal} kcal • <span class="text-rose-500 font-medium">${m.p}g P</span> • ${m.c}g C • ${m.f}g G</p>
+            </div>
+          </label>
+        `;
+      }).join('');
+
+      document.getElementById('customMealsList').innerHTML = dayData.customMeals.map((cm, i) => `
+        <div class="flex justify-between items-center bg-slate-100 dark:bg-slate-700/60 px-3 py-2 rounded-xl text-xs">
+          <div>
+            <p class="font-bold">${cm.name}</p>
+            <p class="text-slate-500 dark:text-slate-400">${cm.kcal} kcal | ${cm.p}g P | ${cm.c}g C | ${cm.f}g G</p>
+          </div>
+          <button onclick="removeCustomFood(${i})" class="text-rose-500 font-bold px-2">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function togglePresetMeal(mealId) {
+      const list = appState.days[appState.currentDay].checkedMeals;
+      const idx = list.indexOf(mealId);
+      if (idx > -1) list.splice(idx, 1);
+      else list.push(mealId);
+      saveState();
+    }
+
+    function addCustomFood() {
+      const name = document.getElementById('customFoodName').value.trim();
+      const kcal = parseInt(document.getElementById('customKcal').value) || 0;
+      const p = parseInt(document.getElementById('customProt').value) || 0;
+      const c = parseInt(document.getElementById('customCarb').value) || 0;
+      const f = parseInt(document.getElementById('customFat').value) || 0;
+      if (!name) return;
+      appState.days[appState.currentDay].customMeals.push({ name, kcal, p, c, f });
+      document.getElementById('customFoodName').value = '';
+      document.getElementById('customKcal').value = '';
+      document.getElementById('customProt').value = '';
+      document.getElementById('customCarb').value = '';
+      document.getElementById('customFat').value = '';
+      saveState();
+    }
+
+    function removeCustomFood(index) {
+      appState.days[appState.currentDay].customMeals.splice(index, 1);
+      saveState();
+    }
+
+    function addWater(amount) {
+      const current = appState.days[appState.currentDay].water;
+      appState.days[appState.currentDay].water = Math.max(0, current + amount);
+      saveState();
+    }
+
+    function renderTasks() {
+      document.getElementById('tasksList').innerHTML = appState.tasks.map((t, i) => `
+        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700">
+          <label class="flex items-center gap-3 flex-1 cursor-pointer text-xs">
+            <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${i})" class="w-4 h-4 accent-brand-500 rounded">
+            <span class="${t.done ? 'line-through text-slate-400' : 'font-medium'}">${t.text}</span>
+          </label>
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-600 font-semibold">${t.tag}</span>
+          <button onclick="deleteTask(${i})" class="text-slate-400 hover:text-rose-500 text-xs ml-2">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function addTask() {
+      const input = document.getElementById('newTaskInput');
+      const tag = document.getElementById('newTaskTag').value;
+      if (!input.value.trim()) return;
+      appState.tasks.unshift({ id: Date.now(), text: input.value.trim(), tag, done: false });
+      input.value = '';
+      saveState();
+    }
+
+    function toggleTask(idx) {
+      appState.tasks[idx].done = !appState.tasks[idx].done;
+      saveState();
+    }
+
+    function deleteTask(idx) {
+      appState.tasks.splice(idx, 1);
+      saveState();
+    }
+
+    let timerInterval = null;
+    let timeLeft = 600;
+    function updateTimerDisplay() {
+      const m = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+      const s = String(timeLeft % 60).padStart(2, '0');
+      document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+    }
+    function toggleTimer() {
+      const btn = document.getElementById('timerBtn');
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        btn.textContent = 'Continuar';
+      } else {
+        btn.textContent = 'Pausar';
+        timerInterval = setInterval(() => {
+          if (timeLeft > 0) {
+            timeLeft--;
+            updateTimerDisplay();
+          } else {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            btn.textContent = '¡Listo!';
+          }
+        }, 1000);
+      }
+    }
+    function resetTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      timeLeft = 600;
+      updateTimerDisplay();
+      document.getElementById('timerBtn').textContent = 'Iniciar';
+    }
+
+    function renderHabits() {
+      const dayHabits = appState.days[appState.currentDay].habits;
+      document.getElementById('dailyHabitsList').innerHTML = HABITS_LIST.map(h => {
+        const done = !!dayHabits[h.id];
+        return `
+          <label class="flex items-center gap-3 p-3 rounded-xl border transition cursor-pointer ${
+            done ? 'bg-brand-500/10 border-brand-500' : 'bg-slate-50 dark:bg-slate-700/40 border-slate-200 dark:border-slate-700'
+          }">
+            <input type="checkbox" ${done ? 'checked' : ''} onchange="toggleHabit('${h.id}')" class="w-4 h-4 accent-brand-500 rounded">
+            <span class="text-xs font-medium flex-1 ${done ? 'line-through text-slate-400' : ''}">${h.name}</span>
+          </label>
+        `;
+      }).join('');
+
+      document.getElementById('habitGridHeader').innerHTML = `<th class="py-2 pr-2">Hábito</th>` + DAYS_CONFIG.map(d => `<th class="p-1 text-center">${d.short}</th>`).join('');
+      document.getElementById('habitGridBody').innerHTML = HABITS_LIST.map(h => `
+        <tr>
+          <td class="py-2 pr-2 font-medium whitespace-nowrap text-[11px]">${h.name.substring(0, 15)}...</td>
+          ${DAYS_CONFIG.map(d => `<td class="p-1 text-center">${!!appState.days[d.id].habits[h.id] ? '✓' : '·'}</td>`).join('')}
+        </tr>
+      `).join('');
+    }
+
+    function toggleHabit(habitId) {
+      const h = appState.days[appState.currentDay].habits;
+      h[habitId] = !h[habitId];
+      saveState();
+    }
+
+    function renderGroceries() {
+      document.getElementById('groceryList').innerHTML = appState.groceries.map((g, i) => `
+        <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 text-xs">
+          <label class="flex items-center gap-3 flex-1 cursor-pointer">
+            <input type="checkbox" ${g.checked ? 'checked' : ''} onchange="toggleGrocery(${i})" class="w-4 h-4 accent-emerald-500 rounded">
+            <span class="${g.checked ? 'line-through text-slate-400' : 'font-medium'}">${g.text}</span>
+          </label>
+          <button onclick="deleteGrocery(${i})" class="text-slate-400 hover:text-rose-500">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function addGrocery() {
+      const input = document.getElementById('newGroceryInput');
+      if (!input.value.trim()) return;
+      appState.groceries.push({ id: Date.now(), text: input.value.trim(), checked: false });
+      input.value = '';
+      saveState();
+    }
+
+    function toggleGrocery(idx) {
+      appState.groceries[idx].checked = !appState.groceries[idx].checked;
+      saveState();
+    }
+
+    function deleteGrocery(idx) {
+      appState.groceries.splice(idx, 1);
+      saveState();
+    }
+
+    function copyDailyReport() {
+      const dayData = appState.days[appState.currentDay];
+      let totKcal = 0, totP = 0, totC = 0, totF = 0;
+      PRESET_MEALS.forEach(m => {
+        if (dayData.checkedMeals.includes(m.id)) {
+          totKcal += m.kcal; totP += m.p; totC += m.c; totF += m.f;
+        }
+      });
+      dayData.customMeals.forEach(cm => {
+        totKcal += cm.kcal; totP += cm.p; totC += cm.c; totF += cm.f;
+      });
+
+      const report = `📊 Reporte del Día (${appState.currentDay}):\n` +
+        `• Calorías: ${totKcal}/2100 kcal\n` +
+        `• Proteína: ${totP}/170g | Carbos: ${totC}/160g | Grasas: ${totF}/85g\n` +
+        `• Agua: ${(dayData.water / 1000).toFixed(2)} L / 4.0 L`;
+
+      navigator.clipboard.writeText(report).then(() => {
+        alert('¡Reporte copiado! Pégalo aquí en el chat para revisarlo.');
+      });
+    }
+
+    function renderAll() {
+      applyTheme();
+      renderCalendar();
+      renderNutrition();
+      renderTasks();
+      renderHabits();
+      renderGroceries();
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>
