@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Control TCC - Allan Pro v22</title>
+  <title>Control TCC - v24</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -37,7 +37,7 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
           </div>
           <div>
-            <h1 class="text-base font-bold tracking-tight">Sistema TCC Pro v22</h1>
+            <h1 class="text-base font-bold tracking-tight">Sistema TCC Pro v24</h1>
             <p id="headerSubtitle" class="text-[11px] text-slate-500 dark:text-slate-400">Gemini IA Conectada</p>
           </div>
         </div>
@@ -182,7 +182,7 @@
       </div>
     </section>
 
-    <!-- ==================== PESTAÑA 3: GIMNASIO POR DÍA ==================== -->
+    <!-- ==================== PESTAÑA 3: GIMNASIO ==================== -->
     <section id="tab-gym" class="space-y-4 hidden">
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
         <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Generador IA de Rutina Semanal</h2>
@@ -213,19 +213,16 @@
         <button onclick="exportToCalendar()" class="w-full py-2.5 bg-emerald-500 text-white font-bold text-xs rounded-xl transition">Añadir al Calendario (ICS)</button>
       </div>
 
-      <!-- Tarjeta del Día Actual con su Enfoque -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
         <div class="flex justify-between items-center mb-1">
           <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400" id="currentGymDayTitle">Entrenamiento de Hoy</h2>
           <button onclick="addGymExercise()" class="text-xs bg-blue-500 text-white px-2.5 py-1 rounded-lg font-bold">+ Ejercicio</button>
         </div>
-        <!-- Enfoque dinámico abajo del día -->
         <div id="gymDayFocusBadge" class="mb-3 inline-block px-3 py-1 rounded-lg bg-blue-500/10 text-blue-400 font-bold text-xs border border-blue-500/20">
           Enfoque: Sin rutina generada aún
         </div>
-
         <div id="gymRoutineList" class="space-y-3">
-          <p class="text-xs text-slate-400 italic">Genera tu rutina con IA para ver los ejercicios correspondientes a este día.</p>
+          <p class="text-xs text-slate-400 italic">Genera tu rutina con IA para ver los ejercicios de este día.</p>
         </div>
       </div>
     </section>
@@ -291,10 +288,10 @@
       </div>
     </section>
 
-    <!-- ==================== PESTAÑA 6: AJUSTES ==================== -->
+    <!-- ==================== PESTAÑA 6: AJUSTES & CÁLCULO DE MACROS CON IA ==================== -->
     <section id="tab-settings" class="space-y-4 hidden">
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
-        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Configuración & Modelos de IA</h2>
+        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Configuración & Token Gemini</h2>
         <div>
           <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1">Tu Clave API de Gemini (API Key):</label>
           <input id="apiKeyInput" type="password" placeholder="AIzaSy..." class="w-full px-3 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none font-mono">
@@ -307,7 +304,54 @@
             <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite (Ultrarrápido y ligero)</option>
           </select>
         </div>
-        <button onclick="saveSettings()" class="w-full py-2.5 bg-blue-500 text-white font-bold text-xs rounded-xl transition">Guardar Ajustes</button>
+        <button onclick="saveSettings()" class="w-full py-2.5 bg-blue-500 text-white font-bold text-xs rounded-xl transition">Guardar Token y Modelo</button>
+      </div>
+
+      <!-- Apartado de Cálculo IA de Calorías y Macros con Objetivos Completos -->
+      <div class="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-2xl p-4 text-white shadow-md space-y-3">
+        <h2 class="font-bold text-sm">✨ Calcular Calorías y Macros con IA</h2>
+        <p class="text-xs text-indigo-100">Introduce tus datos actuales para que Gemini calcule tus metas exactas.</p>
+        
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-[10px] text-indigo-200 block mb-0.5">Peso (kg):</label>
+            <input id="calcWeight" type="number" value="120" class="w-full px-2.5 py-1.5 text-xs rounded-xl bg-white/10 text-white text-center font-bold outline-none border border-white/20">
+          </div>
+          <div>
+            <label class="text-[10px] text-indigo-200 block mb-0.5">Estatura (cm):</label>
+            <input id="calcHeight" type="number" value="182" class="w-full px-2.5 py-1.5 text-xs rounded-xl bg-white/10 text-white text-center font-bold outline-none border border-white/20">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-[10px] text-indigo-200 block mb-0.5">Edad:</label>
+            <input id="calcAge" type="number" value="28" class="w-full px-2.5 py-1.5 text-xs rounded-xl bg-white/10 text-white text-center font-bold outline-none border border-white/20">
+          </div>
+          <div>
+            <label class="text-[10px] text-indigo-200 block mb-0.5">Actividad:</label>
+            <select id="calcActivity" class="w-full px-2 py-1.5 text-xs rounded-xl bg-white/10 text-white font-semibold outline-none border border-white/20">
+              <option value="Moderada (Ejercicio 3-4 días)" class="text-slate-900">Moderada (3-4 días/sem)</option>
+              <option value="Sedentaria" class="text-slate-900">Sedentaria</option>
+              <option value="Alta (Ejercicio diario)" class="text-slate-900">Alta (Diario)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[10px] text-indigo-200 block mb-0.5 font-bold uppercase">Objetivo Principal:</label>
+          <select id="calcGoalSelect" class="w-full px-3 py-2 text-xs rounded-xl bg-white/10 text-white outline-none font-semibold border border-white/20">
+            <option value="Pérdida de grasa corporal y definición (Déficit calórico, alta proteína)" class="text-slate-900">🔥 Quema de grasa / Definición (Déficit)</option>
+            <option value="Volumen y aumento de peso / masa muscular (Superávit calórico)" class="text-slate-900">📈 Volumen / Aumento de peso (Superávit)</option>
+            <option value="Hipertrofia y ganancia muscular limpia (Normocalórica con alta proteína)" class="text-slate-900">💪 Hipertrofia y masa muscular limpia</option>
+            <option value="Recomposición corporal (Bajar grasa y ganar músculo simultáneamente)" class="text-slate-900">⚖️ Recomposición corporal</option>
+            <option value="Fuerza máxima y rendimiento deportivo" class="text-slate-900">🏋️‍♂️ Fuerza máxima y rendimiento</option>
+          </select>
+        </div>
+
+        <button id="calcBtn" onclick="calculateMacrosWithGemini()" class="w-full py-2.5 bg-white text-indigo-700 font-bold text-xs rounded-xl shadow-sm transition">
+          Calcular e Instalar Metas con IA
+        </button>
       </div>
     </section>
 
@@ -366,7 +410,7 @@
       targetWater: 4000,
       days: {},
       tasks: [],
-      gymStructured: {}, // Almacenará por id de día: { focus: "...", exercises: [...] }
+      gymStructured: {},
       habitsList: [],
       groceries: [],
       mealPlanStructured: []
@@ -376,11 +420,11 @@
       DEFAULT_STATE.days[d.id] = { water: 0, meals: [], habitsState: {} };
     });
 
-    let appState = JSON.parse(localStorage.getItem('allan_tcc_app_v22')) || DEFAULT_STATE;
+    let appState = JSON.parse(localStorage.getItem('allan_tcc_app_v24')) || DEFAULT_STATE;
     let currentUploadedImageBase64 = null;
 
     function saveState() {
-      localStorage.setItem('allan_tcc_app_v22', JSON.stringify(appState));
+      localStorage.setItem('allan_tcc_app_v24', JSON.stringify(appState));
       renderAll();
     }
 
@@ -613,6 +657,46 @@
       }
     }
 
+    // CÁLCULO AUTOMÁTICO DE MACROS CON OBJETIVOS COMPLETOS
+    async function calculateMacrosWithGemini() {
+      const apiKey = appState.apiKey;
+      if(!apiKey) { alert("Configura tu API Key en Ajustes."); switchTab('settings'); return; }
+
+      const weight = document.getElementById('calcWeight').value;
+      const height = document.getElementById('calcHeight').value;
+      const age = document.getElementById('calcAge').value;
+      const activity = document.getElementById('calcActivity').value;
+      const goal = document.getElementById('calcGoalSelect').value;
+
+      const btn = document.getElementById('calcBtn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner inline-block"></div><span>Calculando Metas...</span>`;
+      btn.disabled = true;
+
+      try {
+        const prompt = `Calcula las calorías diarias y agua para una persona de ${weight}kg, ${height}cm, ${age} años, nivel de actividad: "${activity}", objetivo principal: "${goal}".
+        Devuelve ÚNICAMENTE un JSON válido sin texto extra:
+        {
+          "targetKcal": número_calorías,
+          "targetWater": mililitros_agua
+        }`;
+
+        const textResult = await callGeminiAPI(prompt, null);
+        const parsed = JSON.parse(textResult);
+
+        appState.targetKcal = parsed.targetKcal || 2100;
+        appState.targetWater = parsed.targetWater || 4000;
+        saveState();
+        alert(`¡Metas instaladas con éxito!\n• Calorías: ${appState.targetKcal} kcal\n• Agua: ${appState.targetWater} ml`);
+        switchTab('nutrition');
+      } catch (err) {
+        alert("Error al calcular metas: " + err.message);
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+
     // TAREAS
     function renderTasks() {
       const el = document.getElementById('tasksList');
@@ -690,7 +774,7 @@
       saveState();
     }
 
-    // GIMNASIO IA ESTRUCTURADO POR DÍAS
+    // GIMNASIO IA
     async function generateGymRoutineWithGemini() {
       const apiKey = appState.apiKey;
       if(!apiKey) { alert("Configura tu API Key en Ajustes."); switchTab('settings'); return; }
@@ -702,17 +786,17 @@
 
       const btn = document.getElementById('gymBtn');
       const originalText = btn.innerHTML;
-      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner inline-block"></div><span>Generando Rutina Semanal...</span>`;
+      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner inline-block"></div><span>Generando...</span>`;
       btn.disabled = true;
 
       try {
         const prompt = `Para una persona de ${weight}kg y ${height}cm, objetivo: "${goal}", entrenando ${daysCount} días por semana. 
-        Crea una distribución semanal de entrenamiento por días (ej. Lunes, Martes, Jueves, Viernes según los días indicados).
-        Devuelve ÚNICAMENTE un JSON válido sin texto extra con esta estructura:
+        Crea una distribución semanal de entrenamiento por días (Lunes, Martes, Miércoles, Jueves, Viernes, Sábado).
+        Devuelve ÚNICAMENTE un JSON válido sin texto extra:
         [
           {
             "dayName": "Lunes",
-            "focus": "Tren Superior - Empuje (Pecho, Hombro, Tríceps)",
+            "focus": "Tren Superior - Empuje",
             "exercises": [{"name": "Press de banca", "weight": 0}]
           }
         ]`;
@@ -720,10 +804,8 @@
         const textResult = await callGeminiAPI(prompt, null);
         const parsedDays = JSON.parse(textResult);
 
-        // Mapear al estado de la aplicación
         appState.gymStructured = {};
         parsedDays.forEach(d => {
-          // Asignar los ejercicios al día correspondiente buscando en DAYS_CONFIG
           const matchedDay = DAYS_CONFIG.find(dc => dc.dayName.toLowerCase() === d.dayName.toLowerCase());
           if (matchedDay) {
             appState.gymStructured[matchedDay.id] = {
@@ -732,19 +814,6 @@
             };
           }
         });
-
-        // Si la IA devolvió una estructura genérica por índice, la asignamos secuencialmente a los días activos
-        if (Object.keys(appState.gymStructured).length === 0) {
-          parsedDays.forEach((d, idx) => {
-            if (idx < DAYS_CONFIG.length) {
-              const dc = DAYS_CONFIG[idx];
-              appState.gymStructured[dc.id] = {
-                focus: d.focus || "Fuerza y Acondicionamiento",
-                exercises: (d.exercises || []).map((ex, i) => ({ id: Date.now() + i, name: ex.name, weight: ex.weight || 0, done: false }))
-              };
-            }
-          });
-        }
 
         saveState();
         alert("¡Rutina semanal por días generada con éxito!");
@@ -870,7 +939,7 @@
 
       try {
         const prompt = `Actúa como nutriólogo. Con un presupuesto de $${budget} MXN para ${days} días en ${store}, meta: "${goal}".
-        Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta (sin texto extra ni markdown):
+        Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta (sin texto extra):
         {
           "groceries": [{"text": "producto (cantidad) - precio"}],
           "mealPlan": [
