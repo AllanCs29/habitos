@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Control TCC - Allan Pro</title>
+  <title>Control TCC - Allan Pro v22</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -22,33 +22,32 @@
     body { -webkit-tap-highlight-color: transparent; font-family: system-ui, -apple-system, sans-serif; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .spinner { animation: spin 1s linear infinite; }
   </style>
 </head>
-<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen pb-24 transition-colors duration-200">
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen pb-28 transition-colors duration-200">
 
   <!-- HEADER & CONTROLES SUPERIORES -->
   <header class="sticky top-0 z-30 bg-white/90 dark:bg-slate-800/90 backdrop-blur border-b border-slate-200 dark:border-slate-700 px-4 py-3 shadow-sm">
     <div class="max-w-md mx-auto">
       <div class="flex justify-between items-center mb-3">
         <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-brand-500/10 dark:bg-brand-500/20 flex items-center justify-center text-brand-500">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+          <div class="w-9 h-9 rounded-xl bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center text-blue-500">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
           </div>
           <div>
-            <h1 class="text-base font-bold tracking-tight">Sistema TCC & Metas</h1>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400">120 kg ➔ Quema de Grasa</p>
+            <h1 class="text-base font-bold tracking-tight">Sistema TCC Pro v22</h1>
+            <p id="headerSubtitle" class="text-[11px] text-slate-500 dark:text-slate-400">Gemini IA Conectada</p>
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <button onclick="copyDailyReport()" class="text-xs bg-brand-500 hover:bg-brand-600 text-white px-3 py-1.5 rounded-xl font-medium shadow-sm active:scale-95 transition flex items-center gap-1.5">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-            Reporte
-          </button>
+          <button onclick="copyDailyReport()" class="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-xl font-medium shadow-sm transition">Reporte</button>
           <button onclick="toggleTheme()" id="themeBtn" class="p-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-sm">🌙</button>
         </div>
       </div>
 
-      <!-- SELECTOR DE CALENDARIO (10 DÍAS) -->
+      <!-- CALENDARIO -->
       <div id="calendarBar" class="flex gap-2 overflow-x-auto no-scrollbar py-1"></div>
     </div>
   </header>
@@ -56,62 +55,54 @@
   <!-- CONTENIDO PRINCIPAL -->
   <main class="max-w-md mx-auto px-4 pt-4 space-y-5">
 
-    <!-- ==================== PESTAÑA 1: NUTRICIÓN Y AGUA ==================== -->
+    <!-- ==================== PESTAÑA 1: NUTRICIÓN ==================== -->
     <section id="tab-nutrition" class="space-y-4">
-      
-      <!-- Tarjeta de Calorías y Gráficas Circulares -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 flex gap-2">
+        <div class="flex-1">
+          <label class="text-[10px] text-slate-400 block mb-1 font-bold uppercase">Meta Kcal Diaria:</label>
+          <input id="targetKcalInput" type="number" onchange="updateTargets()" class="w-full px-3 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 font-bold text-center outline-none">
+        </div>
+        <div class="flex-1">
+          <label class="text-[10px] text-slate-400 block mb-1 font-bold uppercase">Meta Agua (ml):</label>
+          <input id="targetWaterInput" type="number" onchange="updateTargets()" class="w-full px-3 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 font-bold text-center outline-none">
+        </div>
+      </div>
+
+      <!-- Gráficas Macros -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
         <div class="flex justify-between items-center mb-3">
           <div class="flex items-center gap-2">
-            <div class="p-2 rounded-lg bg-blue-500/10 text-blue-500">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-            </div>
+            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             <h2 class="font-bold text-sm">Balance Energético</h2>
           </div>
-          <span id="kcalText" class="text-xs font-extrabold text-brand-500 bg-brand-500/10 px-2.5 py-1 rounded-full">0 / 2100 kcal</span>
+          <span id="kcalText" class="text-xs font-extrabold text-blue-500 bg-blue-500/10 px-2.5 py-1 rounded-full">0 / 2100 kcal</span>
         </div>
 
-        <!-- Barra General Calorías -->
         <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden mb-4">
-          <div id="kcalBar" class="bg-brand-500 h-full transition-all duration-300" style="width: 0%"></div>
+          <div id="kcalBar" class="bg-blue-500 h-full transition-all duration-300" style="width: 0%"></div>
         </div>
 
-        <!-- Gráficas Circulares (Donut Charts) para Macros -->
         <div class="grid grid-cols-3 gap-3 text-center">
-          <!-- Proteína -->
           <div class="bg-slate-50 dark:bg-slate-700/40 p-3 rounded-xl flex flex-col items-center">
-            <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Proteína</span>
+            <span class="text-[11px] font-semibold text-slate-400 mb-1">Proteína</span>
             <div class="relative w-14 h-14 flex items-center justify-center my-1">
-              <svg class="w-14 h-14 transform -rotate-90">
-                <circle cx="28" cy="28" r="24" stroke="currentColor" stroke-width="5" class="text-slate-200 dark:text-slate-600 fill-none"></circle>
-                <circle id="protRing" cx="28" cy="28" r="24" stroke="currentColor" stroke-width="5" stroke-dasharray="150.7" stroke-dashoffset="150.7" stroke-linecap="round" class="text-rose-500 fill-none transition-all duration-500"></circle>
-              </svg>
+              <svg class="w-14 h-14 transform -rotate-90"><circle cx="28" cy="28" r="24" stroke="currentColor" stroke-width="5" class="text-slate-200 dark:text-slate-600 fill-none"></circle><circle id="protRing" cx="28" cy="28" r="24" stroke="currentColor" stroke-width="5" stroke-dasharray="150.7" stroke-dashoffset="150.7" stroke-linecap="round" class="text-rose-500 fill-none transition-all duration-500"></circle></svg>
               <div class="absolute inset-0 flex items-center justify-center text-[11px] font-bold" id="protPercent">0%</div>
             </div>
             <span id="protText" class="text-xs font-bold mt-1">0/170g</span>
           </div>
-
-          <!-- Carbos -->
           <div class="bg-slate-50 dark:bg-slate-700/40 p-3 rounded-xl flex flex-col items-center">
-            <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Carbos</span>
+            <span class="text-[11px] font-semibold text-slate-400 mb-1">Carbos</span>
             <div class="relative w-14 h-14 flex items-center justify-center my-1">
-              <svg class="w-14 h-14 transform -rotate-90">
-                <circle cx="28" cy="28" r="24" stroke="currentColor" stroke-width="5" class="text-slate-200 dark:text-slate-600 fill-none"></circle>
-                <circle id="carbRing" cx="28" cy="28" r="24" stroke="currentColor" stroke-width="5" stroke-dasharray="150.7" stroke-dashoffset="150.7" stroke-linecap="round" class="text-amber-500 fill-none transition-all duration-500"></circle>
-              </svg>
+              <svg class="w-14 h-14 transform -rotate-90"><circle cx="28" cy="28" r="24" stroke="currentColor" stroke-width="5" class="text-slate-200 dark:text-slate-600 fill-none"></circle><circle id="carbRing" cx="28" cy="28" r="24" stroke="currentColor" stroke-width="5" stroke-dasharray="150.7" stroke-dashoffset="150.7" stroke-linecap="round" class="text-amber-500 fill-none transition-all duration-500"></circle></svg>
               <div class="absolute inset-0 flex items-center justify-center text-[11px] font-bold" id="carbPercent">0%</div>
             </div>
             <span id="carbText" class="text-xs font-bold mt-1">0/160g</span>
           </div>
-
-          <!-- Grasas -->
           <div class="bg-slate-50 dark:bg-slate-700/40 p-3 rounded-xl flex flex-col items-center">
-            <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Grasas</span>
+            <span class="text-[11px] font-semibold text-slate-400 mb-1">Grasas</span>
             <div class="relative w-14 h-14 flex items-center justify-center my-1">
-              <svg class="w-14 h-14 transform -rotate-90">
-                <circle cx="28" cy="28" r="24" stroke="currentColor" stroke-width="5" class="text-slate-200 dark:text-slate-600 fill-none"></circle>
-                <circle id="fatRing" cx="28" cy="28" r="24" stroke="currentColor" stroke-width="5" stroke-dasharray="150.7" stroke-dashoffset="150.7" stroke-linecap="round" class="text-emerald-500 fill-none transition-all duration-500"></circle>
-              </svg>
+              <svg class="w-14 h-14 transform -rotate-90"><circle cx="28" cy="28" r="24" stroke="currentColor" stroke-width="5" class="text-slate-200 dark:text-slate-600 fill-none"></circle><circle id="fatRing" cx="28" cy="28" r="24" stroke="currentColor" stroke-width="5" stroke-dasharray="150.7" stroke-dashoffset="150.7" stroke-linecap="round" class="text-emerald-500 fill-none transition-all duration-500"></circle></svg>
               <div class="absolute inset-0 flex items-center justify-center text-[11px] font-bold" id="fatPercent">0%</div>
             </div>
             <span id="fatText" class="text-xs font-bold mt-1">0/85g</span>
@@ -119,10 +110,31 @@
         </div>
       </div>
 
-      <!-- Tarjeta de Hidratación con Vaso Visual -->
+      <!-- Escáner IA -->
+      <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-4 text-white shadow-md space-y-3">
+        <div class="flex justify-between items-center">
+          <h2 class="font-bold text-sm">Gemini IA: Análisis de Plato</h2>
+          <span id="aiModelBadge" class="text-[10px] bg-white/20 px-2 py-0.5 rounded font-mono">IA Activa</span>
+        </div>
+        <p class="text-xs text-blue-100">Toma foto o describe tu comida para calcular macros al instante.</p>
+        <div class="space-y-2">
+          <input id="aiFoodInput" type="text" placeholder="Ej. Pollo con brócoli y aguacate..." class="w-full px-3 py-2 text-xs rounded-xl bg-white/10 text-white placeholder-blue-200 outline-none border border-white/20">
+          <div class="flex gap-2">
+            <label class="flex-1 py-2.5 bg-white/20 hover:bg-white/30 text-white font-bold text-xs rounded-xl text-center cursor-pointer transition flex items-center justify-center gap-1.5">
+              <span>Subir Foto</span>
+              <input type="file" accept="image/*" id="aiFoodImage" onchange="handleImageUpload(event)" class="hidden">
+            </label>
+            <button id="aiFoodBtn" onclick="analyzeFoodWithGemini()" class="flex-1 py-2.5 bg-white text-blue-700 font-bold text-xs rounded-xl shadow-sm transition flex items-center justify-center gap-2">
+              <span>Calcular con IA</span>
+            </button>
+          </div>
+          <div id="aiImagePreview" class="text-[11px] text-blue-200 italic"></div>
+        </div>
+      </div>
+
+      <!-- Vaso de Agua -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4">
-        <!-- Vaso Animado -->
-        <div class="relative w-16 h-24 bg-slate-100 dark:bg-slate-700/60 rounded-b-2xl border-2 border-t-0 border-sky-400 overflow-hidden flex flex-col justify-end shadow-inner">
+        <div class="relative w-16 h-24 bg-slate-100 dark:bg-slate-700/60 rounded-b-2xl border-2 border-t-0 border-sky-400 overflow-hidden flex flex-col justify-end shadow-inner shrink-0">
           <div id="waterLiquid" class="w-full bg-sky-500 transition-all duration-500" style="height: 0%"></div>
           <div class="absolute inset-0 flex items-center justify-center text-xs font-extrabold text-slate-700 dark:text-white drop-shadow">
             <span id="waterPercentText">0%</span>
@@ -130,213 +142,245 @@
         </div>
         <div class="flex-1">
           <div class="flex justify-between items-center mb-1">
-            <h2 class="font-bold text-sm">Hidratación (Meta 4L)</h2>
+            <h2 class="font-bold text-sm">Hidratación</h2>
             <span id="waterText" class="text-sm font-extrabold text-sky-500">0.00 L</span>
           </div>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Suma agua para limpiar toxinas y acelerar metabolismo.</p>
-          <div class="grid grid-cols-4 gap-1.5">
-            <button onclick="addWater(250)" class="py-1.5 bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-300 rounded-lg text-xs font-bold border border-sky-200 dark:border-sky-800 active:scale-95">+250</button>
-            <button onclick="addWater(500)" class="py-1.5 bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-300 rounded-lg text-xs font-bold border border-sky-200 dark:border-sky-800 active:scale-95">+500</button>
-            <button onclick="addWater(1000)" class="py-1.5 bg-sky-500 text-white rounded-lg text-xs font-bold active:scale-95">+1L</button>
-            <button onclick="addWater(-250)" class="py-1.5 bg-slate-100 dark:bg-slate-700 text-slate-500 rounded-lg text-xs font-bold active:scale-95">-250</button>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Suma agua para acelerar tu metabolismo.</p>
+          <div class="grid grid-cols-4 gap-1">
+            <button onclick="addWater(250)" class="py-1.5 bg-sky-50 dark:bg-sky-900/30 text-sky-600 rounded-lg text-xs font-bold border border-sky-200 dark:border-sky-800">+250</button>
+            <button onclick="addWater(500)" class="py-1.5 bg-sky-50 dark:bg-sky-900/30 text-sky-600 rounded-lg text-xs font-bold border border-sky-200 dark:border-sky-800">+500</button>
+            <button onclick="addWater(1000)" class="py-1.5 bg-sky-500 text-white rounded-lg text-xs font-bold">+1L</button>
+            <button onclick="addWater(-250)" class="py-1.5 bg-slate-100 dark:bg-slate-700 text-slate-500 rounded-lg text-xs font-bold">-250</button>
           </div>
         </div>
       </div>
 
-      <!-- Menú del Día -->
-      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
-        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
-          <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-          Menú del Día (Plan 10 Días)
-        </h2>
-        <div id="mealsList" class="space-y-2.5"></div>
-      </div>
-
-      <!-- Registro Manual Extra -->
-      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
-        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
-          <svg class="w-4 h-4 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-          Agregar Comida Manual
-        </h2>
-        <div class="space-y-2">
-          <input id="customFoodName" type="text" placeholder="Ej. Comida fuera, snack..." class="w-full px-3 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-700/60 border-none outline-none focus:ring-2 focus:ring-brand-500">
-          <div class="grid grid-cols-4 gap-2">
-            <input id="customKcal" type="number" placeholder="Kcal" class="px-2 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none text-center">
-            <input id="customProt" type="number" placeholder="Prot" class="px-2 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none text-center">
-            <input id="customCarb" type="number" placeholder="Carb" class="px-2 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none text-center">
-            <input id="customFat" type="number" placeholder="Grasa" class="px-2 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none text-center">
-          </div>
-          <button onclick="addCustomFood()" class="w-full py-2.5 bg-accent-500 hover:bg-accent-600 text-white font-bold text-sm rounded-xl shadow-sm active:scale-98 transition">
-            + Registrar en mis Macros
-          </button>
-        </div>
-        <div id="customMealsList" class="mt-3 space-y-2"></div>
-      </div>
-    </section>
-
-    <!-- ==================== PESTAÑA 2: ENFOQUE Y TAREAS ==================== -->
-    <section id="tab-focus" class="space-y-4 hidden">
-      <!-- Temporizador 10 Minutos -->
-      <div class="bg-gradient-to-r from-indigo-600 to-brand-600 rounded-2xl p-4 text-white shadow-md flex justify-between items-center">
-        <div>
-          <span class="text-[10px] uppercase font-bold tracking-wider bg-white/20 px-2 py-0.5 rounded">Técnica Anti-Parálisis</span>
-          <h2 class="text-base font-bold mt-1">Regla de 10 Minutos</h2>
-          <p class="text-xs text-indigo-100">Rompe la resistencia inicial de tus tareas.</p>
-        </div>
-        <div class="text-right">
-          <div id="timerDisplay" class="text-2xl font-mono font-extrabold">10:00</div>
-          <div class="flex gap-1 mt-1 justify-end">
-            <button onclick="toggleTimer()" id="timerBtn" class="bg-white text-indigo-700 px-3 py-1 rounded-lg text-xs font-bold">Iniciar</button>
-            <button onclick="resetTimer()" class="bg-indigo-800/60 text-white px-2 py-1 rounded-lg text-xs">↺</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tareas Manuales -->
-      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
-        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
-          <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-          Objetivos y Entregables
-        </h2>
-        <div class="flex gap-2 mb-4">
-          <input id="newTaskInput" type="text" placeholder="Nueva tarea..." class="flex-1 px-3 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
-          <select id="newTaskTag" class="px-2 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none font-semibold">
-            <option value="Trabajo">Trabajo</option>
-            <option value="Rutina">Casa</option>
-            <option value="Escuela">Escuela</option>
-          </select>
-          <button onclick="addTask()" class="bg-brand-500 text-white px-3 py-2 rounded-xl font-bold text-sm">+</button>
-        </div>
-        <div id="tasksList" class="space-y-2"></div>
-      </div>
-    </section>
-
-    <!-- ==================== PESTAÑA 3: HÁBITOS TCC ==================== -->
-    <section id="tab-habits" class="space-y-4 hidden">
-      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
-        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-2">
-          <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
-          Hábitos del Día
-        </h2>
-        <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Marca tus victorias conductuales cotidianas.</p>
-        <div id="dailyHabitsList" class="space-y-2.5"></div>
-      </div>
-
-      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 overflow-x-auto">
-        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400 mb-3">Racha de 10 Días</h2>
-        <table class="w-full text-left border-collapse text-xs">
-          <thead><tr id="habitGridHeader" class="border-b border-slate-200 dark:border-slate-700 text-slate-400"></tr></thead>
-          <tbody id="habitGridBody" class="divide-y divide-slate-200 dark:divide-slate-700"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- ==================== PESTAÑA 4: DESPENSA 3B ==================== -->
-    <section id="tab-grocery" class="space-y-4 hidden">
+      <!-- Alimentos -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
         <div class="flex justify-between items-center mb-3">
+          <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Alimentos Registrados</h2>
+          <button onclick="clearTodayMeals()" class="text-[10px] text-rose-500 font-bold">Limpiar</button>
+        </div>
+        <div id="mealsList" class="space-y-2">
+          <p class="text-xs text-slate-400 italic">No hay alimentos registrados hoy.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PESTAÑA 2: ENFOQUE ==================== -->
+    <section id="tab-focus" class="space-y-4 hidden">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
+        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Tareas con Horario Límite</h2>
+        <div class="space-y-2">
+          <input id="newTaskInput" type="text" placeholder="Nueva tarea..." class="w-full px-3 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
+          <input id="newTaskTime" type="time" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
+          <button onclick="addTask()" class="w-full py-2.5 bg-blue-500 text-white font-bold text-xs rounded-xl transition">+ Agregar Tarea</button>
+        </div>
+        <div id="tasksList" class="space-y-2 mt-3">
+          <p class="text-xs text-slate-400 italic">Sin tareas pendientes.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PESTAÑA 3: GIMNASIO POR DÍA ==================== -->
+    <section id="tab-gym" class="space-y-4 hidden">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
+        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Generador IA de Rutina Semanal</h2>
+        <div class="grid grid-cols-3 gap-2">
           <div>
-            <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Despensa 3B ($1,500 MXN)</h2>
-            <p class="text-xs text-emerald-500 font-medium">Presupuesto optimizado para 10 días</p>
+            <label class="text-[10px] text-slate-400 block mb-0.5">Peso (kg)</label>
+            <input id="gymWeight" type="number" value="120" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none">
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-0.5">Altura (cm)</label>
+            <input id="gymHeight" type="number" value="182" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none">
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-0.5">Días / Sem</label>
+            <input id="gymDays" type="number" value="4" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none">
           </div>
         </div>
-        <div class="flex gap-2 mb-4">
-          <input id="newGroceryInput" type="text" placeholder="Artículo a comprar..." class="flex-1 px-3 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
-          <button onclick="addGrocery()" class="bg-brand-500 text-white px-4 py-2 rounded-xl font-bold text-sm">+</button>
+        <div>
+          <label class="text-[10px] text-slate-400 block mb-0.5 font-bold uppercase">Selecciona tu Objetivo:</label>
+          <select id="gymGoalSelect" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 outline-none font-semibold">
+            <option value="Pérdida de grasa abdominal y definición">Pérdida de grasa abdominal y definición</option>
+            <option value="Hipertrofia y ganancia de masa muscular">Hipertrofia y ganancia de masa muscular</option>
+            <option value="Recomposición corporal">Recomposición corporal (Grasa a músculo)</option>
+            <option value="Volumen (Aumento de peso y fuerza)">Volumen (Aumento de peso y fuerza)</option>
+          </select>
         </div>
-        <div id="groceryList" class="space-y-2"></div>
+        <button id="gymBtn" onclick="generateGymRoutineWithGemini()" class="w-full py-2.5 bg-blue-500 text-white font-bold text-xs rounded-xl transition">Generar Rutina por Días con IA</button>
+        <button onclick="exportToCalendar()" class="w-full py-2.5 bg-emerald-500 text-white font-bold text-xs rounded-xl transition">Añadir al Calendario (ICS)</button>
+      </div>
+
+      <!-- Tarjeta del Día Actual con su Enfoque -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+        <div class="flex justify-between items-center mb-1">
+          <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400" id="currentGymDayTitle">Entrenamiento de Hoy</h2>
+          <button onclick="addGymExercise()" class="text-xs bg-blue-500 text-white px-2.5 py-1 rounded-lg font-bold">+ Ejercicio</button>
+        </div>
+        <!-- Enfoque dinámico abajo del día -->
+        <div id="gymDayFocusBadge" class="mb-3 inline-block px-3 py-1 rounded-lg bg-blue-500/10 text-blue-400 font-bold text-xs border border-blue-500/20">
+          Enfoque: Sin rutina generada aún
+        </div>
+
+        <div id="gymRoutineList" class="space-y-3">
+          <p class="text-xs text-slate-400 italic">Genera tu rutina con IA para ver los ejercicios correspondientes a este día.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PESTAÑA 4: HÁBITOS ==================== -->
+    <section id="tab-habits" class="space-y-4 hidden">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
+        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Hábitos Conductuales (Manuales)</h2>
+        <div class="flex gap-2">
+          <input id="newHabitInput" type="text" placeholder="Nuevo hábito..." class="flex-1 px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
+          <button onclick="addHabit()" class="bg-blue-500 text-white px-3 py-2 rounded-xl font-bold text-xs">+</button>
+        </div>
+        <div id="habitsList" class="space-y-2 mt-3">
+          <p class="text-xs text-slate-400 italic">Agrega tus hábitos uno por uno.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PESTAÑA 5: DESPENSA ==================== -->
+    <section id="tab-grocery" class="space-y-4 hidden">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
+        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Generador IA de Despensa & Menú</h2>
+        
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-0.5">Presupuesto ($)</label>
+            <input id="groceryBudget" type="number" value="1500" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none">
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-0.5">Días</label>
+            <input id="groceryDays" type="number" value="10" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none">
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-0.5">Tienda</label>
+            <input id="groceryStore" type="text" value="Tiendas 3B" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[10px] text-slate-400 block mb-0.5 font-bold uppercase">Meta Nutricional:</label>
+          <select id="groceryGoalSelect" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 outline-none font-semibold">
+            <option value="Quema de grasa, alta proteína (170g diarios), cero harinas y azúcares">🔥 Quema de grasa, alta proteína (170g diarios), cero harinas y azúcares</option>
+            <option value="Hipertrofia muscular y ganancia de fuerza limpia">💪 Hipertrofia muscular y ganancia de fuerza limpia</option>
+            <option value="Recomposición corporal estricta">⚖️ Recomposición corporal estricta</option>
+          </select>
+        </div>
+
+        <button id="groceryBtn" onclick="generateGroceryWithGemini()" class="w-full py-2.5 bg-emerald-500 text-white font-bold text-xs rounded-xl transition">Generar Despensa y Menú con IA</button>
+        
+        <div class="mt-4">
+          <h3 class="font-bold text-xs uppercase tracking-wider text-slate-400 mb-2">Lista de Despensa Comprada</h3>
+          <div id="groceryList" class="space-y-2">
+            <p class="text-xs text-slate-400 italic">Vacío.</p>
+          </div>
+        </div>
+
+        <div class="mt-5 pt-4 border-t border-slate-200 dark:border-slate-700">
+          <h3 class="font-bold text-sm uppercase tracking-wider text-slate-400 mb-3">Plan de Comidas Estructurado</h3>
+          <div id="mealPlanContainer" class="space-y-3">
+            <p class="text-xs text-slate-400 italic">Genera tu despensa para desplegar el menú diario detallado.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PESTAÑA 6: AJUSTES ==================== -->
+    <section id="tab-settings" class="space-y-4 hidden">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
+        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Configuración & Modelos de IA</h2>
+        <div>
+          <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1">Tu Clave API de Gemini (API Key):</label>
+          <input id="apiKeyInput" type="password" placeholder="AIzaSy..." class="w-full px-3 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none font-mono">
+        </div>
+        <div>
+          <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1">Selecciona el Modelo:</label>
+          <select id="modelSelect" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 outline-none font-semibold">
+            <option value="gemini-3.1-flash-live-preview">Gemini 3.1 Flash Live Preview (Recomendado / Rápido y gratuito)</option>
+            <option value="gemini-3.8-live">Gemini 3.8 Live (Análisis fluido y dinámico)</option>
+            <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite (Ultrarrápido y ligero)</option>
+          </select>
+        </div>
+        <button onclick="saveSettings()" class="w-full py-2.5 bg-blue-500 text-white font-bold text-xs rounded-xl transition">Guardar Ajustes</button>
       </div>
     </section>
 
   </main>
 
-  <!-- BARRA DE NAVEGACIÓN INFERIOR -->
-  <nav class="fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-2 py-1.5">
-    <div class="max-w-md mx-auto grid grid-cols-4 gap-1">
-      <button onclick="switchTab('nutrition')" id="nav-nutrition" class="flex flex-col items-center py-1 rounded-xl text-brand-500 font-bold">
+  <!-- BARRA DE NAVEGACIÓN INFERIOR (6 PESTAÑAS) -->
+  <nav class="fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-1 py-1.5">
+    <div class="max-w-md mx-auto grid grid-cols-6 gap-0.5">
+      <button onclick="switchTab('nutrition')" id="nav-nutrition" class="flex flex-col items-center py-1 rounded-xl text-blue-500 font-bold">
         <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg>
-        <span class="text-[10px]">Nutrición</span>
+        <span class="text-[8px]">Nutrición</span>
       </button>
       <button onclick="switchTab('focus')" id="nav-focus" class="flex flex-col items-center py-1 rounded-xl text-slate-400 font-medium">
-        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-        <span class="text-[10px]">Enfoque</span>
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+        <span class="text-[8px]">Enfoque</span>
+      </button>
+      <button onclick="switchTab('gym')" id="nav-gym" class="flex flex-col items-center py-1 rounded-xl text-slate-400 font-medium">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <span class="text-[8px]">Gimnasio</span>
       </button>
       <button onclick="switchTab('habits')" id="nav-habits" class="flex flex-col items-center py-1 rounded-xl text-slate-400 font-medium">
-        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-        <span class="text-[10px]">Hábitos</span>
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <span class="text-[8px]">Hábitos</span>
       </button>
       <button onclick="switchTab('grocery')" id="nav-grocery" class="flex flex-col items-center py-1 rounded-xl text-slate-400 font-medium">
         <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-        <span class="text-[10px]">Despensa</span>
+        <span class="text-[8px]">Despensa</span>
+      </button>
+      <button onclick="switchTab('settings')" id="nav-settings" class="flex flex-col items-center py-1 rounded-xl text-slate-400 font-medium">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
+        <span class="text-[8px]">Ajustes</span>
       </button>
     </div>
   </nav>
 
   <script>
     const DAYS_CONFIG = [
-      { id: '2026-10-19', label: 'Lun 19', short: 'L19' },
-      { id: '2026-10-20', label: 'Mar 20', short: 'M20' },
-      { id: '2026-10-21', label: 'Mié 21', short: 'X21' },
-      { id: '2026-10-22', label: 'Jue 22', short: 'J22' },
-      { id: '2026-10-23', label: 'Vie 23', short: 'V23' },
-      { id: '2026-10-24', label: 'Sáb 24', short: 'S24' },
-      { id: '2026-10-25', label: 'Dom 25', short: 'D25' },
-      { id: '2026-10-26', label: 'Lun 26', short: 'L26' },
-      { id: '2026-10-27', label: 'Mar 27', short: 'M27' },
-      { id: '2026-10-28', label: 'Mié 28', short: 'X28' }
-    ];
-
-    const HABITS_LIST = [
-      { id: 'no_tortilla', name: 'Cero tortillas y harinas blancas' },
-      { id: 'gym_move', name: 'Entrenamiento de fuerza / Gimnasio' },
-      { id: 'tics_barrier', name: 'Control de tics (Bálsamo labial / Cintas)' },
-      { id: 'work_stop', name: 'Entrega de pendientes y cierre a tiempo' },
-      { id: 'no_alcohol', name: 'Cero alcohol / Cuidado de finanzas' },
-      { id: 'sleep_time', name: 'En cama antes de las 11:30 PM s/pantallas' }
-    ];
-
-    const PRESET_MEALS = [
-      { id: 'm_des_hoy', name: 'Desayuno: Pierna de pollo asada, 2 zanahorias, jitomate y aguacate', kcal: 460, p: 42, c: 18, f: 24 },
-      { id: 'm_des_huevos', name: 'Desayuno Opción A: 4 Huevos con jitomate, panela y aguacate', kcal: 510, p: 38, c: 9, f: 35 },
-      { id: 'm_des_yogurt', name: 'Desayuno Opción B: Yogurt natural s/azúcar + manzana + nueces', kcal: 290, p: 15, c: 28, f: 13 },
-      { id: 'm_com_hoy', name: 'Comida Lunes: Tortitas de pollo con sopa de verduras (Sin tortillas)', kcal: 560, p: 46, c: 34, f: 25 },
-      { id: 'm_com_tupper', name: 'Comida Tupper: Bistec pollo + brócoli/zanahoria + arroz + aguacate', kcal: 670, p: 58, c: 44, f: 27 },
-      { id: 'm_cen_atun', name: 'Cena Opción A: Ensalada 2 latas atún + lechuga + aderezo yogurt', kcal: 360, p: 54, c: 10, f: 9 },
-      { id: 'm_cen_pollo', name: 'Cena Opción B: Bistec pollo asado + panela + lechuga', kcal: 430, p: 50, c: 7, f: 21 }
+      { id: '2026-10-19', label: 'Lun 19', dayName: 'Lunes' },
+      { id: '2026-10-20', label: 'Mar 20', dayName: 'Martes' },
+      { id: '2026-10-21', label: 'Mié 21', dayName: 'Miércoles' },
+      { id: '2026-10-22', label: 'Jue 22', dayName: 'Jueves' },
+      { id: '2026-10-23', label: 'Vie 23', dayName: 'Viernes' },
+      { id: '2026-10-24', label: 'Sáb 24', dayName: 'Sábado' },
+      { id: '2026-10-25', label: 'Dom 25', dayName: 'Domingo' },
+      { id: '2026-10-26', label: 'Lun 26', dayName: 'Lunes' },
+      { id: '2026-10-27', label: 'Mar 27', dayName: 'Martes' },
+      { id: '2026-10-28', label: 'Mié 28', dayName: 'Miércoles' }
     ];
 
     const DEFAULT_STATE = {
       theme: 'dark',
       currentDay: '2026-10-19',
+      apiKey: '',
+      selectedModel: 'gemini-3.1-flash-live-preview',
+      targetKcal: 2100,
+      targetWater: 4000,
       days: {},
-      tasks: [
-        { id: 1, text: 'Avanzar entregables de trabajo para el jueves', tag: 'Trabajo', done: false },
-        { id: 2, text: 'Hacer Meal Prep de la semana en casa', tag: 'Rutina', done: false },
-        { id: 3, text: 'Comprar faltantes en Tiendas 3B', tag: 'Rutina', done: false }
-      ],
-      groceries: [
-        { id: 1, text: 'Piernas de pollo en bistec (En casa)', checked: true },
-        { id: 2, text: 'Brócoli, zanahoria, lechuga y aguacate (En casa)', checked: true },
-        { id: 3, text: 'Cono de 30 huevos (Comprar en 3B)', checked: false },
-        { id: 4, text: '6 Latas de atún en agua (Comprar en 3B)', checked: false },
-        { id: 5, text: 'Queso Panela bajo en grasa (Comprar en 3B)', checked: false },
-        { id: 6, text: 'Yogurt natural SIN azúcar (Comprar en 3B)', checked: false }
-      ]
+      tasks: [],
+      gymStructured: {}, // Almacenará por id de día: { focus: "...", exercises: [...] }
+      habitsList: [],
+      groceries: [],
+      mealPlanStructured: []
     };
 
-    DAYS_CONFIG.forEach((d, idx) => {
-      DEFAULT_STATE.days[d.id] = {
-        water: idx === 0 ? 1000 : 0,
-        checkedMeals: idx === 0 ? ['m_des_hoy'] : [],
-        customMeals: [],
-        habits: {}
-      };
+    DAYS_CONFIG.forEach(d => {
+      DEFAULT_STATE.days[d.id] = { water: 0, meals: [], habitsState: {} };
     });
 
-    let appState = JSON.parse(localStorage.getItem('allan_tcc_app_v2')) || DEFAULT_STATE;
+    let appState = JSON.parse(localStorage.getItem('allan_tcc_app_v22')) || DEFAULT_STATE;
+    let currentUploadedImageBase64 = null;
 
     function saveState() {
-      localStorage.setItem('allan_tcc_app_v2', JSON.stringify(appState));
+      localStorage.setItem('allan_tcc_app_v22', JSON.stringify(appState));
       renderAll();
     }
 
@@ -359,16 +403,16 @@
     }
 
     function switchTab(tabName) {
-      ['nutrition', 'focus', 'habits', 'grocery'].forEach(t => {
+      ['nutrition', 'focus', 'gym', 'habits', 'grocery', 'settings'].forEach(t => {
         document.getElementById(`tab-${t}`).classList.add('hidden');
         const navBtn = document.getElementById(`nav-${t}`);
-        navBtn.classList.remove('text-brand-500', 'font-bold');
+        navBtn.classList.remove('text-blue-500', 'font-bold');
         navBtn.classList.add('text-slate-400', 'font-medium');
       });
       document.getElementById(`tab-${tabName}`).classList.remove('hidden');
       const activeBtn = document.getElementById(`nav-${tabName}`);
       activeBtn.classList.remove('text-slate-400', 'font-medium');
-      activeBtn.classList.add('text-brand-500', 'font-bold');
+      activeBtn.classList.add('text-blue-500', 'font-bold');
     }
 
     function renderCalendar() {
@@ -377,7 +421,7 @@
         const isSelected = d.id === appState.currentDay;
         return `
           <button onclick="selectDay('${d.id}')" class="px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition ${
-            isSelected ? 'bg-brand-500 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300'
+            isSelected ? 'bg-blue-500 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300'
           }">
             ${d.label}
           </button>
@@ -393,6 +437,7 @@
     function setCircleProgress(ringId, percentTextId, current, max) {
       const ring = document.getElementById(ringId);
       const text = document.getElementById(percentTextId);
+      if(!ring || !text) return;
       const radius = ring.r.baseVal.value;
       const circumference = 2 * Math.PI * radius;
       const pct = Math.min(100, Math.round((current / max) * 100));
@@ -403,20 +448,22 @@
     }
 
     function renderNutrition() {
-      const dayData = appState.days[appState.currentDay];
+      document.getElementById('targetKcalInput').value = appState.targetKcal || 2100;
+      document.getElementById('targetWaterInput').value = appState.targetWater || 4000;
+
+      const dayData = appState.days[appState.currentDay] || { water: 0, meals: [], habitsState: {} };
       let totKcal = 0, totP = 0, totC = 0, totF = 0;
       
-      PRESET_MEALS.forEach(m => {
-        if (dayData.checkedMeals.includes(m.id)) {
-          totKcal += m.kcal; totP += m.p; totC += m.c; totF += m.f;
-        }
-      });
-      dayData.customMeals.forEach(cm => {
-        totKcal += cm.kcal; totP += cm.p; totC += cm.c; totF += cm.f;
+      dayData.meals.forEach(m => {
+        totKcal += m.kcal || 0;
+        totP += m.p || 0;
+        totC += m.c || 0;
+        totF += m.f || 0;
       });
 
-      document.getElementById('kcalText').textContent = `${totKcal} / 2100 kcal`;
-      document.getElementById('kcalBar').style.width = `${Math.min(100, (totKcal / 2100) * 100)}%`;
+      const maxKcal = appState.targetKcal || 2100;
+      document.getElementById('kcalText').textContent = `${totKcal} / ${maxKcal} kcal`;
+      document.getElementById('kcalBar').style.width = `${Math.min(100, (totKcal / maxKcal) * 100)}%`;
 
       document.getElementById('protText').textContent = `${totP}/170g`;
       document.getElementById('carbText').textContent = `${totC}/160g`;
@@ -426,222 +473,487 @@
       setCircleProgress('carbRing', 'carbPercent', totC, 160);
       setCircleProgress('fatRing', 'fatPercent', totF, 85);
 
-      // Agua con Vaso Visual
-      const waterMl = dayData.water;
+      const waterMl = dayData.water || 0;
       const waterLiters = (waterMl / 1000).toFixed(2);
-      const waterPct = Math.min(100, Math.round((waterMl / 4000) * 100));
+      const maxWater = appState.targetWater || 4000;
+      const waterPct = Math.min(100, Math.round((waterMl / maxWater) * 100));
       document.getElementById('waterText').textContent = `${waterLiters} L`;
       document.getElementById('waterLiquid').style.height = `${waterPct}%`;
       document.getElementById('waterPercentText').textContent = `${waterPct}%`;
 
-      // Menú
-      document.getElementById('mealsList').innerHTML = PRESET_MEALS.map(m => {
-        const checked = dayData.checkedMeals.includes(m.id);
-        return `
-          <label class="flex items-start gap-3 p-3 rounded-xl border transition cursor-pointer ${
-            checked ? 'bg-emerald-50/60 dark:bg-emerald-950/30 border-emerald-400 dark:border-emerald-700' : 'bg-slate-50 dark:bg-slate-700/40 border-slate-200 dark:border-slate-700'
-          }">
-            <input type="checkbox" ${checked ? 'checked' : ''} onchange="togglePresetMeal('${m.id}')" class="mt-1 w-4 h-4 accent-emerald-500 rounded">
-            <div class="flex-1 text-xs">
-              <p class="font-semibold ${checked ? 'line-through text-slate-400' : ''}">${m.name}</p>
-              <p class="text-slate-500 dark:text-slate-400 mt-0.5">${m.kcal} kcal • <span class="text-rose-500 font-medium">${m.p}g P</span> • ${m.c}g C • ${m.f}g G</p>
+      const mealsEl = document.getElementById('mealsList');
+      if(dayData.meals.length === 0) {
+        mealsEl.innerHTML = `<p class="text-xs text-slate-400 italic">No hay alimentos registrados hoy.</p>`;
+      } else {
+        mealsEl.innerHTML = dayData.meals.map((m, i) => `
+          <div class="flex justify-between items-center p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 text-xs">
+            <div>
+              <p class="font-bold">${m.name}</p>
+              <p class="text-slate-500 dark:text-slate-400">${m.kcal} kcal | <span class="text-rose-500 font-medium">${m.p}g P</span> | ${m.c}g C | ${m.f}g G</p>
             </div>
-          </label>
-        `;
-      }).join('');
-
-      document.getElementById('customMealsList').innerHTML = dayData.customMeals.map((cm, i) => `
-        <div class="flex justify-between items-center bg-slate-100 dark:bg-slate-700/60 px-3 py-2 rounded-xl text-xs">
-          <div>
-            <p class="font-bold">${cm.name}</p>
-            <p class="text-slate-500 dark:text-slate-400">${cm.kcal} kcal | ${cm.p}g P | ${cm.c}g C | ${cm.f}g G</p>
+            <button onclick="removeMeal(${i})" class="text-rose-500 font-bold px-2">✕</button>
           </div>
-          <button onclick="removeCustomFood(${i})" class="text-rose-500 font-bold px-2">✕</button>
-        </div>
-      `).join('');
+        `).join('');
+      }
     }
 
-    function togglePresetMeal(mealId) {
-      const list = appState.days[appState.currentDay].checkedMeals;
-      const idx = list.indexOf(mealId);
-      if (idx > -1) list.splice(idx, 1);
-      else list.push(mealId);
+    function updateTargets() {
+      appState.targetKcal = parseInt(document.getElementById('targetKcalInput').value) || 2100;
+      appState.targetWater = parseInt(document.getElementById('targetWaterInput').value) || 4000;
       saveState();
     }
 
-    function addCustomFood() {
-      const name = document.getElementById('customFoodName').value.trim();
-      const kcal = parseInt(document.getElementById('customKcal').value) || 0;
-      const p = parseInt(document.getElementById('customProt').value) || 0;
-      const c = parseInt(document.getElementById('customCarb').value) || 0;
-      const f = parseInt(document.getElementById('customFat').value) || 0;
-      if (!name) return;
-      appState.days[appState.currentDay].customMeals.push({ name, kcal, p, c, f });
-      document.getElementById('customFoodName').value = '';
-      document.getElementById('customKcal').value = '';
-      document.getElementById('customProt').value = '';
-      document.getElementById('customCarb').value = '';
-      document.getElementById('customFat').value = '';
+    function removeMeal(index) {
+      appState.days[appState.currentDay].meals.splice(index, 1);
       saveState();
     }
 
-    function removeCustomFood(index) {
-      appState.days[appState.currentDay].customMeals.splice(index, 1);
+    function clearTodayMeals() {
+      appState.days[appState.currentDay].meals = [];
       saveState();
     }
 
     function addWater(amount) {
-      const current = appState.days[appState.currentDay].water;
-      appState.days[appState.currentDay].water = Math.max(0, current + amount);
+      const dayData = appState.days[appState.currentDay];
+      dayData.water = Math.max(0, (dayData.water || 0) + amount);
       saveState();
     }
 
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        currentUploadedImageBase64 = e.target.result;
+        document.getElementById('aiImagePreview').textContent = `Imagen cargada (${file.name})`;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function callGeminiAPI(promptText, imageBase64) {
+      const apiKey = appState.apiKey;
+      const model = appState.selectedModel || 'gemini-3.1-flash-live-preview';
+      
+      let contents = [];
+      contents.push({ text: promptText });
+
+      if(imageBase64) {
+        const base64Data = imageBase64.split(',')[1];
+        const mimeType = imageBase64.split(';')[0].split(':')[1];
+        contents.push({ inline_data: { mime_type: mimeType, data: base64Data } });
+      }
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 25000);
+
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: contents }] }),
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if(!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error?.message || "Error al conectar con la API.");
+        }
+
+        const data = await res.json();
+        let rawText = data.candidates[0].content.parts[0].text;
+        
+        const jsonStart = rawText.indexOf('[');
+        const jsonObjectStart = rawText.indexOf('{');
+        
+        if (jsonStart !== -1 && (jsonObjectStart === -1 || jsonStart < jsonObjectStart)) {
+          const jsonEnd = rawText.lastIndexOf(']');
+          if (jsonEnd !== -1) rawText = rawText.substring(jsonStart, jsonEnd + 1);
+        } else if (jsonObjectStart !== -1) {
+          const jsonEnd = rawText.lastIndexOf('}');
+          if (jsonEnd !== -1) rawText = rawText.substring(jsonObjectStart, jsonEnd + 1);
+        }
+
+        return rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+      } catch (err) {
+        if (err.name === 'AbortError') throw new Error("La solicitud tardó demasiado.");
+        throw err;
+      }
+    }
+
+    async function analyzeFoodWithGemini() {
+      const apiKey = appState.apiKey;
+      if(!apiKey) { alert("Configura tu API Key en Ajustes."); switchTab('settings'); return; }
+
+      const promptText = document.getElementById('aiFoodInput').value.trim();
+      if(!promptText && !currentUploadedImageBase64) { alert("Escribe o sube foto."); return; }
+
+      const btn = document.getElementById('aiFoodBtn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner"></div><span>Calculando...</span>`;
+      btn.disabled = true;
+
+      try {
+        let prompt = "Analiza este alimento. Devuelve ÚNICAMENTE un JSON válido (sin formato markdown ni bloques de código): {\"name\": \"nombre\", \"kcal\": número, \"p\": número, \"c\": número, \"f\": número}.";
+        if(promptText) prompt += ` Descripción: ${promptText}`;
+
+        const textResult = await callGeminiAPI(prompt, currentUploadedImageBase64);
+        const parsed = JSON.parse(textResult);
+
+        appState.days[appState.currentDay].meals.push(parsed);
+        document.getElementById('aiFoodInput').value = '';
+        currentUploadedImageBase64 = null;
+        document.getElementById('aiImagePreview').textContent = '';
+        saveState();
+      } catch (err) {
+        alert("Error de API: " + err.message);
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    // TAREAS
     function renderTasks() {
-      document.getElementById('tasksList').innerHTML = appState.tasks.map((t, i) => `
-        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700">
-          <label class="flex items-center gap-3 flex-1 cursor-pointer text-xs">
-            <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${i})" class="w-4 h-4 accent-brand-500 rounded">
-            <span class="${t.done ? 'line-through text-slate-400' : 'font-medium'}">${t.text}</span>
+      const el = document.getElementById('tasksList');
+      if(appState.tasks.length === 0) { el.innerHTML = `<p class="text-xs text-slate-400 italic">Sin tareas pendientes.</p>`; return; }
+      el.innerHTML = appState.tasks.map((t, i) => `
+        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 text-xs">
+          <label class="flex items-center gap-3 flex-1 cursor-pointer">
+            <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${i})" class="w-4 h-4 accent-blue-500 rounded">
+            <div>
+              <span class="${t.done ? 'line-through text-slate-400' : 'font-medium'}">${t.text}</span>
+              ${t.time ? `<span class="block text-[10px] text-blue-500 font-bold mt-0.5">Límite: ${t.time}</span>` : ''}
+            </div>
           </label>
-          <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-600 font-semibold">${t.tag}</span>
-          <button onclick="deleteTask(${i})" class="text-slate-400 hover:text-rose-500 text-xs ml-2">✕</button>
+          <button onclick="deleteTask(${i})" class="text-slate-400 hover:text-rose-500">✕</button>
         </div>
       `).join('');
     }
 
     function addTask() {
       const input = document.getElementById('newTaskInput');
-      const tag = document.getElementById('newTaskTag').value;
-      if (!input.value.trim()) return;
-      appState.tasks.unshift({ id: Date.now(), text: input.value.trim(), tag, done: false });
+      const timeInput = document.getElementById('newTaskTime').value;
+      if(!input.value.trim()) return;
+      appState.tasks.unshift({ id: Date.now(), text: input.value.trim(), time: timeInput, done: false });
+      input.value = '';
+      document.getElementById('newTaskTime').value = '';
+      saveState();
+    }
+
+    function toggleTask(i) { appState.tasks[i].done = !appState.tasks[i].done; saveState(); }
+    function deleteTask(i) { appState.tasks.splice(i, 1); saveState(); }
+
+    // HÁBITOS
+    function renderHabits() {
+      if(!appState.habitsList) appState.habitsList = [];
+      const dayData = appState.days[appState.currentDay];
+      if(!dayData.habitsState) dayData.habitsState = {};
+
+      const el = document.getElementById('habitsList');
+      if(appState.habitsList.length === 0) {
+        el.innerHTML = `<p class="text-xs text-slate-400 italic">Agrega tus hábitos uno por uno.</p>`;
+        return;
+      }
+      el.innerHTML = appState.habitsList.map((h, i) => {
+        const checked = !!dayData.habitsState[h.id];
+        return `
+          <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 text-xs">
+            <label class="flex items-center gap-3 flex-1 cursor-pointer">
+              <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleHabitState('${h.id}')" class="w-4 h-4 accent-blue-500 rounded">
+              <span class="${checked ? 'line-through text-slate-400' : 'font-medium'}">${h.name}</span>
+            </label>
+            <button onclick="deleteHabit(${i})" class="text-slate-400 hover:text-rose-500">✕</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addHabit() {
+      const input = document.getElementById('newHabitInput');
+      if(!input.value.trim()) return;
+      if(!appState.habitsList) appState.habitsList = [];
+      appState.habitsList.push({ id: 'h_' + Date.now(), name: input.value.trim() });
       input.value = '';
       saveState();
     }
 
-    function toggleTask(idx) {
-      appState.tasks[idx].done = !appState.tasks[idx].done;
+    function toggleHabitState(id) {
+      const dayData = appState.days[appState.currentDay];
+      if(!dayData.habitsState) dayData.habitsState = {};
+      dayData.habitsState[id] = !dayData.habitsState[id];
       saveState();
     }
 
-    function deleteTask(idx) {
-      appState.tasks.splice(idx, 1);
+    function deleteHabit(i) {
+      appState.habitsList.splice(i, 1);
       saveState();
     }
 
-    let timerInterval = null;
-    let timeLeft = 600;
-    function updateTimerDisplay() {
-      const m = String(Math.floor(timeLeft / 60)).padStart(2, '0');
-      const s = String(timeLeft % 60).padStart(2, '0');
-      document.getElementById('timerDisplay').textContent = `${m}:${s}`;
-    }
-    function toggleTimer() {
-      const btn = document.getElementById('timerBtn');
-      if (timerInterval) {
-        clearInterval(timerInterval);
-        timerInterval = null;
-        btn.textContent = 'Continuar';
-      } else {
-        btn.textContent = 'Pausar';
-        timerInterval = setInterval(() => {
-          if (timeLeft > 0) {
-            timeLeft--;
-            updateTimerDisplay();
-          } else {
-            clearInterval(timerInterval);
-            timerInterval = null;
-            btn.textContent = '¡Listo!';
+    // GIMNASIO IA ESTRUCTURADO POR DÍAS
+    async function generateGymRoutineWithGemini() {
+      const apiKey = appState.apiKey;
+      if(!apiKey) { alert("Configura tu API Key en Ajustes."); switchTab('settings'); return; }
+
+      const weight = document.getElementById('gymWeight').value;
+      const height = document.getElementById('gymHeight').value;
+      const daysCount = parseInt(document.getElementById('gymDays').value) || 4;
+      const goal = document.getElementById('gymGoalSelect').value;
+
+      const btn = document.getElementById('gymBtn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner inline-block"></div><span>Generando Rutina Semanal...</span>`;
+      btn.disabled = true;
+
+      try {
+        const prompt = `Para una persona de ${weight}kg y ${height}cm, objetivo: "${goal}", entrenando ${daysCount} días por semana. 
+        Crea una distribución semanal de entrenamiento por días (ej. Lunes, Martes, Jueves, Viernes según los días indicados).
+        Devuelve ÚNICAMENTE un JSON válido sin texto extra con esta estructura:
+        [
+          {
+            "dayName": "Lunes",
+            "focus": "Tren Superior - Empuje (Pecho, Hombro, Tríceps)",
+            "exercises": [{"name": "Press de banca", "weight": 0}]
           }
-        }, 1000);
+        ]`;
+
+        const textResult = await callGeminiAPI(prompt, null);
+        const parsedDays = JSON.parse(textResult);
+
+        // Mapear al estado de la aplicación
+        appState.gymStructured = {};
+        parsedDays.forEach(d => {
+          // Asignar los ejercicios al día correspondiente buscando en DAYS_CONFIG
+          const matchedDay = DAYS_CONFIG.find(dc => dc.dayName.toLowerCase() === d.dayName.toLowerCase());
+          if (matchedDay) {
+            appState.gymStructured[matchedDay.id] = {
+              focus: d.focus,
+              exercises: d.exercises.map((ex, idx) => ({ id: Date.now() + idx, name: ex.name, weight: ex.weight || 0, done: false }))
+            };
+          }
+        });
+
+        // Si la IA devolvió una estructura genérica por índice, la asignamos secuencialmente a los días activos
+        if (Object.keys(appState.gymStructured).length === 0) {
+          parsedDays.forEach((d, idx) => {
+            if (idx < DAYS_CONFIG.length) {
+              const dc = DAYS_CONFIG[idx];
+              appState.gymStructured[dc.id] = {
+                focus: d.focus || "Fuerza y Acondicionamiento",
+                exercises: (d.exercises || []).map((ex, i) => ({ id: Date.now() + i, name: ex.name, weight: ex.weight || 0, done: false }))
+              };
+            }
+          });
+        }
+
+        saveState();
+        alert("¡Rutina semanal por días generada con éxito!");
+      } catch (err) {
+        alert("Error de IA: " + err.message);
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
       }
     }
-    function resetTimer() {
-      clearInterval(timerInterval);
-      timerInterval = null;
-      timeLeft = 600;
-      updateTimerDisplay();
-      document.getElementById('timerBtn').textContent = 'Iniciar';
+
+    function exportToCalendar() {
+      if(!appState.gymStructured || Object.keys(appState.gymStructured).length === 0) { alert("Primero genera una rutina con IA."); return; }
+      let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Allan TCC App//ES\n";
+      
+      Object.keys(appState.gymStructured).forEach(dayId => {
+        const dayInfo = appState.gymStructured[dayId];
+        dayInfo.exercises.forEach((ex) => {
+          icsContent += "BEGIN:VEVENT\n";
+          icsContent += `SUMMARY:Gym (${dayInfo.focus}): ${ex.name}\n`;
+          icsContent += `DESCRIPTION:Rutina TCC - Enfoque: ${dayInfo.focus}\n`;
+          icsContent += `DTSTART:20261019T180000Z\n`;
+          icsContent += `DTEND:20261019T190000Z\n`;
+          icsContent += "END:VEVENT\n";
+        });
+      });
+      icsContent += "END:VCALENDAR";
+
+      const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.setAttribute('download', 'rutina_gym_semanal.ics');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      alert("Archivo de calendario descargado.");
     }
 
-    function renderHabits() {
-      const dayHabits = appState.days[appState.currentDay].habits;
-      document.getElementById('dailyHabitsList').innerHTML = HABITS_LIST.map(h => {
-        const done = !!dayHabits[h.id];
-        return `
-          <label class="flex items-center gap-3 p-3 rounded-xl border transition cursor-pointer ${
-            done ? 'bg-brand-500/10 border-brand-500' : 'bg-slate-50 dark:bg-slate-700/40 border-slate-200 dark:border-slate-700'
-          }">
-            <input type="checkbox" ${done ? 'checked' : ''} onchange="toggleHabit('${h.id}')" class="w-4 h-4 accent-brand-500 rounded">
-            <span class="text-xs font-medium flex-1 ${done ? 'line-through text-slate-400' : ''}">${h.name}</span>
-          </label>
-        `;
-      }).join('');
+    function renderGym() {
+      const currentDayId = appState.currentDay;
+      const dayGymData = appState.gymStructured && appState.gymStructured[currentDayId];
+      
+      const focusBadge = document.getElementById('gymDayFocusBadge');
+      const el = document.getElementById('gymRoutineList');
+      const activeDayObj = DAYS_CONFIG.find(d => d.id === currentDayId);
 
-      document.getElementById('habitGridHeader').innerHTML = `<th class="py-2 pr-2">Hábito</th>` + DAYS_CONFIG.map(d => `<th class="p-1 text-center">${d.short}</th>`).join('');
-      document.getElementById('habitGridBody').innerHTML = HABITS_LIST.map(h => `
-        <tr>
-          <td class="py-2 pr-2 font-medium whitespace-nowrap text-[11px]">${h.name.substring(0, 15)}...</td>
-          ${DAYS_CONFIG.map(d => `<td class="p-1 text-center">${!!appState.days[d.id].habits[h.id] ? '✓' : '·'}</td>`).join('')}
-        </tr>
-      `).join('');
-    }
+      document.getElementById('currentGymDayTitle').textContent = `Entrenamiento de ${activeDayObj ? activeDayObj.dayName : 'Hoy'}`;
 
-    function toggleHabit(habitId) {
-      const h = appState.days[appState.currentDay].habits;
-      h[habitId] = !h[habitId];
-      saveState();
-    }
+      if (!dayGymData || !dayGymData.exercises || dayGymData.exercises.length === 0) {
+        focusBadge.textContent = "Enfoque: Descanso o sin rutina asignada";
+        el.innerHTML = `<p class="text-xs text-slate-400 italic">Genera tu rutina con IA para visualizar los ejercicios específicos de este día.</p>`;
+        return;
+      }
 
-    function renderGroceries() {
-      document.getElementById('groceryList').innerHTML = appState.groceries.map((g, i) => `
-        <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 text-xs">
-          <label class="flex items-center gap-3 flex-1 cursor-pointer">
-            <input type="checkbox" ${g.checked ? 'checked' : ''} onchange="toggleGrocery(${i})" class="w-4 h-4 accent-emerald-500 rounded">
-            <span class="${g.checked ? 'line-through text-slate-400' : 'font-medium'}">${g.text}</span>
-          </label>
-          <button onclick="deleteGrocery(${i})" class="text-slate-400 hover:text-rose-500">✕</button>
+      focusBadge.textContent = `Enfoque: ${dayGymData.focus}`;
+      el.innerHTML = dayGymData.exercises.map((ex, i) => `
+        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 text-xs space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="flex items-center gap-2.5 cursor-pointer">
+              <input type="checkbox" ${ex.done ? 'checked' : ''} onchange="toggleGymEx(${i})" class="w-4 h-4 accent-blue-500 rounded">
+              <span class="font-bold ${ex.done ? 'line-through text-slate-400' : ''}">${ex.name}</span>
+            </label>
+            <button onclick="deleteGymEx(${i})" class="text-slate-400 hover:text-rose-500">✕</button>
+          </div>
+          <div class="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-600">
+            <span class="text-[11px] text-slate-500">Peso actual (kg):</span>
+            <input type="number" value="${ex.weight || 0}" onchange="updateGymWeight(${i}, this.value)" class="w-16 px-2 py-1 text-center font-bold text-xs bg-slate-200 dark:bg-slate-600 rounded-lg outline-none">
+          </div>
         </div>
       `).join('');
     }
 
-    function addGrocery() {
-      const input = document.getElementById('newGroceryInput');
-      if (!input.value.trim()) return;
-      appState.groceries.push({ id: Date.now(), text: input.value.trim(), checked: false });
-      input.value = '';
+    function addGymExercise() {
+      const name = prompt("Nombre del ejercicio:");
+      if(!name) return;
+      const currentDayId = appState.currentDay;
+      if(!appState.gymStructured) appState.gymStructured = {};
+      if(!appState.gymStructured[currentDayId]) {
+        appState.gymStructured[currentDayId] = { focus: "Personalizado", exercises: [] };
+      }
+      appState.gymStructured[currentDayId].exercises.push({ id: Date.now(), name, weight: 0, done: false });
       saveState();
     }
 
-    function toggleGrocery(idx) {
-      appState.groceries[idx].checked = !appState.groceries[idx].checked;
-      saveState();
+    function toggleGymEx(i) {
+      const currentDayId = appState.currentDay;
+      if(appState.gymStructured && appState.gymStructured[currentDayId]) {
+        appState.gymStructured[currentDayId].exercises[i].done = !appState.gymStructured[currentDayId].exercises[i].done;
+        saveState();
+      }
     }
 
-    function deleteGrocery(idx) {
-      appState.groceries.splice(idx, 1);
+    function updateGymWeight(i, val) {
+      const currentDayId = appState.currentDay;
+      if(appState.gymStructured && appState.gymStructured[currentDayId]) {
+        appState.gymStructured[currentDayId].exercises[i].weight = parseFloat(val) || 0;
+        saveState();
+      }
+    }
+
+    function deleteGymEx(i) {
+      const currentDayId = appState.currentDay;
+      if(appState.gymStructured && appState.gymStructured[currentDayId]) {
+        appState.gymStructured[currentDayId].exercises.splice(i, 1);
+        saveState();
+      }
+    }
+
+    // DESPENSA & MENÚ SEMANAL
+    async function generateGroceryWithGemini() {
+      const apiKey = appState.apiKey;
+      if(!apiKey) { alert("Configura tu API Key en Ajustes."); switchTab('settings'); return; }
+
+      const budget = document.getElementById('groceryBudget').value || "1500";
+      const days = document.getElementById('groceryDays').value || "10";
+      const store = document.getElementById('groceryStore').value || "Tiendas 3B";
+      const goal = document.getElementById('groceryGoalSelect').value;
+
+      const btn = document.getElementById('groceryBtn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner inline-block"></div><span>Generando Despensa y Menú...</span>`;
+      btn.disabled = true;
+
+      try {
+        const prompt = `Actúa como nutriólogo. Con un presupuesto de $${budget} MXN para ${days} días en ${store}, meta: "${goal}".
+        Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta (sin texto extra ni markdown):
+        {
+          "groceries": [{"text": "producto (cantidad) - precio"}],
+          "mealPlan": [
+            {
+              "day": "Día 1",
+              "breakfast": "Desayuno detallado",
+              "snack1": "Colación 1",
+              "lunch": "Comida detallada",
+              "snack2": "Colación 2",
+              "dinner": "Cena detallada"
+            }
+          ]
+        }`;
+        
+        const textResult = await callGeminiAPI(prompt, null);
+        const parsedData = JSON.parse(textResult);
+
+        appState.groceries = parsedData.groceries.map((it, idx) => ({ id: Date.now() + idx, text: it.text, checked: false }));
+        appState.mealPlanStructured = parsedData.mealPlan || [];
+        saveState();
+      } catch (err) {
+        alert("Error de IA: " + err.message);
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    function renderGroceries() {
+      const el = document.getElementById('groceryList');
+      if(appState.groceries.length === 0) { 
+        el.innerHTML = `<p class="text-xs text-slate-400 italic">Vacío.</p>`; 
+      } else {
+        el.innerHTML = appState.groceries.map((g, i) => `
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 text-xs">
+            <label class="flex items-center gap-3 flex-1 cursor-pointer">
+              <input type="checkbox" ${g.checked ? 'checked' : ''} onchange="toggleGrocery(${i})" class="w-4 h-4 accent-emerald-500 rounded">
+              <span class="${g.checked ? 'line-through text-slate-400' : 'font-medium text-slate-200'}">${g.text}</span>
+            </label>
+            <button onclick="deleteGrocery(${i})" class="text-slate-400 hover:text-rose-500">✕</button>
+          </div>
+        `).join('');
+      }
+
+      const planContainer = document.getElementById('mealPlanContainer');
+      if(!appState.mealPlanStructured || appState.mealPlanStructured.length === 0) {
+        planContainer.innerHTML = `<p class="text-xs text-slate-400 italic">Genera tu despensa para desplegar el menú diario detallado.</p>`;
+      } else {
+        planContainer.innerHTML = appState.mealPlanStructured.map(day => `
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-1.5 shadow-sm">
+            <h4 class="font-bold text-xs text-blue-400 uppercase tracking-wide border-b border-slate-200 dark:border-slate-700 pb-1">${day.day}</h4>
+            <p class="text-xs text-slate-300"><strong class="text-slate-100">Desayuno:</strong> ${day.breakfast}</p>
+            <p class="text-xs text-slate-300"><strong class="text-slate-100">Colación 1:</strong> ${day.snack1}</p>
+            <p class="text-xs text-slate-300"><strong class="text-slate-100">Comida:</strong> ${day.lunch}</p>
+            <p class="text-xs text-slate-300"><strong class="text-slate-100">Colación 2:</strong> ${day.snack2}</p>
+            <p class="text-xs text-slate-300"><strong class="text-slate-100">Cena:</strong> ${day.dinner}</p>
+          </div>
+        `).join('');
+      }
+    }
+
+    function toggleGrocery(i) { appState.groceries[i].checked = !appState.groceries[i].checked; saveState(); }
+    function deleteGrocery(i) { appState.groceries.splice(i, 1); saveState(); }
+
+    function saveSettings() {
+      appState.apiKey = document.getElementById('apiKeyInput').value.trim();
+      appState.selectedModel = document.getElementById('modelSelect').value;
       saveState();
+      alert("¡Ajustes y modelo guardados correctamente!");
+    }
+
+    function renderSettings() {
+      document.getElementById('apiKeyInput').value = appState.apiKey || '';
+      document.getElementById('modelSelect').value = appState.selectedModel || 'gemini-3.1-flash-live-preview';
+      document.getElementById('headerSubtitle').textContent = appState.apiKey ? `IA Activa (${appState.selectedModel})` : 'Falta Token API';
     }
 
     function copyDailyReport() {
-      const dayData = appState.days[appState.currentDay];
-      let totKcal = 0, totP = 0, totC = 0, totF = 0;
-      PRESET_MEALS.forEach(m => {
-        if (dayData.checkedMeals.includes(m.id)) {
-          totKcal += m.kcal; totP += m.p; totC += m.c; totF += m.f;
-        }
-      });
-      dayData.customMeals.forEach(cm => {
-        totKcal += cm.kcal; totP += cm.p; totC += cm.c; totF += cm.f;
-      });
-
-      const report = `📊 Reporte del Día (${appState.currentDay}):\n` +
-        `• Calorías: ${totKcal}/2100 kcal\n` +
-        `• Proteína: ${totP}/170g | Carbos: ${totC}/160g | Grasas: ${totF}/85g\n` +
-        `• Agua: ${(dayData.water / 1000).toFixed(2)} L / 4.0 L`;
-
-      navigator.clipboard.writeText(report).then(() => {
-        alert('¡Reporte copiado! Pégalo aquí en el chat para revisarlo.');
-      });
+      const dayData = appState.days[appState.currentDay] || { water: 0, meals: [] };
+      let totKcal = 0, totP = 0;
+      dayData.meals.forEach(m => { totKcal += m.kcal || 0; totP += m.p || 0; });
+      const report = `Reporte (${appState.currentDay}):\n• Kcal: ${totKcal}/${appState.targetKcal}\n• Prot: ${totP}/170g\n• Agua: ${(dayData.water/1000).toFixed(2)}L`;
+      navigator.clipboard.writeText(report).then(() => alert('¡Reporte copiado!'));
     }
 
     function renderAll() {
@@ -649,8 +961,10 @@
       renderCalendar();
       renderNutrition();
       renderTasks();
+      renderGym();
       renderHabits();
       renderGroceries();
+      renderSettings();
     }
 
     renderAll();
