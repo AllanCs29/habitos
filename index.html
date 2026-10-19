@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Control TCC - Allan Pro v25</title>
+  <title>Control TCC - Habitos</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -24,11 +24,16 @@
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .spinner { animation: spin 1s linear infinite; }
+    @keyframes slideDown { from { transform: translate(-50%, -100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+    .toast-enter { animation: slideDown 0.25s ease-out forwards; }
   </style>
 </head>
 <body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen pb-28 transition-colors duration-200">
 
-  <!-- HEADER & CONTROLES SUPERIORES -->
+  <!-- NOTIFICACIÓN INTERNA (TOAST) -->
+  <div id="toastContainer" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none w-11/12 max-w-sm space-y-2"></div>
+
+  <!-- HEADER & CALENDARIO -->
   <header class="sticky top-0 z-30 bg-white/90 dark:bg-slate-800/90 backdrop-blur border-b border-slate-200 dark:border-slate-700 px-4 py-3 shadow-sm">
     <div class="max-w-md mx-auto">
       <div class="flex justify-between items-center mb-3">
@@ -37,17 +42,20 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
           </div>
           <div>
-            <h1 class="text-base font-bold tracking-tight">Sistema TCC Pro v25</h1>
-            <p id="headerSubtitle" class="text-[11px] text-slate-500 dark:text-slate-400">Gemini IA Conectada</p>
+            <h1 class="text-base font-bold tracking-tight">Sistema TCC Master v26</h1>
+            <p id="headerSubtitle" class="text-[11px] text-slate-500 dark:text-slate-400">Cargando configuración...</p>
           </div>
         </div>
-        <div class="flex items-center gap-2">
-          <button onclick="copyDailyReport()" class="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-xl font-medium shadow-sm transition">Reporte</button>
-          <button onclick="toggleTheme()" id="themeBtn" class="p-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-sm">🌙</button>
+        <div class="flex items-center gap-1.5">
+          <button onclick="copyDailyReport()" class="flex items-center gap-1 text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-xl font-medium shadow-sm transition">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+            <span>Reporte</span>
+          </button>
+          <button onclick="toggleTheme()" id="themeBtn" class="p-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 transition"></button>
         </div>
       </div>
 
-      <!-- CALENDARIO -->
+      <!-- BARRA DE DÍAS -->
       <div id="calendarBar" class="flex gap-2 overflow-x-auto no-scrollbar py-1"></div>
     </div>
   </header>
@@ -57,22 +65,44 @@
 
     <!-- ==================== PESTAÑA 1: NUTRICIÓN ==================== -->
     <section id="tab-nutrition" class="space-y-4">
-      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 flex gap-2">
-        <div class="flex-1">
-          <label class="text-[10px] text-slate-400 block mb-1 font-bold uppercase">Meta Kcal Diaria:</label>
-          <input id="targetKcalInput" type="number" onchange="updateTargets()" class="w-full px-3 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 font-bold text-center outline-none">
+      
+      <!-- Panel de Metas Directas (Kcal, Agua y Macros) -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Metas Nutricionales Diarias</span>
+          <button onclick="switchTab('settings')" class="text-[11px] text-blue-500 font-semibold hover:underline">Autocalcular con IA</button>
         </div>
-        <div class="flex-1">
-          <label class="text-[10px] text-slate-400 block mb-1 font-bold uppercase">Meta Agua (ml):</label>
-          <input id="targetWaterInput" type="number" onchange="updateTargets()" class="w-full px-3 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 font-bold text-center outline-none">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-1 font-bold uppercase">Meta Kcal</label>
+            <input id="targetKcalInput" type="number" onchange="updateTargets()" class="w-full px-3 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 font-bold text-center outline-none">
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-1 font-bold uppercase">Meta Agua (ml)</label>
+            <input id="targetWaterInput" type="number" onchange="updateTargets()" class="w-full px-3 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 font-bold text-center outline-none">
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="text-[10px] text-rose-400 block mb-1 font-bold uppercase text-center">Proteína (g)</label>
+            <input id="targetProtInput" type="number" onchange="updateTargets()" class="w-full px-2 py-1 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 font-bold text-center outline-none">
+          </div>
+          <div>
+            <label class="text-[10px] text-amber-400 block mb-1 font-bold uppercase text-center">Carbos (g)</label>
+            <input id="targetCarbInput" type="number" onchange="updateTargets()" class="w-full px-2 py-1 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 font-bold text-center outline-none">
+          </div>
+          <div>
+            <label class="text-[10px] text-emerald-400 block mb-1 font-bold uppercase text-center">Grasas (g)</label>
+            <input id="targetFatInput" type="number" onchange="updateTargets()" class="w-full px-2 py-1 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 font-bold text-center outline-none">
+          </div>
         </div>
       </div>
 
-      <!-- Gráficas Macros -->
+      <!-- Gráficas Circulares de Macros -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
         <div class="flex justify-between items-center mb-3">
           <div class="flex items-center gap-2">
-            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
             <h2 class="font-bold text-sm">Balance Energético</h2>
           </div>
           <span id="kcalText" class="text-xs font-extrabold text-blue-500 bg-blue-500/10 px-2.5 py-1 rounded-full">0 / 2100 kcal</span>
@@ -113,14 +143,18 @@
       <!-- Escáner IA -->
       <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-4 text-white shadow-md space-y-3">
         <div class="flex justify-between items-center">
-          <h2 class="font-bold text-sm">Gemini IA: Análisis de Plato</h2>
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+            <h2 class="font-bold text-sm">Gemini IA: Escáner de Alimentos</h2>
+          </div>
           <span id="aiModelBadge" class="text-[10px] bg-white/20 px-2 py-0.5 rounded font-mono">IA Activa</span>
         </div>
-        <p class="text-xs text-blue-100">Toma foto o describe tu comida para calcular macros al instante.</p>
+        <p class="text-xs text-blue-100">Sube una foto o describe tu plato para calcular calorías y macros automáticamente.</p>
         <div class="space-y-2">
-          <input id="aiFoodInput" type="text" placeholder="Ej. Pollo con brócoli y aguacate..." class="w-full px-3 py-2 text-xs rounded-xl bg-white/10 text-white placeholder-blue-200 outline-none border border-white/20">
+          <input id="aiFoodInput" type="text" placeholder="Ej. 200g pechuga de pollo con arroz y aguacate..." class="w-full px-3 py-2 text-xs rounded-xl bg-white/10 text-white placeholder-blue-200 outline-none border border-white/20">
           <div class="flex gap-2">
             <label class="flex-1 py-2.5 bg-white/20 hover:bg-white/30 text-white font-bold text-xs rounded-xl text-center cursor-pointer transition flex items-center justify-center gap-1.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
               <span>Subir Foto</span>
               <input type="file" accept="image/*" id="aiFoodImage" onchange="handleImageUpload(event)" class="hidden">
             </label>
@@ -132,7 +166,7 @@
         </div>
       </div>
 
-      <!-- Vaso de Agua -->
+      <!-- Hidratación -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4">
         <div class="relative w-16 h-24 bg-slate-100 dark:bg-slate-700/60 rounded-b-2xl border-2 border-t-0 border-sky-400 overflow-hidden flex flex-col justify-end shadow-inner shrink-0">
           <div id="waterLiquid" class="w-full bg-sky-500 transition-all duration-500" style="height: 0%"></div>
@@ -142,10 +176,10 @@
         </div>
         <div class="flex-1">
           <div class="flex justify-between items-center mb-1">
-            <h2 class="font-bold text-sm">Hidratación</h2>
+            <h2 class="font-bold text-sm">Hidratación Diaria</h2>
             <span id="waterText" class="text-sm font-extrabold text-sky-500">0.00 L</span>
           </div>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Suma agua para acelerar tu metabolismo.</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Registra tu ingesta de agua del día.</p>
           <div class="grid grid-cols-4 gap-1">
             <button onclick="addWater(250)" class="py-1.5 bg-sky-50 dark:bg-sky-900/30 text-sky-600 rounded-lg text-xs font-bold border border-sky-200 dark:border-sky-800">+250</button>
             <button onclick="addWater(500)" class="py-1.5 bg-sky-50 dark:bg-sky-900/30 text-sky-600 rounded-lg text-xs font-bold border border-sky-200 dark:border-sky-800">+500</button>
@@ -155,34 +189,46 @@
         </div>
       </div>
 
-      <!-- Alimentos -->
+      <!-- Lista de Alimentos -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
         <div class="flex justify-between items-center mb-3">
           <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Alimentos Registrados</h2>
-          <button onclick="clearTodayMeals()" class="text-[10px] text-rose-500 font-bold">Limpiar</button>
+          <button onclick="clearTodayMeals()" class="text-[10px] text-rose-500 font-bold">Limpiar Día</button>
         </div>
-        <div id="mealsList" class="space-y-2">
-          <p class="text-xs text-slate-400 italic">No hay alimentos registrados hoy.</p>
-        </div>
+        <div id="mealsList" class="space-y-2"></div>
       </div>
     </section>
 
-    <!-- ==================== PESTAÑA 2: ENFOQUE ==================== -->
+    <!-- ==================== PESTAÑA 2: ENFOQUE & TAREAS ==================== -->
     <section id="tab-focus" class="space-y-4 hidden">
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
-        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Tareas con Horario Límite</h2>
+        <div class="flex justify-between items-center">
+          <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Tareas con Horario Límite</h2>
+          <button onclick="enableBrowserNotifications()" class="text-[11px] text-blue-500 font-semibold hover:underline">Permiso Alertas</button>
+        </div>
         <div class="space-y-2">
-          <input id="newTaskInput" type="text" placeholder="Nueva tarea..." class="w-full px-3 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
-          <input id="newTaskTime" type="time" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
-          <button onclick="addTask()" class="w-full py-2.5 bg-blue-500 text-white font-bold text-xs rounded-xl transition">+ Agregar Tarea</button>
+          <input id="newTaskInput" type="text" placeholder="Descripción de la tarea o entregable..." class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[10px] text-slate-400 block mb-1">Hora Límite / Alarma</label>
+              <input id="newTaskTime" type="time" class="w-full px-2.5 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400 block mb-1">Categoría</label>
+              <select id="newTaskTag" class="w-full px-2.5 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none font-semibold">
+                <option value="Trabajo">Trabajo</option>
+                <option value="Personal">Personal / Casa</option>
+                <option value="Estudio">Estudio / Proyecto</option>
+              </select>
+            </div>
+          </div>
+          <button onclick="addTask()" class="w-full py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs rounded-xl transition">+ Agregar Tarea</button>
         </div>
-        <div id="tasksList" class="space-y-2 mt-3">
-          <p class="text-xs text-slate-400 italic">Sin tareas pendientes.</p>
-        </div>
+        <div id="tasksList" class="space-y-2 mt-3"></div>
       </div>
     </section>
 
-    <!-- ==================== PESTAÑA 3: GIMNASIO ==================== -->
+    <!-- ==================== PESTAÑA 3: GIMNASIO & HISTORIAL DE CARGAS ==================== -->
     <section id="tab-gym" class="space-y-4 hidden">
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
         <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Generador IA de Rutina Semanal</h2>
@@ -205,43 +251,87 @@
           <select id="gymGoalSelect" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 outline-none font-semibold">
             <option value="Pérdida de grasa abdominal y definición">Pérdida de grasa abdominal y definición</option>
             <option value="Hipertrofia y ganancia de masa muscular">Hipertrofia y ganancia de masa muscular</option>
-            <option value="Recomposición corporal">Recomposición corporal (Grasa a músculo)</option>
+            <option value="Recomposición corporal (Perder grasa y ganar músculo)">Recomposición corporal (Grasa a músculo)</option>
             <option value="Volumen (Aumento de peso y fuerza)">Volumen (Aumento de peso y fuerza)</option>
+            <option value="Fuerza máxima y potencia">Fuerza máxima y potencia</option>
+            <option value="Resistencia y acondicionamiento físico">Resistencia y acondicionamiento físico</option>
           </select>
         </div>
-        <button id="gymBtn" onclick="generateGymRoutineWithGemini()" class="w-full py-2.5 bg-blue-500 text-white font-bold text-xs rounded-xl transition">Generar Rutina por Días con IA</button>
-        <button onclick="exportToCalendar()" class="w-full py-2.5 bg-emerald-500 text-white font-bold text-xs rounded-xl transition">Añadir al Calendario (ICS)</button>
+        <button id="gymBtn" onclick="generateGymRoutineWithGemini()" class="w-full py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-2">
+          <span>Generar Rutina por Días con IA</span>
+        </button>
+        <button onclick="exportToCalendar()" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl transition">
+          Descargar Rutina para Calendario (ICS)
+        </button>
       </div>
 
+      <!-- Entrenamiento del Día + Historial de Sobrecarga Progresiva -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
-        <div class="flex justify-between items-center mb-1">
+        <div class="flex justify-between items-center mb-2">
           <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400" id="currentGymDayTitle">Entrenamiento de Hoy</h2>
-          <button onclick="addGymExercise()" class="text-xs bg-blue-500 text-white px-2.5 py-1 rounded-lg font-bold">+ Ejercicio</button>
+          <button onclick="toggleNewExerciseForm()" class="text-xs bg-blue-500 text-white px-2.5 py-1 rounded-lg font-bold">+ Ejercicio</button>
         </div>
+        
         <div id="gymDayFocusBadge" class="mb-3 inline-block px-3 py-1 rounded-lg bg-blue-500/10 text-blue-400 font-bold text-xs border border-blue-500/20">
-          Enfoque: Sin rutina generada aún
+          Enfoque: Sin rutina asignada
         </div>
-        <div id="gymRoutineList" class="space-y-3">
-          <p class="text-xs text-slate-400 italic">Genera tu rutina con IA para ver los ejercicios de este día.</p>
+
+        <!-- Formulario inline para agregar ejercicio sin prompt() del navegador -->
+        <div id="newExerciseForm" class="hidden mb-3 p-3 rounded-xl bg-slate-100 dark:bg-slate-700/50 space-y-2">
+          <input id="manualExerciseName" type="text" placeholder="Nombre del ejercicio..." class="w-full px-3 py-1.5 text-xs rounded-lg bg-white dark:bg-slate-800 outline-none">
+          <div class="flex gap-2">
+            <button onclick="addGymExercise()" class="flex-1 py-1.5 bg-blue-500 text-white text-xs font-bold rounded-lg">Guardar</button>
+            <button onclick="toggleNewExerciseForm()" class="py-1.5 px-3 bg-slate-300 dark:bg-slate-600 text-xs font-bold rounded-lg">Cancelar</button>
+          </div>
         </div>
+
+        <div id="gymRoutineList" class="space-y-3"></div>
       </div>
     </section>
 
-    <!-- ==================== PESTAÑA 4: HÁBITOS ==================== -->
+    <!-- ==================== PESTAÑA 4: HÁBITOS, RACHAS & BITÁCORA TCC ==================== -->
     <section id="tab-habits" class="space-y-4 hidden">
+      
+      <!-- Módulo 1: Hábitos y Contador de Rachas -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
-        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Hábitos Conductuales (Manuales)</h2>
+        <div class="flex justify-between items-center">
+          <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Hábitos y Control de Rachas</h2>
+          <span class="text-[10px] text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full">Gamificación TCC</span>
+        </div>
         <div class="flex gap-2">
-          <input id="newHabitInput" type="text" placeholder="Nuevo hábito..." class="flex-1 px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
-          <button onclick="addHabit()" class="bg-blue-500 text-white px-3 py-2 rounded-xl font-bold text-xs">+</button>
+          <input id="newHabitInput" type="text" placeholder="Agregar hábito personalizado..." class="flex-1 px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
+          <button onclick="addHabit()" class="bg-blue-500 text-white px-3.5 py-2 rounded-xl font-bold text-xs">+</button>
         </div>
-        <div id="habitsList" class="space-y-2 mt-3">
-          <p class="text-xs text-slate-400 italic">Agrega tus hábitos uno por uno.</p>
+        <div id="habitsList" class="space-y-2 mt-3"></div>
+      </div>
+
+      <!-- Módulo 2: Bitácora TCC de Impulsos y Ansiedad -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+          <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Bitácora TCC de Impulsos y Ansiedad</h2>
         </div>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Registra cualquier tentación, tic o bloqueo y qué acción alternativa tomaste para romper el patrón automático.</p>
+        
+        <div class="space-y-2">
+          <select id="impulseCategory" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 outline-none font-semibold">
+            <option value="Ansiedad Alimenticia / Antojo">Ansiedad Alimenticia / Antojo</option>
+            <option value="Tic / Impulso Físico">Tic / Impulso Físico</option>
+            <option value="Procrastinación / Bloqueo">Procrastinación / Bloqueo</option>
+            <option value="Impulso Financiero / Gasto">Impulso Financiero / Gasto</option>
+          </select>
+          <input id="impulseTrigger" type="text" placeholder="Gatillo: ¿Qué disparó el impulso o qué sentiste?" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
+          <input id="impulseAction" type="text" placeholder="Conducta Alternativa: ¿Cómo lo venciste?" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
+          <button onclick="addImpulseLog()" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl transition">
+            Registrar Victoria sobre Impulso
+          </button>
+        </div>
+
+        <div id="impulseLogsList" class="space-y-2 pt-2"></div>
       </div>
     </section>
 
-    <!-- ==================== PESTAÑA 5: DESPENSA ==================== -->
+    <!-- ==================== PESTAÑA 5: DESPENSA & MENÚ SEMANAL ==================== -->
     <section id="tab-grocery" class="space-y-4 hidden">
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
         <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Generador IA de Despensa & Menú</h2>
@@ -264,100 +354,102 @@
         <div>
           <label class="text-[10px] text-slate-400 block mb-0.5 font-bold uppercase">Meta Nutricional:</label>
           <select id="groceryGoalSelect" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 outline-none font-semibold">
-            <option value="Quema de grasa, alta proteína (170g diarios), cero harinas y azúcares">🔥 Quema de grasa, alta proteína (170g diarios), cero harinas y azúcares</option>
-            <option value="Hipertrofia muscular y ganancia de fuerza limpia">💪 Hipertrofia muscular y ganancia de fuerza limpia</option>
-            <option value="Recomposición corporal estricta">⚖️ Recomposición corporal estricta</option>
+            <option value="Pérdida de grasa, alta proteína, cero harinas y azúcares">Pérdida de grasa, alta proteína, cero harinas y azúcares</option>
+            <option value="Hipertrofia muscular y ganancia de fuerza limpia">Hipertrofia muscular y ganancia de fuerza limpia</option>
+            <option value="Volumen y aumento de masa muscular económico">Volumen y aumento de masa muscular económico</option>
+            <option value="Recomposición corporal estricta">Recomposición corporal estricta</option>
           </select>
         </div>
 
-        <button id="groceryBtn" onclick="generateGroceryWithGemini()" class="w-full py-2.5 bg-emerald-500 text-white font-bold text-xs rounded-xl transition">Generar Despensa y Menú con IA</button>
+        <button id="groceryBtn" onclick="generateGroceryWithGemini()" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-2">
+          <span>Generar Despensa y Menú con IA</span>
+        </button>
         
         <div class="mt-4">
-          <h3 class="font-bold text-xs uppercase tracking-wider text-slate-400 mb-2">Lista de Despensa Comprada</h3>
-          <div id="groceryList" class="space-y-2">
-            <p class="text-xs text-slate-400 italic">Vacío.</p>
-          </div>
+          <h3 class="font-bold text-xs uppercase tracking-wider text-slate-400 mb-2">Lista de Compras</h3>
+          <div id="groceryList" class="space-y-2"></div>
         </div>
 
         <div class="mt-5 pt-4 border-t border-slate-200 dark:border-slate-700">
-          <h3 class="font-bold text-sm uppercase tracking-wider text-slate-400 mb-3">Plan de Comidas Estructurado</h3>
-          <div id="mealPlanContainer" class="space-y-3">
-            <p class="text-xs text-slate-400 italic">Genera tu despensa para desplegar el menú diario detallado.</p>
-          </div>
+          <h3 class="font-bold text-sm uppercase tracking-wider text-slate-400 mb-3">Plan de Comidas Semanal</h3>
+          <div id="mealPlanContainer" class="space-y-3"></div>
         </div>
       </div>
     </section>
 
-    <!-- ==================== PESTAÑA 6: AJUSTES & CÁLCULO DE MACROS Y CALORÍAS CON IA ==================== -->
+    <!-- ==================== PESTAÑA 6: AJUSTES & AUTOCÁLCULO IA ==================== -->
     <section id="tab-settings" class="space-y-4 hidden">
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
-        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Configuración & Token Gemini</h2>
+        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Configuración & Modelos Gemini</h2>
         <div>
           <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1">Tu Clave API de Gemini (API Key):</label>
           <input id="apiKeyInput" type="password" placeholder="AIzaSy..." class="w-full px-3 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none font-mono">
         </div>
         <div>
-          <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1">Selecciona el Modelo:</label>
+          <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1">Selecciona el Modelo de tu Token:</label>
           <select id="modelSelect" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 outline-none font-semibold">
-            <option value="gemini-3.1-flash-live-preview">Gemini 3.1 Flash Live Preview (Recomendado / Rápido y gratuito)</option>
-            <option value="gemini-3.8-live">Gemini 3.8 Live (Análisis fluido y dinámico)</option>
-            <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite (Ultrarrápido y ligero)</option>
+            <option value="gemini-3.1-flash-live-preview">gemini-3.1-flash-live-preview (Rápido y gratuito)</option>
+            <option value="gemini-3.8-live">gemini-3.8-live (Análisis fluido en vivo)</option>
+            <option value="gemini-3.8-flash">gemini-3.8-flash (Soporte de pensamiento alto)</option>
+            <option value="gemini-3.8-live-extended-thinking">gemini-3.8-live-extended-thinking (Pensamiento extendido)</option>
+            <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Ligero de alta velocidad)</option>
           </select>
         </div>
-        <button onclick="saveSettings()" class="w-full py-2.5 bg-blue-500 text-white font-bold text-xs rounded-xl transition">Guardar Token y Modelo</button>
+        <button onclick="saveSettings()" class="w-full py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs rounded-xl transition">Guardar Token y Modelo</button>
       </div>
 
-      <!-- Apartado de Cálculo IA de Calorías, Agua y Macros -->
+      <!-- Calculadora IA de Calorías, Agua y Macros Exactos -->
       <div class="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-2xl p-4 text-white shadow-md space-y-3">
-        <h2 class="font-bold text-sm">✨ Calcular Calorías, Agua y Macros con IA</h2>
-        <p class="text-xs text-indigo-100">Introduce tus datos para que Gemini calcule tus metas exactas y las sincronice con tu nutrición.</p>
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+          <h2 class="font-bold text-sm">Calcular Calorías, Agua y Macros con IA</h2>
+        </div>
+        <p class="text-xs text-indigo-100">Introduce tus parámetros actuales para que Gemini calcule y actualice tus metas diarias de calorías, agua, proteínas, carbohidratos y grasas.</p>
         
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-3 gap-2">
           <div>
-            <label class="text-[10px] text-indigo-200 block mb-0.5">Peso (kg):</label>
-            <input id="calcWeight" type="number" value="85" class="w-full px-2.5 py-1.5 text-xs rounded-xl bg-white/10 text-white text-center font-bold outline-none border border-white/20">
+            <label class="text-[10px] text-indigo-200 block mb-0.5">Peso (kg)</label>
+            <input id="calcWeight" type="number" value="85" class="w-full px-2 py-1.5 text-xs rounded-xl bg-white/10 text-white text-center font-bold outline-none border border-white/20">
           </div>
           <div>
-            <label class="text-[10px] text-indigo-200 block mb-0.5">Estatura (cm):</label>
-            <input id="calcHeight" type="number" value="182" class="w-full px-2.5 py-1.5 text-xs rounded-xl bg-white/10 text-white text-center font-bold outline-none border border-white/20">
+            <label class="text-[10px] text-indigo-200 block mb-0.5">Estatura (cm)</label>
+            <input id="calcHeight" type="number" value="182" class="w-full px-2 py-1.5 text-xs rounded-xl bg-white/10 text-white text-center font-bold outline-none border border-white/20">
+          </div>
+          <div>
+            <label class="text-[10px] text-indigo-200 block mb-0.5">Edad</label>
+            <input id="calcAge" type="number" value="28" class="w-full px-2 py-1.5 text-xs rounded-xl bg-white/10 text-white text-center font-bold outline-none border border-white/20">
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="text-[10px] text-indigo-200 block mb-0.5">Edad:</label>
-            <input id="calcAge" type="number" value="28" class="w-full px-2.5 py-1.5 text-xs rounded-xl bg-white/10 text-white text-center font-bold outline-none border border-white/20">
-          </div>
-          <div>
-            <label class="text-[10px] text-indigo-200 block mb-0.5">Actividad:</label>
-            <select id="calcActivity" class="w-full px-2 py-1.5 text-xs rounded-xl bg-white/10 text-white font-semibold outline-none border border-white/20">
-              <option value="Moderada (Ejercicio 3-4 días)" class="text-slate-900">Moderada (3-4 días/sem)</option>
-              <option value="Sedentaria" class="text-slate-900">Sedentaria</option>
-              <option value="Alta (Ejercicio diario)" class="text-slate-900">Alta (Diario)</option>
-            </select>
-          </div>
+        <div>
+          <label class="text-[10px] text-indigo-200 block mb-0.5 font-bold uppercase">Nivel de Actividad:</label>
+          <select id="calcActivity" class="w-full px-3 py-2 text-xs rounded-xl bg-white/10 text-white font-semibold outline-none border border-white/20">
+            <option value="Moderada (Entrenamiento 3 a 4 días por semana)" class="text-slate-900">Moderada (3 a 4 días / semana)</option>
+            <option value="Sedentaria (Poco o nada de ejercicio)" class="text-slate-900">Sedentaria</option>
+            <option value="Alta (Entrenamiento intenso 5 a 6 días por semana)" class="text-slate-900">Alta (5 a 6 días / semana)</option>
+          </select>
         </div>
 
         <div>
           <label class="text-[10px] text-indigo-200 block mb-0.5 font-bold uppercase">Objetivo Principal:</label>
           <select id="calcGoalSelect" class="w-full px-3 py-2 text-xs rounded-xl bg-white/10 text-white outline-none font-semibold border border-white/20">
-            <option value="Pérdida de grasa corporal y definición (Déficit calórico, alta proteína)" class="text-slate-900">🔥 Quema de grasa / Definición (Déficit)</option>
-            <option value="Volumen y aumento de peso / masa muscular (Superávit calórico)" class="text-slate-900">📈 Volumen / Aumento de peso (Superávit)</option>
-            <option value="Hipertrofia y ganancia muscular limpia (Normocalórica con alta proteína)" class="text-slate-900">💪 Hipertrofia y masa muscular limpia</option>
-            <option value="Recomposición corporal (Bajar grasa y ganar músculo simultáneamente)" class="text-slate-900">⚖️ Recomposición corporal</option>
-            <option value="Fuerza máxima y rendimiento deportivo" class="text-slate-900">🏋️‍♂️ Fuerza máxima y rendimiento</option>
+            <option value="Pérdida de grasa corporal y definición (Déficit calórico, alta proteína)" class="text-slate-900">Quema de grasa y definición (Déficit)</option>
+            <option value="Volumen y aumento de peso / masa muscular (Superávit calórico controlado)" class="text-slate-900">Volumen y aumento de peso (Superávit)</option>
+            <option value="Hipertrofia y ganancia muscular limpia" class="text-slate-900">Hipertrofia y masa muscular limpia</option>
+            <option value="Recomposición corporal (Bajar grasa y ganar músculo simultáneamente)" class="text-slate-900">Recomposición corporal</option>
+            <option value="Fuerza máxima y rendimiento deportivo" class="text-slate-900">Fuerza máxima y rendimiento</option>
           </select>
         </div>
 
-        <button id="calcBtn" onclick="calculateMacrosWithGemini()" class="w-full py-2.5 bg-white text-indigo-700 font-bold text-xs rounded-xl shadow-sm transition">
-          Calcular e Instalar Metas con IA
+        <button id="calcBtn" onclick="calculateMacrosWithGemini()" class="w-full py-2.5 bg-white text-indigo-700 font-bold text-xs rounded-xl shadow-sm transition flex items-center justify-center gap-2">
+          <span>Calcular e Instalar Metas en Nutrición</span>
         </button>
       </div>
     </section>
 
   </main>
 
-  <!-- BARRA DE NAVEGACIÓN INFERIOR (6 PESTAÑAS) -->
+  <!-- BARRA DE NAVEGACIÓN INFERIOR (6 PESTAÑAS CON ICONOS SVG) -->
   <nav class="fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-1 py-1.5">
     <div class="max-w-md mx-auto grid grid-cols-6 gap-0.5">
       <button onclick="switchTab('nutrition')" id="nav-nutrition" class="flex flex-col items-center py-1 rounded-xl text-blue-500 font-bold">
@@ -369,11 +461,11 @@
         <span class="text-[8px]">Enfoque</span>
       </button>
       <button onclick="switchTab('gym')" id="nav-gym" class="flex flex-col items-center py-1 rounded-xl text-slate-400 font-medium">
-        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V6a2 2 0 012-2h2M4 16v2a2 2 0 002 2h2m8-16h2a2 2 0 012 2v2m-4 12h2a2 2 0 002-2v-2M9 12h6M3 12h3m12 0h3"></path></svg>
         <span class="text-[8px]">Gimnasio</span>
       </button>
       <button onclick="switchTab('habits')" id="nav-habits" class="flex flex-col items-center py-1 rounded-xl text-slate-400 font-medium">
-        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         <span class="text-[8px]">Hábitos</span>
       </button>
       <button onclick="switchTab('grocery')" id="nav-grocery" class="flex flex-col items-center py-1 rounded-xl text-slate-400 font-medium">
@@ -408,23 +500,58 @@
       selectedModel: 'gemini-3.1-flash-live-preview',
       targetKcal: 2100,
       targetWater: 4000,
+      targetProt: 170,
+      targetCarb: 160,
+      targetFat: 85,
       days: {},
       tasks: [],
       gymStructured: {},
+      exerciseHistory: {}, // Historial global de cargas por nombre de ejercicio
       habitsList: [],
       groceries: [],
       mealPlanStructured: []
     };
 
     DAYS_CONFIG.forEach(d => {
-      DEFAULT_STATE.days[d.id] = { water: 0, meals: [], habitsState: {} };
+      DEFAULT_STATE.days[d.id] = { water: 0, meals: [], habitsState: {}, impulses: [] };
     });
 
-    let appState = JSON.parse(localStorage.getItem('allan_tcc_app_v25')) || DEFAULT_STATE;
+    let appState = JSON.parse(localStorage.getItem('allan_tcc_app_v26')) || DEFAULT_STATE;
+    
+    // Asegurar compatibilidad de propiedades nuevas
+    if (!appState.targetProt) appState.targetProt = 170;
+    if (!appState.targetCarb) appState.targetCarb = 160;
+    if (!appState.targetFat) appState.targetFat = 85;
+    if (!appState.exerciseHistory) appState.exerciseHistory = {};
+    DAYS_CONFIG.forEach(d => {
+      if (!appState.days[d.id]) appState.days[d.id] = { water: 0, meals: [], habitsState: {}, impulses: [] };
+      if (!appState.days[d.id].impulses) appState.days[d.id].impulses = [];
+    });
+
     let currentUploadedImageBase64 = null;
 
+    // SISTEMA DE NOTIFICACIONES INTERNAS (SIN ALERT DEL NAVEGADOR)
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const colors = {
+        info: 'bg-blue-600 text-white border-blue-400',
+        success: 'bg-emerald-600 text-white border-emerald-400',
+        error: 'bg-rose-600 text-white border-rose-400',
+        warning: 'bg-amber-500 text-white border-amber-300'
+      };
+      const toast = document.createElement('div');
+      toast.className = `toast-enter px-4 py-3 rounded-xl shadow-lg border text-xs font-bold flex items-center justify-between ${colors[type] || colors.info}`;
+      toast.innerHTML = `<span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3200);
+    }
+
     function saveState() {
-      localStorage.setItem('allan_tcc_app_v25', JSON.stringify(appState));
+      localStorage.setItem('allan_tcc_app_v26', JSON.stringify(appState));
       renderAll();
     }
 
@@ -433,10 +560,10 @@
       const btn = document.getElementById('themeBtn');
       if (appState.theme === 'dark') {
         html.classList.add('dark');
-        btn.textContent = '☀️';
+        btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>`;
       } else {
         html.classList.remove('dark');
-        btn.textContent = '🌙';
+        btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>`;
       }
     }
 
@@ -482,44 +609,53 @@
       const ring = document.getElementById(ringId);
       const text = document.getElementById(percentTextId);
       if(!ring || !text) return;
+      const safeMax = max > 0 ? max : 1;
       const radius = ring.r.baseVal.value;
       const circumference = 2 * Math.PI * radius;
-      const pct = Math.min(100, Math.round((current / max) * 100));
+      const pct = Math.min(100, Math.round((current / safeMax) * 100));
       const offset = circumference - (pct / 100) * circumference;
       ring.style.strokeDasharray = `${circumference} ${circumference}`;
       ring.style.strokeDashoffset = offset;
       text.textContent = `${pct}%`;
     }
 
+    // ==================== 1. NUTRICIÓN ====================
     function renderNutrition() {
-      document.getElementById('targetKcalInput').value = appState.targetKcal || 2100;
-      document.getElementById('targetWaterInput').value = appState.targetWater || 4000;
+      const maxKcal = appState.targetKcal || 2100;
+      const maxWater = appState.targetWater || 4000;
+      const maxP = appState.targetProt || 170;
+      const maxC = appState.targetCarb || 160;
+      const maxF = appState.targetFat || 85;
 
-      const dayData = appState.days[appState.currentDay] || { water: 0, meals: [], habitsState: {} };
+      document.getElementById('targetKcalInput').value = maxKcal;
+      document.getElementById('targetWaterInput').value = maxWater;
+      document.getElementById('targetProtInput').value = maxP;
+      document.getElementById('targetCarbInput').value = maxC;
+      document.getElementById('targetFatInput').value = maxF;
+
+      const dayData = appState.days[appState.currentDay];
       let totKcal = 0, totP = 0, totC = 0, totF = 0;
       
       dayData.meals.forEach(m => {
-        totKcal += m.kcal || 0;
-        totP += m.p || 0;
-        totC += m.c || 0;
-        totF += m.f || 0;
+        totKcal += Number(m.kcal) || 0;
+        totP += Number(m.p) || 0;
+        totC += Number(m.c) || 0;
+        totF += Number(m.f) || 0;
       });
 
-      const maxKcal = appState.targetKcal || 2100;
       document.getElementById('kcalText').textContent = `${totKcal} / ${maxKcal} kcal`;
       document.getElementById('kcalBar').style.width = `${Math.min(100, (totKcal / maxKcal) * 100)}%`;
 
-      document.getElementById('protText').textContent = `${totP}/170g`;
-      document.getElementById('carbText').textContent = `${totC}/160g`;
-      document.getElementById('fatText').textContent = `${totF}/85g`;
+      document.getElementById('protText').textContent = `${totP}/${maxP}g`;
+      document.getElementById('carbText').textContent = `${totC}/${maxC}g`;
+      document.getElementById('fatText').textContent = `${totF}/${maxF}g`;
 
-      setCircleProgress('protRing', 'protPercent', totP, 170);
-      setCircleProgress('carbRing', 'carbPercent', totC, 160);
-      setCircleProgress('fatRing', 'fatPercent', totF, 85);
+      setCircleProgress('protRing', 'protPercent', totP, maxP);
+      setCircleProgress('carbRing', 'carbPercent', totC, maxC);
+      setCircleProgress('fatRing', 'fatPercent', totF, maxF);
 
       const waterMl = dayData.water || 0;
       const waterLiters = (waterMl / 1000).toFixed(2);
-      const maxWater = appState.targetWater || 4000;
       const waterPct = Math.min(100, Math.round((waterMl / maxWater) * 100));
       document.getElementById('waterText').textContent = `${waterLiters} L`;
       document.getElementById('waterLiquid').style.height = `${waterPct}%`;
@@ -533,7 +669,7 @@
           <div class="flex justify-between items-center p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 text-xs">
             <div>
               <p class="font-bold">${m.name}</p>
-              <p class="text-slate-500 dark:text-slate-400">${m.kcal} kcal | <span class="text-rose-500 font-medium">${m.p}g P</span> | ${m.c}g C | ${m.f}g G</p>
+              <p class="text-slate-500 dark:text-slate-400">${m.kcal} kcal | <span class="text-rose-500 font-medium">${m.p}g P</span> | <span class="text-amber-500 font-medium">${m.c}g C</span> | <span class="text-emerald-500 font-medium">${m.f}g G</span></p>
             </div>
             <button onclick="removeMeal(${i})" class="text-rose-500 font-bold px-2">✕</button>
           </div>
@@ -544,7 +680,11 @@
     function updateTargets() {
       appState.targetKcal = parseInt(document.getElementById('targetKcalInput').value) || 2100;
       appState.targetWater = parseInt(document.getElementById('targetWaterInput').value) || 4000;
+      appState.targetProt = parseInt(document.getElementById('targetProtInput').value) || 170;
+      appState.targetCarb = parseInt(document.getElementById('targetCarbInput').value) || 160;
+      appState.targetFat = parseInt(document.getElementById('targetFatInput').value) || 85;
       saveState();
+      showToast("Metas nutricionales actualizadas", "success");
     }
 
     function removeMeal(index) {
@@ -555,6 +695,7 @@
     function clearTodayMeals() {
       appState.days[appState.currentDay].meals = [];
       saveState();
+      showToast("Alimentos del día reiniciados", "info");
     }
 
     function addWater(amount) {
@@ -569,17 +710,17 @@
       const reader = new FileReader();
       reader.onload = function(e) {
         currentUploadedImageBase64 = e.target.result;
-        document.getElementById('aiImagePreview').textContent = `Imagen cargada (${file.name})`;
+        document.getElementById('aiImagePreview').textContent = `Imagen lista: ${file.name}`;
       };
       reader.readAsDataURL(file);
     }
 
+    // MOTOR CENTRAL DE LLAMADAS A GEMINI API
     async function callGeminiAPI(promptText, imageBase64) {
       const apiKey = appState.apiKey;
       const model = appState.selectedModel || 'gemini-3.1-flash-live-preview';
       
-      let contents = [];
-      contents.push({ text: promptText });
+      let contents = [{ text: promptText }];
 
       if(imageBase64) {
         const base64Data = imageBase64.split(',')[1];
@@ -620,25 +761,24 @@
 
         return rawText.replace(/```json/g, '').replace(/```/g, '').trim();
       } catch (err) {
-        if (err.name === 'AbortError') throw new Error("La solicitud tardó demasiado.");
+        if (err.name === 'AbortError') throw new Error("Tiempo de espera agotado. Intenta nuevamente.");
         throw err;
       }
     }
 
     async function analyzeFoodWithGemini() {
-      const apiKey = appState.apiKey;
-      if(!apiKey) { alert("Configura tu API Key en Ajustes."); switchTab('settings'); return; }
+      if(!appState.apiKey) { showToast("Configura tu API Key en Ajustes", "warning"); switchTab('settings'); return; }
 
       const promptText = document.getElementById('aiFoodInput').value.trim();
-      if(!promptText && !currentUploadedImageBase64) { alert("Escribe o sube foto."); return; }
+      if(!promptText && !currentUploadedImageBase64) { showToast("Describe tu comida o sube una foto", "warning"); return; }
 
       const btn = document.getElementById('aiFoodBtn');
       const originalText = btn.innerHTML;
-      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner"></div><span>Calculando...</span>`;
+      btn.innerHTML = `<div class="w-4 h-4 border-2 border-blue-700 border-t-transparent rounded-full spinner"></div><span>Analizando...</span>`;
       btn.disabled = true;
 
       try {
-        let prompt = "Analiza este alimento. Devuelve ÚNICAMENTE un JSON válido (sin formato markdown ni bloques de código): {\"name\": \"nombre\", \"kcal\": número, \"p\": número, \"c\": número, \"f\": número}.";
+        let prompt = "Analiza este alimento. Devuelve ÚNICAMENTE un JSON válido sin texto adicional: {\"name\": \"nombre del plato\", \"kcal\": número, \"p\": gramos_proteina, \"c\": gramos_carbohidratos, \"f\": gramos_grasas}.";
         if(promptText) prompt += ` Descripción: ${promptText}`;
 
         const textResult = await callGeminiAPI(prompt, currentUploadedImageBase64);
@@ -649,55 +789,38 @@
         currentUploadedImageBase64 = null;
         document.getElementById('aiImagePreview').textContent = '';
         saveState();
+        showToast(`Registrado: ${parsed.name} (${parsed.kcal} kcal)`, "success");
       } catch (err) {
-        alert("Error de API: " + err.message);
+        showToast("Error IA: " + err.message, "error");
       } finally {
         btn.innerHTML = originalText;
         btn.disabled = false;
       }
     }
 
-    // CÁLCULO DE CALORÍAS, AGUA Y MACROS CON IA
-    async function calculateMacrosWithGemini() {
-      const apiKey = appState.apiKey;
-      if(!apiKey) { alert("Configura tu API Key en Ajustes."); switchTab('settings'); return; }
-
-      const weight = document.getElementById('calcWeight').value;
-      const height = document.getElementById('calcHeight').value;
-      const age = document.getElementById('calcAge').value;
-      const activity = document.getElementById('calcActivity').value;
-      const goal = document.getElementById('calcGoalSelect').value;
-
-      const btn = document.getElementById('calcBtn');
-      const originalText = btn.innerHTML;
-      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner inline-block"></div><span>Calculando Metas y Macros...</span>`;
-      btn.disabled = true;
-
-      try {
-        const prompt = `Calcula las calorías diarias, el agua y los macros (proteína, carbohidratos, grasas) en base a las necesidades para una persona de ${weight}kg, ${height}cm, ${age} años, nivel de actividad: "${activity}", objetivo principal: "${goal}".
-        Devuelve ÚNICAMENTE un JSON válido sin texto extra:
-        {
-          "targetKcal": número_calorías,
-          "targetWater": mililitros_agua
-        }`;
-
-        const textResult = await callGeminiAPI(prompt, null);
-        const parsed = JSON.parse(textResult);
-
-        appState.targetKcal = parsed.targetKcal || 2100;
-        appState.targetWater = parsed.targetWater || 4000;
-        saveState();
-        alert(`¡Metas y Macros ajustados con éxito!\n• Calorías: ${appState.targetKcal} kcal\n• Agua: ${appState.targetWater} ml`);
-        switchTab('nutrition');
-      } catch (err) {
-        alert("Error al calcular metas: " + err.message);
-      } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-      }
+    // ==================== 2. TAREAS Y ALERTAS POR HORARIO ====================
+    function enableBrowserNotifications() {
+      if (!("Notification" in window)) { showToast("Navegador sin soporte de notificaciones", "warning"); return; }
+      Notification.requestPermission().then(p => {
+        if (p === "granted") showToast("Alertas de horario activadas", "success");
+      });
     }
 
-    // TAREAS
+    setInterval(() => {
+      const now = new Date();
+      const cur = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      appState.tasks.forEach(t => {
+        if (!t.done && t.time === cur && !t.notified) {
+          t.notified = true;
+          saveState();
+          showToast(`Hora límite alcanzada: ${t.text}`, "warning");
+          if ("Notification" in window && Notification.permission === "granted") {
+            new Notification("Hora límite de tarea", { body: t.text });
+          }
+        }
+      });
+    }, 15000);
+
     function renderTasks() {
       const el = document.getElementById('tasksList');
       if(appState.tasks.length === 0) { el.innerHTML = `<p class="text-xs text-slate-400 italic">Sin tareas pendientes.</p>`; return; }
@@ -706,11 +829,14 @@
           <label class="flex items-center gap-3 flex-1 cursor-pointer">
             <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${i})" class="w-4 h-4 accent-blue-500 rounded">
             <div>
-              <span class="${t.done ? 'line-through text-slate-400' : 'font-medium'}">${t.text}</span>
-              ${t.time ? `<span class="block text-[10px] text-blue-500 font-bold mt-0.5">Límite: ${t.time}</span>` : ''}
+              <span class="${t.done ? 'line-through text-slate-400' : 'font-semibold'}">${t.text}</span>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300 font-medium">${t.tag || 'General'}</span>
+                ${t.time ? `<span class="text-[10px] text-blue-500 font-bold">Límite: ${t.time}</span>` : ''}
+              </div>
             </div>
           </label>
-          <button onclick="deleteTask(${i})" class="text-slate-400 hover:text-rose-500">✕</button>
+          <button onclick="deleteTask(${i})" class="text-slate-400 hover:text-rose-500 px-2">✕</button>
         </div>
       `).join('');
     }
@@ -718,66 +844,41 @@
     function addTask() {
       const input = document.getElementById('newTaskInput');
       const timeInput = document.getElementById('newTaskTime').value;
+      const tagInput = document.getElementById('newTaskTag').value;
       if(!input.value.trim()) return;
-      appState.tasks.unshift({ id: Date.now(), text: input.value.trim(), time: timeInput, done: false });
+      appState.tasks.unshift({ id: Date.now(), text: input.value.trim(), time: timeInput, tag: tagInput, done: false, notified: false });
       input.value = '';
       document.getElementById('newTaskTime').value = '';
       saveState();
+      showToast("Tarea agregada", "success");
     }
 
     function toggleTask(i) { appState.tasks[i].done = !appState.tasks[i].done; saveState(); }
     function deleteTask(i) { appState.tasks.splice(i, 1); saveState(); }
 
-    // HÁBITOS
-    function renderHabits() {
-      if(!appState.habitsList) appState.habitsList = [];
-      const dayData = appState.days[appState.currentDay];
-      if(!dayData.habitsState) dayData.habitsState = {};
+    // ==================== 3. GIMNASIO & SOBRECARGA PROGRESIVA ====================
+    function toggleNewExerciseForm() {
+      const form = document.getElementById('newExerciseForm');
+      form.classList.toggle('hidden');
+    }
 
-      const el = document.getElementById('habitsList');
-      if(appState.habitsList.length === 0) {
-        el.innerHTML = `<p class="text-xs text-slate-400 italic">Agrega tus hábitos uno por uno.</p>`;
-        return;
+    function addGymExercise() {
+      const input = document.getElementById('manualExerciseName');
+      const name = input.value.trim();
+      if(!name) return;
+      const currentDayId = appState.currentDay;
+      if(!appState.gymStructured[currentDayId]) {
+        appState.gymStructured[currentDayId] = { focus: "Entrenamiento Personalizado", exercises: [] };
       }
-      el.innerHTML = appState.habitsList.map((h, i) => {
-        const checked = !!dayData.habitsState[h.id];
-        return `
-          <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 text-xs">
-            <label class="flex items-center gap-3 flex-1 cursor-pointer">
-              <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleHabitState('${h.id}')" class="w-4 h-4 accent-blue-500 rounded">
-              <span class="${checked ? 'line-through text-slate-400' : 'font-medium'}">${h.name}</span>
-            </label>
-            <button onclick="deleteHabit(${i})" class="text-slate-400 hover:text-rose-500">✕</button>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function addHabit() {
-      const input = document.getElementById('newHabitInput');
-      if(!input.value.trim()) return;
-      if(!appState.habitsList) appState.habitsList = [];
-      appState.habitsList.push({ id: 'h_' + Date.now(), name: input.value.trim() });
+      appState.gymStructured[currentDayId].exercises.push({ id: Date.now(), name, weight: 0, done: false });
       input.value = '';
+      document.getElementById('newExerciseForm').classList.add('hidden');
       saveState();
+      showToast("Ejercicio añadido al día", "success");
     }
 
-    function toggleHabitState(id) {
-      const dayData = appState.days[appState.currentDay];
-      if(!dayData.habitsState) dayData.habitsState = {};
-      dayData.habitsState[id] = !dayData.habitsState[id];
-      saveState();
-    }
-
-    function deleteHabit(i) {
-      appState.habitsList.splice(i, 1);
-      saveState();
-    }
-
-    // GIMNASIO IA
     async function generateGymRoutineWithGemini() {
-      const apiKey = appState.apiKey;
-      if(!apiKey) { alert("Configura tu API Key en Ajustes."); switchTab('settings'); return; }
+      if(!appState.apiKey) { showToast("Configura tu API Key en Ajustes", "warning"); switchTab('settings'); return; }
 
       const weight = document.getElementById('gymWeight').value;
       const height = document.getElementById('gymHeight').value;
@@ -786,18 +887,18 @@
 
       const btn = document.getElementById('gymBtn');
       const originalText = btn.innerHTML;
-      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner inline-block"></div><span>Generando...</span>`;
+      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner"></div><span>Estructurando rutina por días...</span>`;
       btn.disabled = true;
 
       try {
-        const prompt = `Para una persona de ${weight}kg y ${height}cm, objetivo: "${goal}", entrenando ${daysCount} días por semana. 
-        Crea una distribución semanal de entrenamiento por días (Lunes, Martes, Miércoles, Jueves, Viernes, Sábado).
+        const prompt = `Para una persona de ${weight}kg y ${height}cm, objetivo: "${goal}", entrenando ${daysCount} días por semana.
+        Crea una distribución semanal dividida por días (ej. Lunes, Martes, Jueves, Viernes).
         Devuelve ÚNICAMENTE un JSON válido sin texto extra:
         [
           {
             "dayName": "Lunes",
-            "focus": "Tren Superior - Empuje",
-            "exercises": [{"name": "Press de banca", "weight": 0}]
+            "focus": "Tren Superior - Empuje (Pecho, Hombro, Tríceps)",
+            "exercises": [{"name": "Press de banca con mancuernas (4x10)", "weight": 0}]
           }
         ]`;
 
@@ -806,50 +907,53 @@
 
         appState.gymStructured = {};
         parsedDays.forEach(d => {
-          const matchedDay = DAYS_CONFIG.find(dc => dc.dayName.toLowerCase() === d.dayName.toLowerCase());
-          if (matchedDay) {
+          const matchedDays = DAYS_CONFIG.filter(dc => dc.dayName.toLowerCase() === (d.dayName || '').toLowerCase());
+          matchedDays.forEach(matchedDay => {
             appState.gymStructured[matchedDay.id] = {
               focus: d.focus,
-              exercises: d.exercises.map((ex, idx) => ({ id: Date.now() + idx, name: ex.name, weight: ex.weight || 0, done: false }))
+              exercises: (d.exercises || []).map((ex, idx) => {
+                const prevHist = appState.exerciseHistory[ex.name] || [];
+                const lastWeight = prevHist.length > 0 ? prevHist[prevHist.length - 1].weight : (ex.weight || 0);
+                return { id: Date.now() + idx + Math.random(), name: ex.name, weight: lastWeight, done: false };
+              })
             };
-          }
+          });
         });
 
         saveState();
-        alert("¡Rutina semanal por días generada con éxito!");
+        showToast("Rutina dividida por días generada", "success");
       } catch (err) {
-        alert("Error de IA: " + err.message);
+        showToast("Error IA: " + err.message, "error");
       } finally {
         btn.innerHTML = originalText;
         btn.disabled = false;
       }
     }
 
-    function exportToCalendar() {
-      if(!appState.gymStructured || Object.keys(appState.gymStructured).length === 0) { alert("Primero genera una rutina con IA."); return; }
-      let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Allan TCC App//ES\n";
-      
-      Object.keys(appState.gymStructured).forEach(dayId => {
-        const dayInfo = appState.gymStructured[dayId];
-        dayInfo.exercises.forEach((ex) => {
-          icsContent += "BEGIN:VEVENT\n";
-          icsContent += `SUMMARY:Gym (${dayInfo.focus}): ${ex.name}\n`;
-          icsContent += `DESCRIPTION:Rutina TCC - Enfoque: ${dayInfo.focus}\n`;
-          icsContent += `DTSTART:20261019T180000Z\n`;
-          icsContent += `DTEND:20261019T190000Z\n`;
-          icsContent += "END:VEVENT\n";
-        });
-      });
-      icsContent += "END:VCALENDAR";
+    function updateGymWeight(i, val) {
+      const currentDayId = appState.currentDay;
+      const dayObj = DAYS_CONFIG.find(d => d.id === currentDayId);
+      const dayLabel = dayObj ? dayObj.label : currentDayId;
+      const newWeight = parseFloat(val) || 0;
 
-      const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-      const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.setAttribute('download', 'rutina_gym_semanal.ics');
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      alert("Archivo de calendario descargado.");
+      if(appState.gymStructured && appState.gymStructured[currentDayId]) {
+        const ex = appState.gymStructured[currentDayId].exercises[i];
+        ex.weight = newWeight;
+
+        if(!appState.exerciseHistory[ex.name]) appState.exerciseHistory[ex.name] = [];
+        const hist = appState.exerciseHistory[ex.name];
+        
+        // Guardar o actualizar el registro del día actual en el historial
+        const existingTodayIndex = hist.findIndex(h => h.day === dayLabel);
+        if (existingTodayIndex !== -1) {
+          hist[existingTodayIndex].weight = newWeight;
+        } else if (newWeight > 0) {
+          hist.push({ day: dayLabel, weight: newWeight });
+        }
+
+        saveState();
+        showToast(`Carga registrada: ${ex.name} (${newWeight} kg)`, "info");
+      }
     }
 
     function renderGym() {
@@ -860,56 +964,56 @@
       const el = document.getElementById('gymRoutineList');
       const activeDayObj = DAYS_CONFIG.find(d => d.id === currentDayId);
 
-      document.getElementById('currentGymDayTitle').textContent = `Entrenamiento de ${activeDayObj ? activeDayObj.dayName : 'Hoy'}`;
+      document.getElementById('currentGymDayTitle').textContent = `Entrenamiento: ${activeDayObj ? activeDayObj.dayName : 'Hoy'}`;
 
       if (!dayGymData || !dayGymData.exercises || dayGymData.exercises.length === 0) {
-        focusBadge.textContent = "Enfoque: Descanso o sin rutina asignada";
-        el.innerHTML = `<p class="text-xs text-slate-400 italic">Genera tu rutina con IA para visualizar los ejercicios específicos de este día.</p>`;
+        focusBadge.textContent = "Enfoque: Día de descanso o sin rutina asignada";
+        el.innerHTML = `<p class="text-xs text-slate-400 italic">No hay ejercicios programados para este día.</p>`;
         return;
       }
 
       focusBadge.textContent = `Enfoque: ${dayGymData.focus}`;
-      el.innerHTML = dayGymData.exercises.map((ex, i) => `
-        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 text-xs space-y-2">
-          <div class="flex items-center justify-between">
-            <label class="flex items-center gap-2.5 cursor-pointer">
-              <input type="checkbox" ${ex.done ? 'checked' : ''} onchange="toggleGymEx(${i})" class="w-4 h-4 accent-blue-500 rounded">
-              <span class="font-bold ${ex.done ? 'line-through text-slate-400' : ''}">${ex.name}</span>
-            </label>
-            <button onclick="deleteGymEx(${i})" class="text-slate-400 hover:text-rose-500">✕</button>
-          </div>
-          <div class="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-600">
-            <span class="text-[11px] text-slate-500">Peso actual (kg):</span>
-            <input type="number" value="${ex.weight || 0}" onchange="updateGymWeight(${i}, this.value)" class="w-16 px-2 py-1 text-center font-bold text-xs bg-slate-200 dark:bg-slate-600 rounded-lg outline-none">
-          </div>
-        </div>
-      `).join('');
-    }
+      el.innerHTML = dayGymData.exercises.map((ex, i) => {
+        const hist = appState.exerciseHistory[ex.name] || [];
+        let historyText = "Sin historial previo";
+        let diffBadge = "";
 
-    function addGymExercise() {
-      const name = prompt("Nombre del ejercicio:");
-      if(!name) return;
-      const currentDayId = appState.currentDay;
-      if(!appState.gymStructured) appState.gymStructured = {};
-      if(!appState.gymStructured[currentDayId]) {
-        appState.gymStructured[currentDayId] = { focus: "Personalizado", exercises: [] };
-      }
-      appState.gymStructured[currentDayId].exercises.push({ id: Date.now(), name, weight: 0, done: false });
-      saveState();
+        if (hist.length > 0) {
+          historyText = hist.slice(-3).map(h => `${h.weight}kg (${h.day})`).join(' → ');
+          if (hist.length >= 2) {
+            const diff = hist[hist.length - 1].weight - hist[hist.length - 2].weight;
+            if (diff > 0) diffBadge = `<span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-bold">+${diff} kg</span>`;
+          }
+        }
+
+        return `
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 text-xs space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="flex items-center gap-2.5 cursor-pointer">
+                <input type="checkbox" ${ex.done ? 'checked' : ''} onchange="toggleGymEx(${i})" class="w-4 h-4 accent-blue-500 rounded">
+                <span class="font-bold ${ex.done ? 'line-through text-slate-400' : ''}">${ex.name}</span>
+              </label>
+              <button onclick="deleteGymEx(${i})" class="text-slate-400 hover:text-rose-500">✕</button>
+            </div>
+            <div class="flex items-center justify-between pt-1.5 border-t border-slate-200 dark:border-slate-600">
+              <div class="space-y-0.5">
+                <span class="text-[10px] text-slate-400 block">Progresión: ${historyText}</span>
+                ${diffBadge}
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] text-slate-400">Kg:</span>
+                <input type="number" step="0.5" value="${ex.weight || 0}" onchange="updateGymWeight(${i}, this.value)" class="w-16 px-2 py-1 text-center font-bold text-xs bg-slate-200 dark:bg-slate-600 rounded-lg outline-none">
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     function toggleGymEx(i) {
       const currentDayId = appState.currentDay;
       if(appState.gymStructured && appState.gymStructured[currentDayId]) {
         appState.gymStructured[currentDayId].exercises[i].done = !appState.gymStructured[currentDayId].exercises[i].done;
-        saveState();
-      }
-    }
-
-    function updateGymWeight(i, val) {
-      const currentDayId = appState.currentDay;
-      if(appState.gymStructured && appState.gymStructured[currentDayId]) {
-        appState.gymStructured[currentDayId].exercises[i].weight = parseFloat(val) || 0;
         saveState();
       }
     }
@@ -922,10 +1026,149 @@
       }
     }
 
-    // DESPENSA & MENÚ SEMANAL
+    function exportToCalendar() {
+      if(!appState.gymStructured || Object.keys(appState.gymStructured).length === 0) { showToast("Primero genera una rutina con IA", "warning"); return; }
+      let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Allan TCC App//ES\n";
+      Object.keys(appState.gymStructured).forEach(dayId => {
+        const dayInfo = appState.gymStructured[dayId];
+        const dateClean = dayId.replace(/-/g, '');
+        if (dayInfo.exercises && dayInfo.exercises.length > 0) {
+          const exNames = dayInfo.exercises.map(e => e.name).join(', ');
+          icsContent += "BEGIN:VEVENT\n";
+          icsContent += `SUMMARY:Entrenamiento: ${dayInfo.focus}\n`;
+          icsContent += `DESCRIPTION:Ejercicios: ${exNames}\n`;
+          icsContent += `DTSTART:${dateClean}T180000Z\n`;
+          icsContent += `DTEND:${dateClean}T193000Z\n`;
+          icsContent += "END:VEVENT\n";
+        }
+      });
+      icsContent += "END:VCALENDAR";
+
+      const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.setAttribute('download', 'rutina_semanal_tcc.ics');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast("Calendario ICS descargado", "success");
+    }
+
+    // ==================== 4. HÁBITOS, RACHAS & BITÁCORA TCC ====================
+    function calculateHabitStreak(habitId) {
+      const currentIdx = DAYS_CONFIG.findIndex(d => d.id === appState.currentDay);
+      if (currentIdx === -1) return 0;
+      let streak = 0;
+      for (let i = currentIdx; i >= 0; i--) {
+        const dId = DAYS_CONFIG[i].id;
+        const checked = appState.days[dId]?.habitsState?.[habitId];
+        if (checked) {
+          streak++;
+        } else {
+          if (i !== currentIdx) break;
+        }
+      }
+      return streak;
+    }
+
+    function renderHabits() {
+      if(!appState.habitsList) appState.habitsList = [];
+      const dayData = appState.days[appState.currentDay];
+      if(!dayData.habitsState) dayData.habitsState = {};
+
+      const el = document.getElementById('habitsList');
+      if(appState.habitsList.length === 0) {
+        el.innerHTML = `<p class="text-xs text-slate-400 italic">Agrega tus hábitos conductuales manualmente uno por uno.</p>`;
+      } else {
+        el.innerHTML = appState.habitsList.map((h, i) => {
+          const checked = !!dayData.habitsState[h.id];
+          const streak = calculateHabitStreak(h.id);
+          return `
+            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 text-xs">
+              <label class="flex items-center gap-3 flex-1 cursor-pointer">
+                <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleHabitState('${h.id}')" class="w-4 h-4 accent-blue-500 rounded">
+                <span class="${checked ? 'line-through text-slate-400' : 'font-semibold'}">${h.name}</span>
+              </label>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${streak > 0 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-slate-200 dark:bg-slate-700 text-slate-400'}">
+                  Racha: ${streak}d
+                </span>
+                <button onclick="deleteHabit(${i})" class="text-slate-400 hover:text-rose-500">✕</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Renderizar Bitácora TCC de Impulsos
+      const impulsesEl = document.getElementById('impulseLogsList');
+      const impulses = dayData.impulses || [];
+      if (impulses.length === 0) {
+        impulsesEl.innerHTML = `<p class="text-xs text-slate-400 italic">Sin impulsos registrados hoy.</p>`;
+      } else {
+        impulsesEl.innerHTML = impulses.map((imp, idx) => `
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 text-xs space-y-1">
+            <div class="flex justify-between items-center">
+              <span class="text-[10px] font-bold text-amber-400 uppercase">${imp.category} • ${imp.time}</span>
+              <button onclick="deleteImpulseLog(${idx})" class="text-slate-400 hover:text-rose-500">✕</button>
+            </div>
+            <p class="text-slate-300"><strong class="text-slate-100">Gatillo:</strong> ${imp.trigger}</p>
+            <p class="text-emerald-400"><strong class="text-emerald-300">Acción Alternativa:</strong> ${imp.action}</p>
+          </div>
+        `).join('');
+      }
+    }
+
+    function addHabit() {
+      const input = document.getElementById('newHabitInput');
+      if(!input.value.trim()) return;
+      appState.habitsList.push({ id: 'h_' + Date.now(), name: input.value.trim() });
+      input.value = '';
+      saveState();
+      showToast("Hábito registrado", "success");
+    }
+
+    function toggleHabitState(id) {
+      const dayData = appState.days[appState.currentDay];
+      dayData.habitsState[id] = !dayData.habitsState[id];
+      saveState();
+    }
+
+    function deleteHabit(i) {
+      appState.habitsList.splice(i, 1);
+      saveState();
+    }
+
+    function addImpulseLog() {
+      const cat = document.getElementById('impulseCategory').value;
+      const triggerInput = document.getElementById('impulseTrigger');
+      const actionInput = document.getElementById('impulseAction');
+      if (!triggerInput.value.trim() || !actionInput.value.trim()) {
+        showToast("Completa el gatillo y la conducta alternativa", "warning");
+        return;
+      }
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      appState.days[appState.currentDay].impulses.unshift({
+        category: cat,
+        trigger: triggerInput.value.trim(),
+        action: actionInput.value.trim(),
+        time: timeStr
+      });
+      triggerInput.value = '';
+      actionInput.value = '';
+      saveState();
+      showToast("Victoria conductual registrada", "success");
+    }
+
+    function deleteImpulseLog(idx) {
+      appState.days[appState.currentDay].impulses.splice(idx, 1);
+      saveState();
+    }
+
+    // ==================== 5. DESPENSA & MENÚ SEMANAL ====================
     async function generateGroceryWithGemini() {
-      const apiKey = appState.apiKey;
-      if(!apiKey) { alert("Configura tu API Key en Ajustes."); switchTab('settings'); return; }
+      if(!appState.apiKey) { showToast("Configura tu API Key en Ajustes", "warning"); switchTab('settings'); return; }
 
       const budget = document.getElementById('groceryBudget').value || "1500";
       const days = document.getElementById('groceryDays').value || "10";
@@ -934,22 +1177,22 @@
 
       const btn = document.getElementById('groceryBtn');
       const originalText = btn.innerHTML;
-      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner inline-block"></div><span>Generando Despensa y Menú...</span>`;
+      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner"></div><span>Generando Despensa y Menú...</span>`;
       btn.disabled = true;
 
       try {
-        const prompt = `Actúa como nutriólogo. Con un presupuesto de $${budget} MXN para ${days} días en ${store}, meta: "${goal}".
+        const prompt = `Actúa como nutriólogo clínico. Presupuesto: $${budget} MXN para ${days} días en ${store}. Meta: "${goal}" (${appState.targetKcal} kcal, ${appState.targetProt}g proteína, ${appState.targetCarb}g carbos, ${appState.targetFat}g grasas).
         Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta (sin texto extra):
         {
-          "groceries": [{"text": "producto (cantidad) - precio"}],
+          "groceries": [{"text": "producto (cantidad) - precio aprox"}],
           "mealPlan": [
             {
               "day": "Día 1",
-              "breakfast": "Desayuno detallado",
-              "snack1": "Colación 1",
-              "lunch": "Comida detallada",
-              "snack2": "Colación 2",
-              "dinner": "Cena detallada"
+              "breakfast": "Desayuno con cantidades",
+              "snack1": "Colación matutina",
+              "lunch": "Comida con cantidades",
+              "snack2": "Colación vespertina",
+              "dinner": "Cena con cantidades"
             }
           ]
         }`;
@@ -957,11 +1200,12 @@
         const textResult = await callGeminiAPI(prompt, null);
         const parsedData = JSON.parse(textResult);
 
-        appState.groceries = parsedData.groceries.map((it, idx) => ({ id: Date.now() + idx, text: it.text, checked: false }));
+        appState.groceries = (parsedData.groceries || []).map((it, idx) => ({ id: Date.now() + idx, text: it.text, checked: false }));
         appState.mealPlanStructured = parsedData.mealPlan || [];
         saveState();
+        showToast("Despensa y menú semanal actualizados", "success");
       } catch (err) {
-        alert("Error de IA: " + err.message);
+        showToast("Error IA: " + err.message, "error");
       } finally {
         btn.innerHTML = originalText;
         btn.disabled = false;
@@ -971,13 +1215,13 @@
     function renderGroceries() {
       const el = document.getElementById('groceryList');
       if(appState.groceries.length === 0) { 
-        el.innerHTML = `<p class="text-xs text-slate-400 italic">Vacío.</p>`; 
+        el.innerHTML = `<p class="text-xs text-slate-400 italic">No hay productos en la lista.</p>`; 
       } else {
         el.innerHTML = appState.groceries.map((g, i) => `
           <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 text-xs">
             <label class="flex items-center gap-3 flex-1 cursor-pointer">
               <input type="checkbox" ${g.checked ? 'checked' : ''} onchange="toggleGrocery(${i})" class="w-4 h-4 accent-emerald-500 rounded">
-              <span class="${g.checked ? 'line-through text-slate-400' : 'font-medium text-slate-200'}">${g.text}</span>
+              <span class="${g.checked ? 'line-through text-slate-400' : 'font-medium text-slate-700 dark:text-slate-200'}">${g.text}</span>
             </label>
             <button onclick="deleteGrocery(${i})" class="text-slate-400 hover:text-rose-500">✕</button>
           </div>
@@ -986,16 +1230,16 @@
 
       const planContainer = document.getElementById('mealPlanContainer');
       if(!appState.mealPlanStructured || appState.mealPlanStructured.length === 0) {
-        planContainer.innerHTML = `<p class="text-xs text-slate-400 italic">Genera tu despensa para desplegar el menú diario detallado.</p>`;
+        planContainer.innerHTML = `<p class="text-xs text-slate-400 italic">Genera tu despensa para visualizar el menú estructurado.</p>`;
       } else {
         planContainer.innerHTML = appState.mealPlanStructured.map(day => `
-          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-1.5 shadow-sm">
-            <h4 class="font-bold text-xs text-blue-400 uppercase tracking-wide border-b border-slate-200 dark:border-slate-700 pb-1">${day.day}</h4>
-            <p class="text-xs text-slate-300"><strong class="text-slate-100">Desayuno:</strong> ${day.breakfast}</p>
-            <p class="text-xs text-slate-300"><strong class="text-slate-100">Colación 1:</strong> ${day.snack1}</p>
-            <p class="text-xs text-slate-300"><strong class="text-slate-100">Comida:</strong> ${day.lunch}</p>
-            <p class="text-xs text-slate-300"><strong class="text-slate-100">Colación 2:</strong> ${day.snack2}</p>
-            <p class="text-xs text-slate-300"><strong class="text-slate-100">Cena:</strong> ${day.dinner}</p>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 space-y-1.5 shadow-sm">
+            <h4 class="font-bold text-xs text-blue-500 dark:text-blue-400 uppercase tracking-wide border-b border-slate-200 dark:border-slate-600 pb-1">${day.day}</h4>
+            <p class="text-xs text-slate-600 dark:text-slate-300"><strong class="text-slate-900 dark:text-white">Desayuno:</strong> ${day.breakfast}</p>
+            <p class="text-xs text-slate-600 dark:text-slate-300"><strong class="text-slate-900 dark:text-white">Colación 1:</strong> ${day.snack1}</p>
+            <p class="text-xs text-slate-600 dark:text-slate-300"><strong class="text-slate-900 dark:text-white">Comida:</strong> ${day.lunch}</p>
+            <p class="text-xs text-slate-600 dark:text-slate-300"><strong class="text-slate-900 dark:text-white">Colación 2:</strong> ${day.snack2}</p>
+            <p class="text-xs text-slate-600 dark:text-slate-300"><strong class="text-slate-900 dark:text-white">Cena:</strong> ${day.dinner}</p>
           </div>
         `).join('');
       }
@@ -1004,25 +1248,79 @@
     function toggleGrocery(i) { appState.groceries[i].checked = !appState.groceries[i].checked; saveState(); }
     function deleteGrocery(i) { appState.groceries.splice(i, 1); saveState(); }
 
+    // ==================== 6. AJUSTES & AUTOCÁLCULO DE CALORÍAS, AGUA Y MACROS ====================
+    async function calculateMacrosWithGemini() {
+      if(!appState.apiKey) { showToast("Primero guarda tu API Key arriba", "warning"); return; }
+
+      const weight = document.getElementById('calcWeight').value;
+      const height = document.getElementById('calcHeight').value;
+      const age = document.getElementById('calcAge').value;
+      const activity = document.getElementById('calcActivity').value;
+      const goal = document.getElementById('calcGoalSelect').value;
+
+      const btn = document.getElementById('calcBtn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<div class="w-4 h-4 border-2 border-indigo-700 border-t-transparent rounded-full spinner"></div><span>Calculando Calorías y Macros...</span>`;
+      btn.disabled = true;
+
+      try {
+        const prompt = `Calcula las calorías diarias exactas, mililitros de agua y gramos diarios de macronutrientes (proteína, carbohidratos y grasas) para una persona de ${weight}kg, ${height}cm, ${age} años, actividad: "${activity}", objetivo: "${goal}".
+        Devuelve ÚNICAMENTE un JSON válido sin texto adicional:
+        {
+          "targetKcal": número_entero,
+          "targetWater": número_entero_ml,
+          "targetProt": gramos_proteina_entero,
+          "targetCarb": gramos_carbohidratos_entero,
+          "targetFat": gramos_grasas_entero
+        }`;
+
+        const textResult = await callGeminiAPI(prompt, null);
+        const parsed = JSON.parse(textResult);
+
+        appState.targetKcal = Number(parsed.targetKcal) || 2100;
+        appState.targetWater = Number(parsed.targetWater) || 4000;
+        appState.targetProt = Number(parsed.targetProt) || 170;
+        appState.targetCarb = Number(parsed.targetCarb) || 160;
+        appState.targetFat = Number(parsed.targetFat) || 85;
+
+        saveState();
+        showToast(`Metas instaladas: ${appState.targetKcal} kcal | ${appState.targetProt}g P | ${appState.targetCarb}g C | ${appState.targetFat}g G`, "success");
+        switchTab('nutrition');
+      } catch (err) {
+        showToast("Error al calcular metas: " + err.message, "error");
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+
     function saveSettings() {
       appState.apiKey = document.getElementById('apiKeyInput').value.trim();
       appState.selectedModel = document.getElementById('modelSelect').value;
       saveState();
-      alert("¡Ajustes y modelo guardados correctamente!");
+      showToast("Token y modelo guardados correctamente", "success");
     }
 
     function renderSettings() {
       document.getElementById('apiKeyInput').value = appState.apiKey || '';
       document.getElementById('modelSelect').value = appState.selectedModel || 'gemini-3.1-flash-live-preview';
-      document.getElementById('headerSubtitle').textContent = appState.apiKey ? `IA Activa (${appState.selectedModel})` : 'Falta Token API';
+      document.getElementById('headerSubtitle').textContent = appState.apiKey ? `IA Activa (${appState.selectedModel})` : 'Configura tu Token API en Ajustes';
+      const badge = document.getElementById('aiModelBadge');
+      if (badge) badge.textContent = appState.selectedModel;
     }
 
     function copyDailyReport() {
-      const dayData = appState.days[appState.currentDay] || { water: 0, meals: [] };
-      let totKcal = 0, totP = 0;
-      dayData.meals.forEach(m => { totKcal += m.kcal || 0; totP += m.p || 0; });
-      const report = `Reporte (${appState.currentDay}):\n• Kcal: ${totKcal}/${appState.targetKcal}\n• Prot: ${totP}/170g\n• Agua: ${(dayData.water/1000).toFixed(2)}L`;
-      navigator.clipboard.writeText(report).then(() => alert('¡Reporte copiado!'));
+      const dayData = appState.days[appState.currentDay];
+      let totKcal = 0, totP = 0, totC = 0, totF = 0;
+      dayData.meals.forEach(m => {
+        totKcal += Number(m.kcal) || 0;
+        totP += Number(m.p) || 0;
+        totC += Number(m.c) || 0;
+        totF += Number(m.f) || 0;
+      });
+      const impulsesCount = (dayData.impulses || []).length;
+      const report = `Reporte TCC (${appState.currentDay}):\n• Kcal: ${totKcal}/${appState.targetKcal}\n• Macros: ${totP}/${appState.targetProt}g P | ${totC}/${appState.targetCarb}g C | ${totF}/${appState.targetFat}g G\n• Agua: ${(dayData.water/1000).toFixed(2)}L\n• Impulsos controlados hoy: ${impulsesCount}`;
+      navigator.clipboard.writeText(report).then(() => showToast("Reporte copiado al portapapeles", "success"));
     }
 
     function renderAll() {
