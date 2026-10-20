@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Control TCC - Habitos</title>
+  <title>Control TCC - Master v42</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -26,14 +26,122 @@
     .spinner { animation: spin 1s linear infinite; }
     @keyframes slideDown { from { transform: translate(-50%, -100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
     .toast-enter { animation: slideDown 0.25s ease-out forwards; }
+
+    /* Animaciones Cinemáticas para el Simulador Biomecánico */
+    @keyframes pressMove { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-22px); } }
+    @keyframes squatMove { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(20px); } }
+    @keyframes pullMove { 0%, 100% { transform: translateY(-18px); } 50% { transform: translateY(6px); } }
+    @keyframes curlMove { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-65deg); } }
+    @keyframes pulseGlow { 0%, 100% { opacity: 0.45; r: 8px; } 50% { opacity: 1; r: 12px; } }
+    @keyframes breatheCircle {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      35% { transform: scale(1.45); opacity: 1; }
+      70% { transform: scale(1.45); opacity: 0.9; }
+    }
+    .anim-press { animation: pressMove 2.2s ease-in-out infinite; }
+    .anim-squat { animation: squatMove 2.4s ease-in-out infinite; }
+    .anim-pull { animation: pullMove 2.2s ease-in-out infinite; }
+    .anim-curl { transform-origin: 50px 45px; animation: curlMove 2s ease-in-out infinite; }
+    .muscle-active { animation: pulseGlow 1.5s ease-in-out infinite; }
+    .breathe-active { animation: breatheCircle 12s ease-in-out infinite; }
   </style>
 </head>
 <body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen pb-28 transition-colors duration-200">
 
-  <!-- NOTIFICACIÓN INTERNA (TOAST) -->
+  <!-- CONTENEDOR DE NOTIFICACIONES INTERNAS (TOAST) -->
   <div id="toastContainer" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none w-11/12 max-w-sm space-y-2"></div>
 
-  <!-- HEADER & CALENDARIO -->
+  <!-- ==================== MODAL ONBOARDING (BIENVENIDA POR PRIMERA VEZ) ==================== -->
+  <div id="onboardingModal" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 w-full max-w-md rounded-3xl p-6 space-y-5 shadow-2xl my-auto">
+      <div class="flex items-center gap-3 border-b border-slate-200 dark:border-slate-700 pb-4">
+        <div class="w-11 h-11 rounded-2xl bg-blue-500/20 text-blue-500 flex items-center justify-center shrink-0">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        </div>
+        <div>
+          <h2 class="text-base font-extrabold tracking-tight">Configuración Inicial TCC</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Personaliza tus metas clínicas, nutricionales y de entrenamiento.</p>
+        </div>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Tu Nombre o Alias</label>
+          <input id="obName" type="text" placeholder="Ej. Allan" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 outline-none font-bold">
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Peso (kg)</label>
+            <input id="obWeight" type="number" value="120" class="w-full px-2 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Altura (cm)</label>
+            <input id="obHeight" type="number" value="182" class="w-full px-2 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Edad</label>
+            <input id="obAge" type="number" value="28" class="w-full px-2 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Actividad Física</label>
+            <select id="obActivity" class="w-full px-2.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 font-semibold outline-none">
+              <option value="1.2">Sedentaria (Oficina)</option>
+              <option value="1.375">Ligera (1-2 días/sem)</option>
+              <option value="1.55" selected>Moderada (3-4 días/sem)</option>
+              <option value="1.725">Intensa (5-6 días/sem)</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Días Gym / Sem</label>
+            <input id="obGymDays" type="number" value="4" min="1" max="7" class="w-full px-2.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">¿Qué quieres lograr? (Objetivo Principal)</label>
+          <select id="obGoal" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 font-semibold outline-none">
+            <option value="deficit">Pérdida de grasa corporal y definición (Déficit)</option>
+            <option value="recomp">Recomposición corporal (Perder grasa y ganar músculo)</option>
+            <option value="hypertrophy">Hipertrofia y ganancia muscular limpia</option>
+            <option value="bulk">Volumen y aumento de fuerza máxima</option>
+          </select>
+        </div>
+
+        <div class="pt-2 border-t border-slate-200 dark:border-slate-700">
+          <label class="text-[10px] font-bold uppercase text-blue-400 block mb-1">Clave API de Gemini (Opcional ahora, necesaria para IA)</label>
+          <input id="obApiKey" type="password" placeholder="AIzaSy..." class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 outline-none font-mono text-xs">
+          <p class="text-[10px] text-slate-400 mt-1">Calcularemos tus calorías, agua y macros automáticamente con base en tus datos.</p>
+        </div>
+      </div>
+
+      <button id="obSubmitBtn" onclick="completeOnboarding()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-2xl shadow-lg transition flex items-center justify-center gap-2">
+        <span>Guardar Perfil e Iniciar Sistema</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL INTERNO DE DEMOSTRACIÓN VISUAL (GIFS + SIMULADOR 2D) ==================== -->
+  <div id="demoModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 w-full max-w-md rounded-2xl p-5 space-y-4 shadow-2xl relative">
+      <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 pb-2.5">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+          <h3 id="modalExerciseTitle" class="font-bold text-sm text-slate-800 dark:text-slate-100">Demostración Visual</h3>
+        </div>
+        <button onclick="closeDemoModal()" class="text-slate-400 hover:text-rose-500 font-bold text-sm px-2 py-1 rounded-lg">✕</button>
+      </div>
+      <div id="modalExerciseContent" class="text-xs space-y-3 max-h-[75vh] overflow-y-auto no-scrollbar"></div>
+      <button onclick="closeDemoModal()" class="w-full py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs rounded-xl shadow-sm transition">Cerrar Demostración</button>
+    </div>
+  </div>
+
+  <!-- ==================== HEADER & CALENDARIO ==================== -->
   <header class="sticky top-0 z-30 bg-white/90 dark:bg-slate-800/90 backdrop-blur border-b border-slate-200 dark:border-slate-700 px-4 py-3 shadow-sm">
     <div class="max-w-md mx-auto">
       <div class="flex justify-between items-center mb-3">
@@ -42,8 +150,8 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
           </div>
           <div>
-            <h1 class="text-base font-bold tracking-tight">Sistema TCC Master v26</h1>
-            <p id="headerSubtitle" class="text-[11px] text-slate-500 dark:text-slate-400">Cargando configuración...</p>
+            <h1 id="headerTitle" class="text-sm font-bold tracking-tight">Sistema TCC Master v42</h1>
+            <p id="headerSubtitle" class="text-[11px] text-slate-500 dark:text-slate-400">Cargando...</p>
           </div>
         </div>
         <div class="flex items-center gap-1.5">
@@ -60,17 +168,17 @@
     </div>
   </header>
 
-  <!-- CONTENIDO PRINCIPAL -->
+  <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
   <main class="max-w-md mx-auto px-4 pt-4 space-y-5">
 
-    <!-- ==================== PESTAÑA 1: NUTRICIÓN ==================== -->
+    <!-- ==================== PESTAÑA 1: NUTRICIÓN, ESCÁNER & CHEF IA ==================== -->
     <section id="tab-nutrition" class="space-y-4">
       
-      <!-- Panel de Metas Directas (Kcal, Agua y Macros) -->
+      <!-- Panel de Metas Directas -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
         <div class="flex justify-between items-center">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Metas Nutricionales Diarias</span>
-          <button onclick="switchTab('settings')" class="text-[11px] text-blue-500 font-semibold hover:underline">Autocalcular con IA</button>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Metas Diarias Configuradas</span>
+          <button onclick="openOnboardingEdit()" class="text-[11px] text-blue-500 font-semibold hover:underline">Editar mi Perfil</button>
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
@@ -100,13 +208,14 @@
 
       <!-- Gráficas Circulares de Macros -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
-        <div class="flex justify-between items-center mb-3">
+        <div class="flex justify-between items-center mb-2">
           <div class="flex items-center gap-2">
             <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
             <h2 class="font-bold text-sm">Balance Energético</h2>
           </div>
           <span id="kcalText" class="text-xs font-extrabold text-blue-500 bg-blue-500/10 px-2.5 py-1 rounded-full">0 / 2100 kcal</span>
         </div>
+        <p id="remainingMacrosSummary" class="text-[11px] text-slate-400 mb-3"></p>
 
         <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden mb-4">
           <div id="kcalBar" class="bg-blue-500 h-full transition-all duration-300" style="width: 0%"></div>
@@ -140,30 +249,85 @@
         </div>
       </div>
 
-      <!-- Escáner IA -->
+      <!-- Escáner IA con Vista Previa de Foto Altamente Notoria -->
       <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-4 text-white shadow-md space-y-3">
         <div class="flex justify-between items-center">
           <div class="flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
-            <h2 class="font-bold text-sm">Gemini IA: Escáner de Alimentos</h2>
+            <h2 class="font-bold text-sm">Escáner de Alimentos IA</h2>
           </div>
           <span id="aiModelBadge" class="text-[10px] bg-white/20 px-2 py-0.5 rounded font-mono">IA Activa</span>
         </div>
-        <p class="text-xs text-blue-100">Sube una foto o describe tu plato para calcular calorías y macros automáticamente.</p>
-        <div class="space-y-2">
+        <p class="text-xs text-blue-100">Sube una foto de tu comida o descríbela para registrar sus macros.</p>
+        
+        <div class="space-y-2.5">
           <input id="aiFoodInput" type="text" placeholder="Ej. 200g pechuga de pollo con arroz y aguacate..." class="w-full px-3 py-2 text-xs rounded-xl bg-white/10 text-white placeholder-blue-200 outline-none border border-white/20">
+          
+          <!-- TARJETA NOTORIA DE VISTA PREVIA DE FOTO -->
+          <div id="photoPreviewCard" class="hidden bg-emerald-950/90 border-2 border-emerald-400 rounded-xl p-3 flex items-center gap-3 shadow-lg">
+            <img id="photoThumbnail" src="" alt="Vista previa" class="w-16 h-16 object-cover rounded-lg border border-emerald-300 shrink-0">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                <span class="text-[11px] font-extrabold text-emerald-300 uppercase tracking-wide">Foto Cargada y Lista</span>
+              </div>
+              <p id="photoFileName" class="text-xs text-white truncate font-medium mt-0.5"></p>
+              <p class="text-[10px] text-emerald-200 mt-0.5">Presiona "Calcular con IA" para analizarla</p>
+            </div>
+            <button onclick="clearUploadedPhoto()" class="px-2.5 py-1.5 bg-rose-500/80 hover:bg-rose-600 text-white rounded-lg text-[10px] font-bold shrink-0">
+              Quitar
+            </button>
+          </div>
+
           <div class="flex gap-2">
-            <label class="flex-1 py-2.5 bg-white/20 hover:bg-white/30 text-white font-bold text-xs rounded-xl text-center cursor-pointer transition flex items-center justify-center gap-1.5">
+            <label id="uploadPhotoLabel" class="flex-1 py-2.5 bg-white/20 hover:bg-white/30 text-white font-bold text-xs rounded-xl text-center cursor-pointer transition flex items-center justify-center gap-1.5 border border-transparent">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-              <span>Subir Foto</span>
+              <span id="uploadPhotoBtnText">Seleccionar Foto</span>
               <input type="file" accept="image/*" id="aiFoodImage" onchange="handleImageUpload(event)" class="hidden">
             </label>
             <button id="aiFoodBtn" onclick="analyzeFoodWithGemini()" class="flex-1 py-2.5 bg-white text-blue-700 font-bold text-xs rounded-xl shadow-sm transition flex items-center justify-center gap-2">
               <span>Calcular con IA</span>
             </button>
           </div>
-          <div id="aiImagePreview" class="text-[11px] text-blue-200 italic"></div>
         </div>
+      </div>
+
+      <!-- NUEVO APARTADO: CHEF IA / QUÉ TENGO EN MI REFRI -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+            </div>
+            <div>
+              <h2 class="font-bold text-sm">Chef IA: ¿Qué tengo en mi refri?</h2>
+              <p class="text-[10px] text-slate-400">Dime qué ingredientes tienes y te diré qué preparar y qué evitar según tu meta.</p>
+            </div>
+          </div>
+        </div>
+
+        <textarea id="fridgeIngredients" rows="2" placeholder="Ej. Sopa de fideo, pierna de pollo en bistec, zanahoria, aguacate, lechuga y brócoli..." class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none resize-none"></textarea>
+
+        <div class="flex flex-wrap gap-2 text-[11px]">
+          <label class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-lg cursor-pointer">
+            <input type="checkbox" id="planDinner" checked class="accent-emerald-500">
+            <span>Cena de hoy</span>
+          </label>
+          <label class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-lg cursor-pointer">
+            <input type="checkbox" id="planBreakfast" checked class="accent-emerald-500">
+            <span>Desayuno mañana</span>
+          </label>
+          <label class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-lg cursor-pointer">
+            <input type="checkbox" id="planLunch" checked class="accent-emerald-500">
+            <span>Comida trabajo</span>
+          </label>
+        </div>
+
+        <button id="fridgeBtn" onclick="recommendFromFridge()" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 shadow-sm">
+          <span>Recomendar Platillos y Qué Evitar</span>
+        </button>
+
+        <div id="fridgeRecommendations" class="space-y-2.5 pt-1"></div>
       </div>
 
       <!-- Hidratación -->
@@ -192,15 +356,33 @@
       <!-- Lista de Alimentos -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
         <div class="flex justify-between items-center mb-3">
-          <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Alimentos Registrados</h2>
+          <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Alimentos Registrados Hoy</h2>
           <button onclick="clearTodayMeals()" class="text-[10px] text-rose-500 font-bold">Limpiar Día</button>
         </div>
         <div id="mealsList" class="space-y-2"></div>
       </div>
     </section>
 
-    <!-- ==================== PESTAÑA 2: ENFOQUE & TAREAS ==================== -->
+    <!-- ==================== PESTAÑA 2: ENFOQUE & POMODORO ==================== -->
     <section id="tab-focus" class="space-y-4 hidden">
+      
+      <!-- Temporizador Pomodoro Deep Focus -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
+        <div class="flex justify-between items-center">
+          <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Temporizador Deep Focus (TCC)</h2>
+          <span id="pomoStatusBadge" class="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-full font-bold">Enfoque 25m</span>
+        </div>
+        <div class="flex items-center justify-between bg-slate-100 dark:bg-slate-700/50 p-4 rounded-2xl">
+          <div id="pomoDisplay" class="text-3xl font-extrabold font-mono tracking-tight text-blue-500">25:00</div>
+          <div class="flex gap-1.5">
+            <button onclick="togglePomodoro()" id="pomoStartBtn" class="px-3.5 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold rounded-xl transition">Iniciar</button>
+            <button onclick="setPomodoroMode(25, 'Enfoque 25m')" class="px-2.5 py-2 bg-slate-200 dark:bg-slate-600 text-xs font-bold rounded-xl">25m</button>
+            <button onclick="setPomodoroMode(5, 'Descanso 5m')" class="px-2.5 py-2 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-xl">5m</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tareas con Horario Límite -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
         <div class="flex justify-between items-center">
           <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Tareas con Horario Límite</h2>
@@ -228,14 +410,30 @@
       </div>
     </section>
 
-    <!-- ==================== PESTAÑA 3: GIMNASIO & HISTORIAL DE CARGAS ==================== -->
+    <!-- ==================== PESTAÑA 3: GIMNASIO, CRONÓMETRO & DEMOS ANIMADAS ==================== -->
     <section id="tab-gym" class="space-y-4 hidden">
+      
+      <!-- Cronómetro de Descanso entre Series -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-3.5 shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-bold uppercase text-slate-400 block">Descanso entre series</span>
+          <span id="gymTimerDisplay" class="text-xl font-extrabold font-mono text-emerald-500">00:00</span>
+        </div>
+        <div class="flex gap-1.5">
+          <button onclick="startGymRestTimer(60)" class="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-emerald-500/20 text-xs font-bold rounded-xl">60s</button>
+          <button onclick="startGymRestTimer(90)" class="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-emerald-500/20 text-xs font-bold rounded-xl">90s</button>
+          <button onclick="startGymRestTimer(120)" class="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-emerald-500/20 text-xs font-bold rounded-xl">2m</button>
+          <button onclick="stopGymRestTimer()" class="px-2.5 py-1.5 bg-rose-500/10 text-rose-400 text-xs font-bold rounded-xl">Parar</button>
+        </div>
+      </div>
+
+      <!-- Generador de Rutina -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
         <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Generador IA de Rutina Semanal</h2>
         <div class="grid grid-cols-3 gap-2">
           <div>
             <label class="text-[10px] text-slate-400 block mb-0.5">Peso (kg)</label>
-            <input id="gymWeight" type="number" value="85" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none">
+            <input id="gymWeight" type="number" value="120" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none">
           </div>
           <div>
             <label class="text-[10px] text-slate-400 block mb-0.5">Altura (cm)</label>
@@ -251,68 +449,78 @@
           <select id="gymGoalSelect" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 outline-none font-semibold">
             <option value="Pérdida de grasa abdominal y definición">Pérdida de grasa abdominal y definición</option>
             <option value="Hipertrofia y ganancia de masa muscular">Hipertrofia y ganancia de masa muscular</option>
-            <option value="Recomposición corporal (Perder grasa y ganar músculo)">Recomposición corporal (Grasa a músculo)</option>
+            <option value="Recomposición corporal">Recomposición corporal (Grasa a músculo)</option>
             <option value="Volumen (Aumento de peso y fuerza)">Volumen (Aumento de peso y fuerza)</option>
             <option value="Fuerza máxima y potencia">Fuerza máxima y potencia</option>
-            <option value="Resistencia y acondicionamiento físico">Resistencia y acondicionamiento físico</option>
           </select>
         </div>
         <button id="gymBtn" onclick="generateGymRoutineWithGemini()" class="w-full py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-2">
           <span>Generar Rutina por Días con IA</span>
         </button>
-        <button onclick="exportToCalendar()" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl transition">
+        <button onclick="exportToCalendar()" class="w-full py-2 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 font-bold text-xs rounded-xl transition border border-emerald-500/30">
           Descargar Rutina para Calendario (ICS)
         </button>
       </div>
 
-      <!-- Entrenamiento del Día + Historial de Sobrecarga Progresiva -->
+      <!-- Lista de Ejercicios del Día -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
         <div class="flex justify-between items-center mb-2">
           <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400" id="currentGymDayTitle">Entrenamiento de Hoy</h2>
           <button onclick="toggleNewExerciseForm()" class="text-xs bg-blue-500 text-white px-2.5 py-1 rounded-lg font-bold">+ Ejercicio</button>
         </div>
-        
         <div id="gymDayFocusBadge" class="mb-3 inline-block px-3 py-1 rounded-lg bg-blue-500/10 text-blue-400 font-bold text-xs border border-blue-500/20">
           Enfoque: Sin rutina asignada
         </div>
-
-        <!-- Formulario inline para agregar ejercicio sin prompt() del navegador -->
         <div id="newExerciseForm" class="hidden mb-3 p-3 rounded-xl bg-slate-100 dark:bg-slate-700/50 space-y-2">
-          <input id="manualExerciseName" type="text" placeholder="Nombre del ejercicio..." class="w-full px-3 py-1.5 text-xs rounded-lg bg-white dark:bg-slate-800 outline-none">
+          <input id="manualExerciseName" type="text" placeholder="Nombre del ejercicio (ej. Sentadilla con barra)..." class="w-full px-3 py-1.5 text-xs rounded-lg bg-white dark:bg-slate-800 outline-none">
           <div class="flex gap-2">
             <button onclick="addGymExercise()" class="flex-1 py-1.5 bg-blue-500 text-white text-xs font-bold rounded-lg">Guardar</button>
             <button onclick="toggleNewExerciseForm()" class="py-1.5 px-3 bg-slate-300 dark:bg-slate-600 text-xs font-bold rounded-lg">Cancelar</button>
           </div>
         </div>
-
         <div id="gymRoutineList" class="space-y-3"></div>
       </div>
     </section>
 
-    <!-- ==================== PESTAÑA 4: HÁBITOS, RACHAS & BITÁCORA TCC ==================== -->
+    <!-- ==================== PESTAÑA 4: HÁBITOS, RACHAS & SOS TCC ==================== -->
     <section id="tab-habits" class="space-y-4 hidden">
       
-      <!-- Módulo 1: Hábitos y Contador de Rachas -->
+      <!-- Botón de Pánico / Respiración Guiada Anti-Ansiedad -->
+      <div class="bg-gradient-to-r from-amber-500/20 to-emerald-500/20 rounded-2xl p-4 border border-amber-500/30 space-y-3">
+        <div class="flex justify-between items-center">
+          <div>
+            <h2 class="font-bold text-sm text-amber-400">SOS Anti-Ansiedad / Antojos (60s)</h2>
+            <p class="text-[11px] text-slate-300">Usa esta guía visual antes de ceder a un impulso o atracón.</p>
+          </div>
+          <button onclick="toggleBreathingExercise()" id="breatheBtn" class="px-3 py-1.5 bg-amber-500 text-slate-900 font-extrabold text-xs rounded-xl">Iniciar</button>
+        </div>
+        <div id="breatheBox" class="hidden py-6 flex flex-col items-center justify-center space-y-3">
+          <div class="w-20 h-20 rounded-full bg-emerald-500/30 border-2 border-emerald-400 flex items-center justify-center breathe-active">
+            <span id="breatheInstruction" class="text-[11px] font-extrabold text-emerald-200 text-center px-1">Inhala 4s</span>
+          </div>
+          <p class="text-[11px] text-slate-300">Sigue el ritmo del círculo para reducir el cortisol.</p>
+        </div>
+      </div>
+
+      <!-- Hábitos y Rachas -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
         <div class="flex justify-between items-center">
           <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Hábitos y Control de Rachas</h2>
           <span class="text-[10px] text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full">Gamificación TCC</span>
         </div>
         <div class="flex gap-2">
-          <input id="newHabitInput" type="text" placeholder="Agregar hábito personalizado..." class="flex-1 px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
+          <input id="newHabitInput" type="text" placeholder="Agregar hábito diario..." class="flex-1 px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
           <button onclick="addHabit()" class="bg-blue-500 text-white px-3.5 py-2 rounded-xl font-bold text-xs">+</button>
         </div>
         <div id="habitsList" class="space-y-2 mt-3"></div>
       </div>
 
-      <!-- Módulo 2: Bitácora TCC de Impulsos y Ansiedad -->
+      <!-- Bitácora TCC -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
         <div class="flex items-center gap-2">
           <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-          <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Bitácora TCC de Impulsos y Ansiedad</h2>
+          <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Bitácora TCC de Impulsos</h2>
         </div>
-        <p class="text-xs text-slate-500 dark:text-slate-400">Registra cualquier tentación, tic o bloqueo y qué acción alternativa tomaste para romper el patrón automático.</p>
-        
         <div class="space-y-2">
           <select id="impulseCategory" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 outline-none font-semibold">
             <option value="Ansiedad Alimenticia / Antojo">Ansiedad Alimenticia / Antojo</option>
@@ -320,22 +528,20 @@
             <option value="Procrastinación / Bloqueo">Procrastinación / Bloqueo</option>
             <option value="Impulso Financiero / Gasto">Impulso Financiero / Gasto</option>
           </select>
-          <input id="impulseTrigger" type="text" placeholder="Gatillo: ¿Qué disparó el impulso o qué sentiste?" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
+          <input id="impulseTrigger" type="text" placeholder="Gatillo: ¿Qué disparó el impulso?" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
           <input id="impulseAction" type="text" placeholder="Conducta Alternativa: ¿Cómo lo venciste?" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
-          <button onclick="addImpulseLog()" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl transition">
-            Registrar Victoria sobre Impulso
+          <button onclick="addImpulseLog()" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-900 font-extrabold text-xs rounded-xl transition">
+            Registrar Victoria Conductual
           </button>
         </div>
-
         <div id="impulseLogsList" class="space-y-2 pt-2"></div>
       </div>
     </section>
 
-    <!-- ==================== PESTAÑA 5: DESPENSA & MENÚ SEMANAL ==================== -->
+    <!-- ==================== PESTAÑA 5: DESPENSA ==================== -->
     <section id="tab-grocery" class="space-y-4 hidden">
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
         <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Generador IA de Despensa & Menú</h2>
-        
         <div class="grid grid-cols-3 gap-2">
           <div>
             <label class="text-[10px] text-slate-400 block mb-0.5">Presupuesto ($)</label>
@@ -350,7 +556,6 @@
             <input id="groceryStore" type="text" value="Tiendas 3B" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none">
           </div>
         </div>
-
         <div>
           <label class="text-[10px] text-slate-400 block mb-0.5 font-bold uppercase">Meta Nutricional:</label>
           <select id="groceryGoalSelect" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 outline-none font-semibold">
@@ -360,16 +565,13 @@
             <option value="Recomposición corporal estricta">Recomposición corporal estricta</option>
           </select>
         </div>
-
         <button id="groceryBtn" onclick="generateGroceryWithGemini()" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-2">
           <span>Generar Despensa y Menú con IA</span>
         </button>
-        
         <div class="mt-4">
           <h3 class="font-bold text-xs uppercase tracking-wider text-slate-400 mb-2">Lista de Compras</h3>
           <div id="groceryList" class="space-y-2"></div>
         </div>
-
         <div class="mt-5 pt-4 border-t border-slate-200 dark:border-slate-700">
           <h3 class="font-bold text-sm uppercase tracking-wider text-slate-400 mb-3">Plan de Comidas Semanal</h3>
           <div id="mealPlanContainer" class="space-y-3"></div>
@@ -377,79 +579,66 @@
       </div>
     </section>
 
-    <!-- ==================== PESTAÑA 6: AJUSTES & AUTOCÁLCULO IA ==================== -->
+    <!-- ==================== PESTAÑA 6: AJUSTES, PERFIL Y REINICIO DE FÁBRICA ==================== -->
     <section id="tab-settings" class="space-y-4 hidden">
+      
+      <!-- Token & Modelo -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
-        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Configuración & Modelos Gemini</h2>
+        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Configuración de Inteligencia Artificial</h2>
         <div>
           <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1">Tu Clave API de Gemini (API Key):</label>
           <input id="apiKeyInput" type="password" placeholder="AIzaSy..." class="w-full px-3 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none font-mono">
         </div>
         <div>
-          <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1">Selecciona el Modelo de tu Token:</label>
+          <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1">Modelo Gemini Activo:</label>
           <select id="modelSelect" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 outline-none font-semibold">
-            <option value="gemini-3.1-flash-live-preview">gemini-3.1-flash-live-preview (Rápido y gratuito)</option>
-            <option value="gemini-3.8-live">gemini-3.8-live (Análisis fluido en vivo)</option>
-            <option value="gemini-3.8-flash">gemini-3.8-flash (Soporte de pensamiento alto)</option>
-            <option value="gemini-3.8-live-extended-thinking">gemini-3.8-live-extended-thinking (Pensamiento extendido)</option>
-            <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Ligero de alta velocidad)</option>
+            <option value="gemini-2.5-flash">gemini-2.5-flash (Recomendado Estándar)</option>
+            <option value="gemini-3.1-flash-live-preview">gemini-3.1-flash-live-preview (Rápido)</option>
+            <option value="gemini-2.5-pro">gemini-2.5-pro (Razonamiento Avanzado)</option>
           </select>
         </div>
         <button onclick="saveSettings()" class="w-full py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs rounded-xl transition">Guardar Token y Modelo</button>
       </div>
 
-      <!-- Calculadora IA de Calorías, Agua y Macros Exactos -->
-      <div class="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-2xl p-4 text-white shadow-md space-y-3">
-        <div class="flex items-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
-          <h2 class="font-bold text-sm">Calcular Calorías, Agua y Macros con IA</h2>
-        </div>
-        <p class="text-xs text-indigo-100">Introduce tus parámetros actuales para que Gemini calcule y actualice tus metas diarias de calorías, agua, proteínas, carbohidratos y grasas.</p>
-        
-        <div class="grid grid-cols-3 gap-2">
-          <div>
-            <label class="text-[10px] text-indigo-200 block mb-0.5">Peso (kg)</label>
-            <input id="calcWeight" type="number" value="85" class="w-full px-2 py-1.5 text-xs rounded-xl bg-white/10 text-white text-center font-bold outline-none border border-white/20">
-          </div>
-          <div>
-            <label class="text-[10px] text-indigo-200 block mb-0.5">Estatura (cm)</label>
-            <input id="calcHeight" type="number" value="182" class="w-full px-2 py-1.5 text-xs rounded-xl bg-white/10 text-white text-center font-bold outline-none border border-white/20">
-          </div>
-          <div>
-            <label class="text-[10px] text-indigo-200 block mb-0.5">Edad</label>
-            <input id="calcAge" type="number" value="28" class="w-full px-2 py-1.5 text-xs rounded-xl bg-white/10 text-white text-center font-bold outline-none border border-white/20">
-          </div>
-        </div>
-
-        <div>
-          <label class="text-[10px] text-indigo-200 block mb-0.5 font-bold uppercase">Nivel de Actividad:</label>
-          <select id="calcActivity" class="w-full px-3 py-2 text-xs rounded-xl bg-white/10 text-white font-semibold outline-none border border-white/20">
-            <option value="Moderada (Entrenamiento 3 a 4 días por semana)" class="text-slate-900">Moderada (3 a 4 días / semana)</option>
-            <option value="Sedentaria (Poco o nada de ejercicio)" class="text-slate-900">Sedentaria</option>
-            <option value="Alta (Entrenamiento intenso 5 a 6 días por semana)" class="text-slate-900">Alta (5 a 6 días / semana)</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="text-[10px] text-indigo-200 block mb-0.5 font-bold uppercase">Objetivo Principal:</label>
-          <select id="calcGoalSelect" class="w-full px-3 py-2 text-xs rounded-xl bg-white/10 text-white outline-none font-semibold border border-white/20">
-            <option value="Pérdida de grasa corporal y definición (Déficit calórico, alta proteína)" class="text-slate-900">Quema de grasa y definición (Déficit)</option>
-            <option value="Volumen y aumento de peso / masa muscular (Superávit calórico controlado)" class="text-slate-900">Volumen y aumento de peso (Superávit)</option>
-            <option value="Hipertrofia y ganancia muscular limpia" class="text-slate-900">Hipertrofia y masa muscular limpia</option>
-            <option value="Recomposición corporal (Bajar grasa y ganar músculo simultáneamente)" class="text-slate-900">Recomposición corporal</option>
-            <option value="Fuerza máxima y rendimiento deportivo" class="text-slate-900">Fuerza máxima y rendimiento</option>
-          </select>
-        </div>
-
-        <button id="calcBtn" onclick="calculateMacrosWithGemini()" class="w-full py-2.5 bg-white text-indigo-700 font-bold text-xs rounded-xl shadow-sm transition flex items-center justify-center gap-2">
-          <span>Calcular e Instalar Metas en Nutrición</span>
+      <!-- Perfil Inicial y Recálculo -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
+        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Tu Perfil Inicial y Objetivos</h2>
+        <div id="profileSummaryCard" class="p-3 rounded-xl bg-slate-100 dark:bg-slate-700/50 text-xs space-y-1"></div>
+        <button onclick="openOnboardingEdit()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition">
+          Reconfigurar Datos Iniciales y Metas
         </button>
       </div>
+
+      <!-- Respaldo y Reinicio Total de Cero -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-rose-500/30 space-y-3">
+        <h2 class="font-bold text-sm uppercase tracking-wider text-rose-400">Respaldo y Reinicio de Fábrica</h2>
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="exportBackupJSON()" class="py-2 bg-slate-200 dark:bg-slate-700 text-xs font-bold rounded-xl">Exportar Respaldo</button>
+          <label class="py-2 bg-slate-200 dark:bg-slate-700 text-xs font-bold rounded-xl text-center cursor-pointer">
+            <span>Importar Respaldo</span>
+            <input type="file" accept=".json" onchange="importBackupJSON(event)" class="hidden">
+          </label>
+        </div>
+
+        <div class="pt-2 border-t border-slate-200 dark:border-slate-700">
+          <button onclick="toggleFactoryResetConfirm()" class="w-full py-2.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 font-bold text-xs rounded-xl transition">
+            Reiniciar Todo de Cero (Borrar Datos)
+          </button>
+          <div id="factoryResetConfirmBox" class="hidden mt-3 p-3 rounded-xl bg-rose-950/60 border border-rose-500 text-xs space-y-2">
+            <p class="text-rose-200 font-bold">¿Confirmas que deseas borrar todos los registros y volver a la pantalla de bienvenida inicial?</p>
+            <div class="flex gap-2">
+              <button onclick="executeFactoryReset()" class="flex-1 py-2 bg-rose-600 text-white font-extrabold rounded-lg">Sí, Reiniciar de 0</button>
+              <button onclick="toggleFactoryResetConfirm()" class="flex-1 py-2 bg-slate-700 text-white font-bold rounded-lg">Cancelar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </section>
 
   </main>
 
-  <!-- BARRA DE NAVEGACIÓN INFERIOR (6 PESTAÑAS CON ICONOS SVG) -->
+  <!-- ==================== BARRA DE NAVEGACIÓN INFERIOR ==================== -->
   <nav class="fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-1 py-1.5">
     <div class="max-w-md mx-auto grid grid-cols-6 gap-0.5">
       <button onclick="switchTab('nutrition')" id="nav-nutrition" class="flex flex-col items-center py-1 rounded-xl text-blue-500 font-bold">
@@ -480,6 +669,7 @@
   </nav>
 
   <script>
+    // ==================== CONFIGURACIÓN DEL CALENDARIO ====================
     const DAYS_CONFIG = [
       { id: '2026-10-19', label: 'Lun 19', dayName: 'Lunes' },
       { id: '2026-10-20', label: 'Mar 20', dayName: 'Martes' },
@@ -493,51 +683,90 @@
       { id: '2026-10-28', label: 'Mié 28', dayName: 'Miércoles' }
     ];
 
-    const DEFAULT_STATE = {
-      theme: 'dark',
-      currentDay: '2026-10-19',
-      apiKey: '',
-      selectedModel: 'gemini-3.1-flash-live-preview',
-      targetKcal: 2100,
-      targetWater: 4000,
-      targetProt: 170,
-      targetCarb: 160,
-      targetFat: 85,
-      days: {},
-      tasks: [],
-      gymStructured: {},
-      exerciseHistory: {}, // Historial global de cargas por nombre de ejercicio
-      habitsList: [],
-      groceries: [],
-      mealPlanStructured: []
+    const GOAL_LABELS = {
+      deficit: 'Pérdida de grasa abdominal y definición',
+      recomp: 'Recomposición corporal (Perder grasa y ganar músculo)',
+      hypertrophy: 'Hipertrofia y ganancia de masa muscular',
+      bulk: 'Volumen (Aumento de peso y fuerza)'
     };
 
-    DAYS_CONFIG.forEach(d => {
-      DEFAULT_STATE.days[d.id] = { water: 0, meals: [], habitsState: {}, impulses: [] };
-    });
+    function createDefaultState() {
+      const state = {
+        theme: 'dark',
+        currentDay: '2026-10-19',
+        apiKey: '',
+        selectedModel: 'gemini-2.5-flash',
+        onboardingComplete: false,
+        profile: {
+          name: '',
+          weight: 120,
+          height: 182,
+          age: 28,
+          activity: 1.55,
+          gymDays: 4,
+          goalKey: 'deficit',
+          goalText: GOAL_LABELS.deficit
+        },
+        targetKcal: 2150,
+        targetWater: 4000,
+        targetProt: 180,
+        targetCarb: 165,
+        targetFat: 85,
+        days: {},
+        tasks: [],
+        gymStructured: {},
+        exerciseHistory: {},
+        habitsList: [
+          { id: 'h_1', name: 'Cero refrescos ni azúcares líquidos' },
+          { id: 'h_2', name: 'Cumplir meta de proteína del día' }
+        ],
+        groceries: [],
+        mealPlanStructured: [],
+        lastFridgePlan: null
+      };
+      DAYS_CONFIG.forEach(d => {
+        state.days[d.id] = { water: 0, meals: [], habitsState: {}, impulses: [] };
+      });
+      return state;
+    }
 
-    let appState = JSON.parse(localStorage.getItem('allan_tcc_app_v26')) || DEFAULT_STATE;
-    
-    // Asegurar compatibilidad de propiedades nuevas
-    if (!appState.targetProt) appState.targetProt = 170;
-    if (!appState.targetCarb) appState.targetCarb = 160;
-    if (!appState.targetFat) appState.targetFat = 85;
-    if (!appState.exerciseHistory) appState.exerciseHistory = {};
+    let appState = JSON.parse(localStorage.getItem('allan_tcc_app_v42')) || createDefaultState();
+    // Asegurar integridad de datos si viene de una versión previa
+    if (!appState.profile) appState.profile = createDefaultState().profile;
     DAYS_CONFIG.forEach(d => {
       if (!appState.days[d.id]) appState.days[d.id] = { water: 0, meals: [], habitsState: {}, impulses: [] };
       if (!appState.days[d.id].impulses) appState.days[d.id].impulses = [];
     });
 
     let currentUploadedImageBase64 = null;
+    let cachedExerciseRepoTree = null;
+    let cachedFreeExerciseDb = null;
+    let flipbookInterval = null;
 
-    // SISTEMA DE NOTIFICACIONES INTERNAS (SIN ALERT DEL NAVEGADOR)
+    // ==================== SONIDO SINTETIZADO (WEB AUDIO API) ====================
+    function playBeep() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.35);
+      } catch (e) {}
+    }
+
+    // ==================== NOTIFICACIONES INTERNAS (TOAST) ====================
     function showToast(message, type = 'info') {
       const container = document.getElementById('toastContainer');
       const colors = {
         info: 'bg-blue-600 text-white border-blue-400',
         success: 'bg-emerald-600 text-white border-emerald-400',
         error: 'bg-rose-600 text-white border-rose-400',
-        warning: 'bg-amber-500 text-white border-amber-300'
+        warning: 'bg-amber-500 text-slate-950 border-amber-300'
       };
       const toast = document.createElement('div');
       toast.className = `toast-enter px-4 py-3 rounded-xl shadow-lg border text-xs font-bold flex items-center justify-between ${colors[type] || colors.info}`;
@@ -551,10 +780,95 @@
     }
 
     function saveState() {
-      localStorage.setItem('allan_tcc_app_v26', JSON.stringify(appState));
+      localStorage.setItem('allan_tcc_app_v42', JSON.stringify(appState));
       renderAll();
     }
 
+    // ==================== ONBOARDING Y PERFIL INICIAL ====================
+    function checkOnboarding() {
+      const modal = document.getElementById('onboardingModal');
+      if (!appState.onboardingComplete) {
+        document.getElementById('obName').value = appState.profile.name || '';
+        document.getElementById('obWeight').value = appState.profile.weight || 120;
+        document.getElementById('obHeight').value = appState.profile.height || 182;
+        document.getElementById('obAge').value = appState.profile.age || 28;
+        document.getElementById('obActivity').value = appState.profile.activity || '1.55';
+        document.getElementById('obGymDays').value = appState.profile.gymDays || 4;
+        document.getElementById('obGoal').value = appState.profile.goalKey || 'deficit';
+        document.getElementById('obApiKey').value = appState.apiKey || '';
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    function openOnboardingEdit() {
+      appState.onboardingComplete = false;
+      checkOnboarding();
+    }
+
+    function completeOnboarding() {
+      const name = document.getElementById('obName').value.trim() || 'Usuario';
+      const weight = parseFloat(document.getElementById('obWeight').value) || 120;
+      const height = parseFloat(document.getElementById('obHeight').value) || 182;
+      const age = parseInt(document.getElementById('obAge').value) || 28;
+      const activity = parseFloat(document.getElementById('obActivity').value) || 1.55;
+      const gymDays = parseInt(document.getElementById('obGymDays').value) || 4;
+      const goalKey = document.getElementById('obGoal').value;
+      const apiKey = document.getElementById('obApiKey').value.trim();
+
+      appState.profile = {
+        name, weight, height, age, activity, gymDays,
+        goalKey,
+        goalText: GOAL_LABELS[goalKey] || GOAL_LABELS.deficit
+      };
+      if (apiKey) appState.apiKey = apiKey;
+
+      // Fórmula clínica Mifflin-St Jeor para configurar metas al instante
+      const bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
+      const tdee = bmr * activity;
+      let targetKcal = Math.round(tdee);
+      let protPerKg = 1.6;
+
+      if (goalKey === 'deficit') {
+        targetKcal = Math.max(1600, Math.round(tdee - 650));
+        protPerKg = 1.5;
+      } else if (goalKey === 'recomp') {
+        targetKcal = Math.round(tdee - 300);
+        protPerKg = 1.6;
+      } else if (goalKey === 'hypertrophy') {
+        targetKcal = Math.round(tdee + 250);
+        protPerKg = 1.7;
+      } else if (goalKey === 'bulk') {
+        targetKcal = Math.round(tdee + 450);
+        protPerKg = 1.7;
+      }
+
+      const targetProt = Math.round(weight * protPerKg);
+      const targetFat = Math.round((targetKcal * 0.28) / 9);
+      const remainingKcalForCarbs = Math.max(400, targetKcal - (targetProt * 4) - (targetFat * 9));
+      const targetCarb = Math.round(remainingKcalForCarbs / 4);
+      const targetWater = Math.round(weight * 35);
+
+      appState.targetKcal = targetKcal;
+      appState.targetProt = targetProt;
+      appState.targetCarb = targetCarb;
+      appState.targetFat = targetFat;
+      appState.targetWater = targetWater;
+      appState.onboardingComplete = true;
+
+      // Sincronizar con pestaña de Gimnasio
+      document.getElementById('gymWeight').value = weight;
+      document.getElementById('gymHeight').value = height;
+      document.getElementById('gymDays').value = gymDays;
+      document.getElementById('gymGoalSelect').value = appState.profile.goalText;
+
+      saveState();
+      document.getElementById('onboardingModal').classList.add('hidden');
+      showToast(`Bienvenido, ${name}. Tus metas fueron configuradas.`, 'success');
+    }
+
+    // ==================== TEMA Y NAVEGACIÓN ====================
     function applyTheme() {
       const html = document.documentElement;
       const btn = document.getElementById('themeBtn');
@@ -605,10 +919,60 @@
       saveState();
     }
 
+    // ==================== MOTOR CENTRAL GEMINI API ====================
+    async function callGeminiAPI(promptText, imageBase64) {
+      const apiKey = appState.apiKey;
+      const model = appState.selectedModel || 'gemini-2.5-flash';
+      let parts = [{ text: promptText }];
+
+      if (imageBase64) {
+        const base64Data = imageBase64.split(',')[1];
+        const mimeType = imageBase64.split(';')[0].split(':')[1];
+        parts.push({ inline_data: { mime_type: mimeType, data: base64Data } });
+      }
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 28000);
+
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: parts }] }),
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error?.message || "Error al conectar con Gemini API.");
+        }
+
+        const data = await res.json();
+        let rawText = data.candidates[0].content.parts[0].text;
+        const jsonStart = rawText.indexOf('[');
+        const jsonObjectStart = rawText.indexOf('{');
+
+        if (jsonStart !== -1 && (jsonObjectStart === -1 || jsonStart < jsonObjectStart)) {
+          const jsonEnd = rawText.lastIndexOf(']');
+          if (jsonEnd !== -1) rawText = rawText.substring(jsonStart, jsonEnd + 1);
+        } else if (jsonObjectStart !== -1) {
+          const jsonEnd = rawText.lastIndexOf('}');
+          if (jsonEnd !== -1) rawText = rawText.substring(jsonObjectStart, jsonEnd + 1);
+        }
+
+        return rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+      } catch (err) {
+        if (err.name === 'AbortError') throw new Error("Tiempo de espera agotado.");
+        throw err;
+      }
+    }
+
+    // ==================== 1. NUTRICIÓN, FOTO NOTORIA & CHEF IA ====================
     function setCircleProgress(ringId, percentTextId, current, max) {
       const ring = document.getElementById(ringId);
       const text = document.getElementById(percentTextId);
-      if(!ring || !text) return;
+      if (!ring || !text) return;
       const safeMax = max > 0 ? max : 1;
       const radius = ring.r.baseVal.value;
       const circumference = 2 * Math.PI * radius;
@@ -619,7 +983,18 @@
       text.textContent = `${pct}%`;
     }
 
-    // ==================== 1. NUTRICIÓN ====================
+    function getTodayTotals() {
+      const dayData = appState.days[appState.currentDay];
+      let totKcal = 0, totP = 0, totC = 0, totF = 0;
+      dayData.meals.forEach(m => {
+        totKcal += Number(m.kcal) || 0;
+        totP += Number(m.p) || 0;
+        totC += Number(m.c) || 0;
+        totF += Number(m.f) || 0;
+      });
+      return { totKcal, totP, totC, totF };
+    }
+
     function renderNutrition() {
       const maxKcal = appState.targetKcal || 2100;
       const maxWater = appState.targetWater || 4000;
@@ -633,17 +1008,12 @@
       document.getElementById('targetCarbInput').value = maxC;
       document.getElementById('targetFatInput').value = maxF;
 
-      const dayData = appState.days[appState.currentDay];
-      let totKcal = 0, totP = 0, totC = 0, totF = 0;
-      
-      dayData.meals.forEach(m => {
-        totKcal += Number(m.kcal) || 0;
-        totP += Number(m.p) || 0;
-        totC += Number(m.c) || 0;
-        totF += Number(m.f) || 0;
-      });
+      const { totKcal, totP, totC, totF } = getTodayTotals();
+      const remKcal = Math.max(0, maxKcal - totKcal);
+      const remP = Math.max(0, maxP - totP);
 
       document.getElementById('kcalText').textContent = `${totKcal} / ${maxKcal} kcal`;
+      document.getElementById('remainingMacrosSummary').textContent = `Restante hoy: ${remKcal} kcal y ${remP}g de proteína para cumplir tu meta.`;
       document.getElementById('kcalBar').style.width = `${Math.min(100, (totKcal / maxKcal) * 100)}%`;
 
       document.getElementById('protText').textContent = `${totP}/${maxP}g`;
@@ -654,6 +1024,7 @@
       setCircleProgress('carbRing', 'carbPercent', totC, maxC);
       setCircleProgress('fatRing', 'fatPercent', totF, maxF);
 
+      const dayData = appState.days[appState.currentDay];
       const waterMl = dayData.water || 0;
       const waterLiters = (waterMl / 1000).toFixed(2);
       const waterPct = Math.min(100, Math.round((waterMl / maxWater) * 100));
@@ -662,7 +1033,7 @@
       document.getElementById('waterPercentText').textContent = `${waterPct}%`;
 
       const mealsEl = document.getElementById('mealsList');
-      if(dayData.meals.length === 0) {
+      if (dayData.meals.length === 0) {
         mealsEl.innerHTML = `<p class="text-xs text-slate-400 italic">No hay alimentos registrados hoy.</p>`;
       } else {
         mealsEl.innerHTML = dayData.meals.map((m, i) => `
@@ -675,6 +1046,8 @@
           </div>
         `).join('');
       }
+
+      renderFridgePlan();
     }
 
     function updateTargets() {
@@ -684,7 +1057,173 @@
       appState.targetCarb = parseInt(document.getElementById('targetCarbInput').value) || 160;
       appState.targetFat = parseInt(document.getElementById('targetFatInput').value) || 85;
       saveState();
-      showToast("Metas nutricionales actualizadas", "success");
+      showToast("Metas actualizadas", "success");
+    }
+
+    // GESTIÓN VISUAL NOTORIA DE LA FOTO SUBIDA
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        currentUploadedImageBase64 = e.target.result;
+        document.getElementById('photoThumbnail').src = currentUploadedImageBase64;
+        document.getElementById('photoFileName').textContent = file.name;
+        document.getElementById('photoPreviewCard').classList.remove('hidden');
+
+        const label = document.getElementById('uploadPhotoLabel');
+        label.classList.remove('bg-white/20');
+        label.classList.add('bg-emerald-500', 'text-slate-950', 'border-emerald-300');
+        document.getElementById('uploadPhotoBtnText').textContent = 'Cambiar Foto';
+        showToast("Foto cargada con éxito. Presiona Calcular con IA.", "success");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearUploadedPhoto() {
+      currentUploadedImageBase64 = null;
+      document.getElementById('aiFoodImage').value = '';
+      document.getElementById('photoPreviewCard').classList.add('hidden');
+      const label = document.getElementById('uploadPhotoLabel');
+      label.classList.add('bg-white/20');
+      label.classList.remove('bg-emerald-500', 'text-slate-950', 'border-emerald-300');
+      document.getElementById('uploadPhotoBtnText').textContent = 'Seleccionar Foto';
+    }
+
+    async function analyzeFoodWithGemini() {
+      if (!appState.apiKey) { showToast("Configura tu API Key en Ajustes", "warning"); switchTab('settings'); return; }
+      const promptText = document.getElementById('aiFoodInput').value.trim();
+      if (!promptText && !currentUploadedImageBase64) { showToast("Describe tu comida o selecciona una foto", "warning"); return; }
+
+      const btn = document.getElementById('aiFoodBtn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<div class="w-4 h-4 border-2 border-blue-700 border-t-transparent rounded-full spinner"></div><span>Analizando...</span>`;
+      btn.disabled = true;
+
+      try {
+        let prompt = "Analiza este alimento o plato (imagen/texto). Devuelve ÚNICAMENTE un JSON válido sin texto extra: {\"name\": \"nombre del plato\", \"kcal\": número_entero, \"p\": gramos_proteina_entero, \"c\": gramos_carbohidratos_entero, \"f\": gramos_grasas_entero}.";
+        if (promptText) prompt += ` Descripción adicional: ${promptText}`;
+
+        const textResult = await callGeminiAPI(prompt, currentUploadedImageBase64);
+        const parsed = JSON.parse(textResult);
+
+        appState.days[appState.currentDay].meals.push(parsed);
+        document.getElementById('aiFoodInput').value = '';
+        clearUploadedPhoto();
+        saveState();
+        showToast(`Registrado: ${parsed.name} (${parsed.kcal} kcal)`, "success");
+      } catch (err) {
+        showToast("Error IA: " + err.message, "error");
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    // CHEF IA: RECOMENDADOR SEGÚN INGREDIENTES Y PERFIL INICIAL
+    async function recommendFromFridge() {
+      const ingredients = document.getElementById('fridgeIngredients').value.trim();
+      if (!ingredients) { showToast("Escribe qué ingredientes tienes disponibles", "warning"); return; }
+      if (!appState.apiKey) { showToast("Configura tu API Key en Ajustes para usar el Chef IA", "warning"); switchTab('settings'); return; }
+
+      const wantDinner = document.getElementById('planDinner').checked;
+      const wantBreakfast = document.getElementById('planBreakfast').checked;
+      const wantLunch = document.getElementById('planLunch').checked;
+
+      const mealsRequested = [];
+      if (wantDinner) mealsRequested.push("Cena de hoy");
+      if (wantBreakfast) mealsRequested.push("Desayuno de mañana");
+      if (wantLunch) mealsRequested.push("Comida para llevar al trabajo mañana");
+
+      if (mealsRequested.length === 0) { showToast("Marca al menos una comida a planificar", "warning"); return; }
+
+      const { totKcal, totP, totC, totF } = getTodayTotals();
+      const remKcal = Math.max(300, appState.targetKcal - totKcal);
+      const remP = Math.max(20, appState.targetProt - totP);
+
+      const btn = document.getElementById('fridgeBtn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner"></div><span>Diseñando menú con tus ingredientes...</span>`;
+      btn.disabled = true;
+
+      try {
+        const prompt = `Actúa como nutriólogo clínico deportivo.
+        Perfil del usuario: Peso ${appState.profile.weight}kg, Altura ${appState.profile.height}cm, Objetivo: "${appState.profile.goalText}".
+        Metas diarias: ${appState.targetKcal} kcal, ${appState.targetProt}g Proteína, ${appState.targetCarb}g Carbos, ${appState.targetFat}g Grasas.
+        Calorías restantes para hoy: ${remKcal} kcal (${remP}g proteína restantes).
+        Ingredientes disponibles del usuario: "${ingredients}".
+        Comidas solicitadas: ${mealsRequested.join(', ')}.
+
+        Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta:
+        {
+          "avoidWarning": "Explicación clara y directa de qué ingrediente moderar o evitar en ciertos horarios (ej. evitar carbohidratos simples en la cena) y qué bebida o extra no tomar.",
+          "proposals": [
+            {
+              "mealTime": "Cena de hoy",
+              "title": "Nombre del platillo sugerido",
+              "instructions": "Cómo prepararlo usando los ingredientes y cantidades sugeridas",
+              "kcal": 480,
+              "p": 45,
+              "c": 20,
+              "f": 22
+            }
+          ]
+        }`;
+
+        const resText = await callGeminiAPI(prompt, null);
+        appState.lastFridgePlan = JSON.parse(resText);
+        saveState();
+        showToast("Plan de comidas con tus ingredientes listo", "success");
+      } catch (err) {
+        showToast("Error Chef IA: " + err.message, "error");
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    function renderFridgePlan() {
+      const container = document.getElementById('fridgeRecommendations');
+      const plan = appState.lastFridgePlan;
+      if (!plan) { container.innerHTML = ''; return; }
+
+      const proposalsHtml = (plan.proposals || []).map((prop, idx) => `
+        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 space-y-1.5">
+          <div class="flex justify-between items-start gap-2">
+            <div>
+              <span class="text-[10px] font-extrabold uppercase text-emerald-500 block">${prop.mealTime}</span>
+              <h4 class="font-bold text-xs">${prop.title}</h4>
+            </div>
+            <button onclick="logFridgeProposal(${idx})" class="px-2.5 py-1 bg-blue-500 hover:bg-blue-600 text-white text-[10px] font-bold rounded-lg shrink-0">
+              + Registrar Hoy
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-500 dark:text-slate-300">${prop.instructions}</p>
+          <p class="text-[10px] font-bold text-slate-400">${prop.kcal} kcal | ${prop.p}g P | ${prop.c}g C | ${prop.f}g G</p>
+        </div>
+      `).join('');
+
+      container.innerHTML = `
+        <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs space-y-1">
+          <span class="font-extrabold text-rose-400 uppercase text-[10px] block">Qué evitar / Precaución Nutricional</span>
+          <p class="text-slate-600 dark:text-slate-200 text-[11px]">${plan.avoidWarning}</p>
+        </div>
+        <div class="space-y-2">${proposalsHtml}</div>
+      `;
+    }
+
+    function logFridgeProposal(idx) {
+      if (!appState.lastFridgePlan || !appState.lastFridgePlan.proposals[idx]) return;
+      const p = appState.lastFridgePlan.proposals[idx];
+      appState.days[appState.currentDay].meals.push({
+        name: `${p.mealTime}: ${p.title}`,
+        kcal: Number(p.kcal) || 400,
+        p: Number(p.p) || 35,
+        c: Number(p.c) || 25,
+        f: Number(p.f) || 15
+      });
+      saveState();
+      showToast(`Agregado a tu registro: ${p.title}`, "success");
     }
 
     function removeMeal(index) {
@@ -704,101 +1243,48 @@
       saveState();
     }
 
-    function handleImageUpload(event) {
-      const file = event.target.files[0];
-      if(!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        currentUploadedImageBase64 = e.target.result;
-        document.getElementById('aiImagePreview').textContent = `Imagen lista: ${file.name}`;
-      };
-      reader.readAsDataURL(file);
+    // ==================== 2. ENFOQUE, POMODORO Y TAREAS ====================
+    let pomoSeconds = 25 * 60;
+    let pomoInterval = null;
+
+    function updatePomoDisplay() {
+      const m = String(Math.floor(pomoSeconds / 60)).padStart(2, '0');
+      const s = String(pomoSeconds % 60).padStart(2, '0');
+      document.getElementById('pomoDisplay').textContent = `${m}:${s}`;
     }
 
-    // MOTOR CENTRAL DE LLAMADAS A GEMINI API
-    async function callGeminiAPI(promptText, imageBase64) {
-      const apiKey = appState.apiKey;
-      const model = appState.selectedModel || 'gemini-3.1-flash-live-preview';
-      
-      let contents = [{ text: promptText }];
+    function setPomodoroMode(minutes, label) {
+      clearInterval(pomoInterval);
+      pomoInterval = null;
+      pomoSeconds = minutes * 60;
+      document.getElementById('pomoStatusBadge').textContent = label;
+      document.getElementById('pomoStartBtn').textContent = 'Iniciar';
+      updatePomoDisplay();
+    }
 
-      if(imageBase64) {
-        const base64Data = imageBase64.split(',')[1];
-        const mimeType = imageBase64.split(';')[0].split(':')[1];
-        contents.push({ inline_data: { mime_type: mimeType, data: base64Data } });
-      }
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 25000);
-
-      try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: contents }] }),
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-
-        if(!res.ok) {
-          const errData = await res.json();
-          throw new Error(errData.error?.message || "Error al conectar con la API.");
-        }
-
-        const data = await res.json();
-        let rawText = data.candidates[0].content.parts[0].text;
-        
-        const jsonStart = rawText.indexOf('[');
-        const jsonObjectStart = rawText.indexOf('{');
-        
-        if (jsonStart !== -1 && (jsonObjectStart === -1 || jsonStart < jsonObjectStart)) {
-          const jsonEnd = rawText.lastIndexOf(']');
-          if (jsonEnd !== -1) rawText = rawText.substring(jsonStart, jsonEnd + 1);
-        } else if (jsonObjectStart !== -1) {
-          const jsonEnd = rawText.lastIndexOf('}');
-          if (jsonEnd !== -1) rawText = rawText.substring(jsonObjectStart, jsonEnd + 1);
-        }
-
-        return rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-      } catch (err) {
-        if (err.name === 'AbortError') throw new Error("Tiempo de espera agotado. Intenta nuevamente.");
-        throw err;
+    function togglePomodoro() {
+      const btn = document.getElementById('pomoStartBtn');
+      if (pomoInterval) {
+        clearInterval(pomoInterval);
+        pomoInterval = null;
+        btn.textContent = 'Reanudar';
+      } else {
+        btn.textContent = 'Pausar';
+        pomoInterval = setInterval(() => {
+          if (pomoSeconds > 0) {
+            pomoSeconds--;
+            updatePomoDisplay();
+          } else {
+            clearInterval(pomoInterval);
+            pomoInterval = null;
+            btn.textContent = 'Iniciar';
+            playBeep();
+            showToast("Sesión de enfoque completada", "success");
+          }
+        }, 1000);
       }
     }
 
-    async function analyzeFoodWithGemini() {
-      if(!appState.apiKey) { showToast("Configura tu API Key en Ajustes", "warning"); switchTab('settings'); return; }
-
-      const promptText = document.getElementById('aiFoodInput').value.trim();
-      if(!promptText && !currentUploadedImageBase64) { showToast("Describe tu comida o sube una foto", "warning"); return; }
-
-      const btn = document.getElementById('aiFoodBtn');
-      const originalText = btn.innerHTML;
-      btn.innerHTML = `<div class="w-4 h-4 border-2 border-blue-700 border-t-transparent rounded-full spinner"></div><span>Analizando...</span>`;
-      btn.disabled = true;
-
-      try {
-        let prompt = "Analiza este alimento. Devuelve ÚNICAMENTE un JSON válido sin texto adicional: {\"name\": \"nombre del plato\", \"kcal\": número, \"p\": gramos_proteina, \"c\": gramos_carbohidratos, \"f\": gramos_grasas}.";
-        if(promptText) prompt += ` Descripción: ${promptText}`;
-
-        const textResult = await callGeminiAPI(prompt, currentUploadedImageBase64);
-        const parsed = JSON.parse(textResult);
-
-        appState.days[appState.currentDay].meals.push(parsed);
-        document.getElementById('aiFoodInput').value = '';
-        currentUploadedImageBase64 = null;
-        document.getElementById('aiImagePreview').textContent = '';
-        saveState();
-        showToast(`Registrado: ${parsed.name} (${parsed.kcal} kcal)`, "success");
-      } catch (err) {
-        showToast("Error IA: " + err.message, "error");
-      } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-      }
-    }
-
-    // ==================== 2. TAREAS Y ALERTAS POR HORARIO ====================
     function enableBrowserNotifications() {
       if (!("Notification" in window)) { showToast("Navegador sin soporte de notificaciones", "warning"); return; }
       Notification.requestPermission().then(p => {
@@ -806,24 +1292,9 @@
       });
     }
 
-    setInterval(() => {
-      const now = new Date();
-      const cur = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-      appState.tasks.forEach(t => {
-        if (!t.done && t.time === cur && !t.notified) {
-          t.notified = true;
-          saveState();
-          showToast(`Hora límite alcanzada: ${t.text}`, "warning");
-          if ("Notification" in window && Notification.permission === "granted") {
-            new Notification("Hora límite de tarea", { body: t.text });
-          }
-        }
-      });
-    }, 15000);
-
     function renderTasks() {
       const el = document.getElementById('tasksList');
-      if(appState.tasks.length === 0) { el.innerHTML = `<p class="text-xs text-slate-400 italic">Sin tareas pendientes.</p>`; return; }
+      if (appState.tasks.length === 0) { el.innerHTML = `<p class="text-xs text-slate-400 italic">Sin tareas pendientes.</p>`; return; }
       el.innerHTML = appState.tasks.map((t, i) => `
         <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 text-xs">
           <label class="flex items-center gap-3 flex-1 cursor-pointer">
@@ -845,7 +1316,7 @@
       const input = document.getElementById('newTaskInput');
       const timeInput = document.getElementById('newTaskTime').value;
       const tagInput = document.getElementById('newTaskTag').value;
-      if(!input.value.trim()) return;
+      if (!input.value.trim()) return;
       appState.tasks.unshift({ id: Date.now(), text: input.value.trim(), time: timeInput, tag: tagInput, done: false, notified: false });
       input.value = '';
       document.getElementById('newTaskTime').value = '';
@@ -856,30 +1327,59 @@
     function toggleTask(i) { appState.tasks[i].done = !appState.tasks[i].done; saveState(); }
     function deleteTask(i) { appState.tasks.splice(i, 1); saveState(); }
 
-    // ==================== 3. GIMNASIO & SOBRECARGA PROGRESIVA ====================
+    // ==================== 3. GIMNASIO, CRONÓMETRO Y MOTOR BIOMECÁNICO + GIFS ====================
+    let gymRestSeconds = 0;
+    let gymRestInterval = null;
+
+    function startGymRestTimer(sec) {
+      clearInterval(gymRestInterval);
+      gymRestSeconds = sec;
+      updateGymTimerUI();
+      gymRestInterval = setInterval(() => {
+        if (gymRestSeconds > 0) {
+          gymRestSeconds--;
+          updateGymTimerUI();
+        } else {
+          clearInterval(gymRestInterval);
+          playBeep();
+          showToast("¡Tiempo de descanso terminado! Siguiente serie.", "success");
+        }
+      }, 1000);
+    }
+
+    function stopGymRestTimer() {
+      clearInterval(gymRestInterval);
+      gymRestSeconds = 0;
+      updateGymTimerUI();
+    }
+
+    function updateGymTimerUI() {
+      const m = String(Math.floor(gymRestSeconds / 60)).padStart(2, '0');
+      const s = String(gymRestSeconds % 60).padStart(2, '0');
+      document.getElementById('gymTimerDisplay').textContent = `${m}:${s}`;
+    }
+
     function toggleNewExerciseForm() {
-      const form = document.getElementById('newExerciseForm');
-      form.classList.toggle('hidden');
+      document.getElementById('newExerciseForm').classList.toggle('hidden');
     }
 
     function addGymExercise() {
       const input = document.getElementById('manualExerciseName');
       const name = input.value.trim();
-      if(!name) return;
+      if (!name) return;
       const currentDayId = appState.currentDay;
-      if(!appState.gymStructured[currentDayId]) {
+      if (!appState.gymStructured[currentDayId]) {
         appState.gymStructured[currentDayId] = { focus: "Entrenamiento Personalizado", exercises: [] };
       }
       appState.gymStructured[currentDayId].exercises.push({ id: Date.now(), name, weight: 0, done: false });
       input.value = '';
       document.getElementById('newExerciseForm').classList.add('hidden');
       saveState();
-      showToast("Ejercicio añadido al día", "success");
+      showToast("Ejercicio añadido", "success");
     }
 
     async function generateGymRoutineWithGemini() {
-      if(!appState.apiKey) { showToast("Configura tu API Key en Ajustes", "warning"); switchTab('settings'); return; }
-
+      if (!appState.apiKey) { showToast("Configura tu API Key en Ajustes", "warning"); switchTab('settings'); return; }
       const weight = document.getElementById('gymWeight').value;
       const height = document.getElementById('gymHeight').value;
       const daysCount = parseInt(document.getElementById('gymDays').value) || 4;
@@ -887,18 +1387,18 @@
 
       const btn = document.getElementById('gymBtn');
       const originalText = btn.innerHTML;
-      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner"></div><span>Estructurando rutina por días...</span>`;
+      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner"></div><span>Generando...</span>`;
       btn.disabled = true;
 
       try {
         const prompt = `Para una persona de ${weight}kg y ${height}cm, objetivo: "${goal}", entrenando ${daysCount} días por semana.
-        Crea una distribución semanal dividida por días (ej. Lunes, Martes, Jueves, Viernes).
+        Crea una distribución semanal dividida por días (ej. Lunes, Martes, Jueves, Viernes). Usa nombres claros en español (ej. Press de banca plano, Sentadilla con barra, Jalón al pecho, Curl femoral sentado, Press militar con mancuernas, Curl de bíceps, Extensión de tríceps en polea).
         Devuelve ÚNICAMENTE un JSON válido sin texto extra:
         [
           {
             "dayName": "Lunes",
-            "focus": "Tren Superior - Empuje (Pecho, Hombro, Tríceps)",
-            "exercises": [{"name": "Press de banca con mancuernas (4x10)", "weight": 0}]
+            "focus": "Tren Superior - Empuje",
+            "exercises": [{"name": "Press de banca plano (4x10)", "weight": 0}]
           }
         ]`;
 
@@ -921,7 +1421,7 @@
         });
 
         saveState();
-        showToast("Rutina dividida por días generada", "success");
+        showToast("Rutina generada con éxito", "success");
       } catch (err) {
         showToast("Error IA: " + err.message, "error");
       } finally {
@@ -930,36 +1430,255 @@
       }
     }
 
+    // MOTOR BIOMECÁNICO ANIMADO 2D + BUSCADOR EN REPOSITORIOS GITHUB SIN IMÁGENES ROTAS
+    function getBiomechanicalAnimationSVG(exerciseName) {
+      const q = exerciseName.toLowerCase();
+      let type = 'press';
+      let muscleLabel = 'Pectoral Mayor, Deltoides Anterior y Tríceps';
+      let cue = 'Inhala al bajar la carga en 2s • Exhala al empujar con fuerza';
+
+      if (q.includes('sentadilla') || q.includes('squat') || q.includes('prensa') || q.includes('zancada') || q.includes('pierna')) {
+        type = 'squat';
+        muscleLabel = 'Cuádriceps, Glúteo Mayor y Core';
+        cue = 'Inhala al descender manteniendo espalda neutra • Exhala al subir';
+      } else if (q.includes('jalón') || q.includes('jalon') || q.includes('dominada') || q.includes('remo') || q.includes('espalda') || q.includes('pull')) {
+        type = 'pull';
+        muscleLabel = 'Dorsal Ancho, Trapecio Medio y Bíceps';
+        cue = 'Inhala al estirar brazos • Exhala al traccionar llevando codos atrás';
+      } else if (q.includes('curl') || q.includes('bíceps') || q.includes('biceps') || q.includes('tríceps') || q.includes('triceps') || q.includes('femoral') || q.includes('extensión') || q.includes('extension') || q.includes('elevacion')) {
+        type = 'curl';
+        muscleLabel = 'Aislamiento Articular (Bíceps / Tríceps / Isquiosurales)';
+        cue = 'Mantén la articulación fija sin columpiar el torso • Controla el regreso';
+      }
+
+      const svgs = {
+        press: `
+          <svg viewBox="0 0 160 120" class="w-48 h-36">
+            <!-- Banco -->
+            <rect x="25" y="78" width="95" height="8" rx="3" fill="#475569"/>
+            <rect x="35" y="86" width="8" height="24" fill="#334155"/>
+            <rect x="100" y="86" width="8" height="24" fill="#334155"/>
+            <!-- Torso y Cabeza -->
+            <circle cx="42" cy="68" r="9" fill="#94a3b8"/>
+            <rect x="53" y="64" width="48" height="14" rx="6" fill="#64748b"/>
+            <!-- Músculo Pectoral Activo -->
+            <circle cx="66" cy="68" r="9" fill="#ef4444" class="muscle-active"/>
+            <!-- Piernas -->
+            <path d="M101 70 L125 70 L132 105" stroke="#64748b" stroke-width="8" stroke-linecap="round" fill="none"/>
+            <!-- Brazos y Barra Animados -->
+            <g class="anim-press">
+              <line x1="65" y1="68" x2="65" y2="38" stroke="#3b82f6" stroke-width="6" stroke-linecap="round"/>
+              <line x1="40" y1="36" x2="90" y2="36" stroke="#e2e8f0" stroke-width="4" stroke-linecap="round"/>
+              <rect x="36" y="26" width="7" height="20" rx="2" fill="#3b82f6"/>
+              <rect x="87" y="26" width="7" height="20" rx="2" fill="#3b82f6"/>
+            </g>
+          </svg>`,
+        squat: `
+          <svg viewBox="0 0 160 120" class="w-48 h-36">
+            <!-- Piso -->
+            <line x1="20" y1="108" x2="140" y2="108" stroke="#475569" stroke-width="4"/>
+            <!-- Cuerpo superior y barra que bajan -->
+            <g class="anim-squat">
+              <circle cx="80" cy="24" r="9" fill="#94a3b8"/>
+              <line x1="45" y1="35" x2="115" y2="35" stroke="#e2e8f0" stroke-width="4"/>
+              <rect x="40" y="26" width="7" height="18" rx="2" fill="#3b82f6"/>
+              <rect x="113" y="26" width="7" height="18" rx="2" fill="#3b82f6"/>
+              <rect x="71" y="34" width="18" height="34" rx="6" fill="#64748b"/>
+              <!-- Glúteo / Cuádriceps activo -->
+              <circle cx="80" cy="66" r="10" fill="#ef4444" class="muscle-active"/>
+            </g>
+            <!-- Base piernas -->
+            <line x1="73" y1="75" x2="68" y2="106" stroke="#3b82f6" stroke-width="7" stroke-linecap="round"/>
+            <line x1="87" y1="75" x2="92" y2="106" stroke="#3b82f6" stroke-width="7" stroke-linecap="round"/>
+          </svg>`,
+        pull: `
+          <svg viewBox="0 0 160 120" class="w-48 h-36">
+            <!-- Estructura Polea -->
+            <line x1="80" y1="5" x2="80" y2="45" stroke="#64748b" stroke-width="2" stroke-dasharray="3 3"/>
+            <!-- Torso -->
+            <circle cx="80" cy="52" r="9" fill="#94a3b8"/>
+            <polygon points="62,64 98,64 90,104 70,104" fill="#475569"/>
+            <!-- Dorsal activo -->
+            <circle cx="70" cy="78" r="8" fill="#ef4444" class="muscle-active"/>
+            <circle cx="90" cy="78" r="8" fill="#ef4444" class="muscle-active"/>
+            <!-- Barra y Brazos Traccionando -->
+            <g class="anim-pull">
+              <line x1="35" y1="36" x2="125" y2="36" stroke="#e2e8f0" stroke-width="5" stroke-linecap="round"/>
+              <line x1="45" y1="36" x2="64" y2="66" stroke="#3b82f6" stroke-width="6" stroke-linecap="round"/>
+              <line x1="115" y1="36" x2="96" y2="66" stroke="#3b82f6" stroke-width="6" stroke-linecap="round"/>
+            </g>
+          </svg>`,
+        curl: `
+          <svg viewBox="0 0 160 120" class="w-48 h-36">
+            <!-- Torso lateral -->
+            <circle cx="50" cy="22" r="9" fill="#94a3b8"/>
+            <rect x="40" y="34" width="20" height="48" rx="6" fill="#475569"/>
+            <!-- Músculo activo -->
+            <circle cx="53" cy="50" r="8" fill="#ef4444" class="muscle-active"/>
+            <!-- Antebrazo y mancuerna articulados -->
+            <g class="anim-curl">
+              <line x1="50" y1="45" x2="50" y2="82" stroke="#3b82f6" stroke-width="7" stroke-linecap="round"/>
+              <rect x="42" y="80" width="16" height="8" rx="2" fill="#e2e8f0"/>
+            </g>
+          </svg>`
+      };
+
+      return { svg: svgs[type], muscleLabel, cue };
+    }
+
+    // Mapeo de palabras en español a términos de búsqueda en los repositorios públicos
+    function getEnglishSearchKeywords(spanishName) {
+      const q = spanishName.toLowerCase();
+      if (q.includes('banca') && q.includes('inclinad')) return ['incline', 'bench', 'press'];
+      if (q.includes('banca') || q.includes('pecho')) return ['bench', 'press'];
+      if (q.includes('sentadilla') || q.includes('squat')) return ['squat'];
+      if (q.includes('prensa')) return ['leg', 'press'];
+      if (q.includes('femoral') && q.includes('sentad')) return ['seated', 'leg', 'curl'];
+      if (q.includes('femoral') || q.includes('isquio')) return ['leg', 'curl'];
+      if (q.includes('extensión de pierna') || q.includes('cuádriceps') || q.includes('cuadriceps')) return ['leg', 'extension'];
+      if (q.includes('jalón') || q.includes('jalon') || q.includes('polea alta')) return ['lat', 'pulldown'];
+      if (q.includes('dominada')) return ['pull', 'up'];
+      if (q.includes('remo') && q.includes('barra')) return ['bent', 'over', 'row'];
+      if (q.includes('remo')) return ['seated', 'cable', 'row'];
+      if (q.includes('militar') || (q.includes('hombro') && q.includes('press'))) return ['shoulder', 'press'];
+      if (q.includes('lateral')) return ['lateral', 'raise'];
+      if (q.includes('bíceps') || q.includes('biceps') || q.includes('curl')) return ['bicep', 'curl'];
+      if (q.includes('tríceps') || q.includes('triceps') || q.includes('copa') || q.includes('polea')) return ['tricep', 'pushdown'];
+      if (q.includes('peso muerto')) return ['deadlift'];
+      if (q.includes('zancada') || q.includes(' desplante')) return ['lunge'];
+      if (q.includes('pantorrilla') || q.includes('gemelo')) return ['calf', 'raise'];
+      return ['bench', 'press'];
+    }
+
+    async function showExerciseDemo(exerciseName) {
+      if (flipbookInterval) { clearInterval(flipbookInterval); flipbookInterval = null; }
+      const modal = document.getElementById('demoModal');
+      const title = document.getElementById('modalExerciseTitle');
+      const content = document.getElementById('modalExerciseContent');
+
+      title.textContent = exerciseName;
+      const bio = getBiomechanicalAnimationSVG(exerciseName);
+
+      // Renderizamos de inmediato el Simulador Biomecánico Animado (nunca falla) + contenedor para GIF/Secuencia real
+      content.innerHTML = `
+        <div class="space-y-3">
+          <!-- Contenedor de GIF / Secuencia Real (Oculto hasta que el archivo cargue al 100% sin error) -->
+          <div id="realMediaBox" class="hidden w-full bg-slate-950 rounded-2xl overflow-hidden border border-blue-500/40 flex flex-col items-center p-2 shadow-inner">
+            <span id="realMediaBadge" class="text-[10px] font-bold uppercase text-emerald-400 mb-1">Demostración Oficial Cargada</span>
+            <img id="realExerciseImg" src="" alt="${exerciseName}" class="max-h-56 object-contain rounded-xl">
+          </div>
+
+          <!-- Simulador Biomecánico Cinemático 2D (Siempre activo y en movimiento) -->
+          <div class="w-full bg-slate-950 rounded-2xl border border-slate-700 p-3 flex flex-col items-center justify-center">
+            <div class="flex items-center justify-between w-full mb-1">
+              <span class="text-[10px] font-bold uppercase text-blue-400">Simulador Biomecánico en Vivo</span>
+              <span class="text-[10px] text-rose-400 font-bold">● Zona Muscular Activa</span>
+            </div>
+            ${bio.svg}
+            <p class="text-[11px] text-emerald-300 font-semibold text-center mt-1">${bio.cue}</p>
+          </div>
+
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 space-y-1">
+            <p class="font-bold text-blue-500 dark:text-blue-400 uppercase text-[11px]">Músculos Implicados: ${bio.muscleLabel}</p>
+            <p class="text-slate-600 dark:text-slate-300 text-[11px]">Mantén el control excéntrico (2 segundos al bajar) y evita usar impulso lumbar.</p>
+          </div>
+        </div>
+      `;
+      modal.classList.remove('hidden');
+
+      const keywords = getEnglishSearchKeywords(exerciseName);
+      const imgEl = document.getElementById('realExerciseImg');
+      const boxEl = document.getElementById('realMediaBox');
+
+      // 1. Intentar descubrir el archivo .gif real en el árbol de GitHub de JahelCuadrado/ExerciseGymGifsDB
+      try {
+        if (!cachedExerciseRepoTree) {
+          const treeRes = await fetch('https://api.github.com/repos/JahelCuadrado/ExerciseGymGifsDB/git/trees/main?recursive=1');
+          if (treeRes.ok) {
+            const treeData = await treeRes.json();
+            cachedExerciseRepoTree = (treeData.tree || []).filter(item => item.path && item.path.endsWith('.gif'));
+          }
+        }
+        if (cachedExerciseRepoTree && cachedExerciseRepoTree.length > 0) {
+          const matchedGifNode = cachedExerciseRepoTree.find(node => {
+            const p = node.path.toLowerCase();
+            return keywords.every(k => p.includes(k));
+          }) || cachedExerciseRepoTree.find(node => {
+            const p = node.path.toLowerCase();
+            return keywords.some(k => p.includes(k));
+          });
+
+          if (matchedGifNode) {
+            const cdnUrl = `https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/${matchedGifNode.path}`;
+            imgEl.onload = () => { boxEl.classList.remove('hidden'); };
+            imgEl.src = cdnUrl;
+            return;
+          }
+        }
+      } catch (e) {}
+
+      // 2. Respaldo automático con la base de datos abierta verificada yuhonas/free-exercise-db (Animación cuadro por cuadro)
+      try {
+        if (!cachedFreeExerciseDb) {
+          const dbRes = await fetch('https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json');
+          if (dbRes.ok) cachedFreeExerciseDb = await dbRes.json();
+        }
+        if (cachedFreeExerciseDb && cachedFreeExerciseDb.length > 0) {
+          const foundEx = cachedFreeExerciseDb.find(item => {
+            const n = item.name.toLowerCase();
+            return keywords.every(k => n.includes(k)) && item.images && item.images.length >= 2;
+          }) || cachedFreeExerciseDb.find(item => {
+            const n = item.name.toLowerCase();
+            return keywords.some(k => n.includes(k)) && item.images && item.images.length >= 2;
+          });
+
+          if (foundEx) {
+            const frames = [
+              `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${foundEx.images[0]}`,
+              `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${foundEx.images[1]}`
+            ];
+            let frameIdx = 0;
+            imgEl.onload = () => { boxEl.classList.remove('hidden'); };
+            imgEl.src = frames[0];
+            flipbookInterval = setInterval(() => {
+              frameIdx = (frameIdx + 1) % 2;
+              imgEl.src = frames[frameIdx];
+            }, 750);
+          }
+        }
+      } catch (e) {}
+    }
+
+    function closeDemoModal() {
+      if (flipbookInterval) { clearInterval(flipbookInterval); flipbookInterval = null; }
+      document.getElementById('demoModal').classList.add('hidden');
+    }
+
     function updateGymWeight(i, val) {
       const currentDayId = appState.currentDay;
       const dayObj = DAYS_CONFIG.find(d => d.id === currentDayId);
       const dayLabel = dayObj ? dayObj.label : currentDayId;
       const newWeight = parseFloat(val) || 0;
 
-      if(appState.gymStructured && appState.gymStructured[currentDayId]) {
+      if (appState.gymStructured && appState.gymStructured[currentDayId]) {
         const ex = appState.gymStructured[currentDayId].exercises[i];
         ex.weight = newWeight;
 
-        if(!appState.exerciseHistory[ex.name]) appState.exerciseHistory[ex.name] = [];
+        if (!appState.exerciseHistory[ex.name]) appState.exerciseHistory[ex.name] = [];
         const hist = appState.exerciseHistory[ex.name];
-        
-        // Guardar o actualizar el registro del día actual en el historial
         const existingTodayIndex = hist.findIndex(h => h.day === dayLabel);
         if (existingTodayIndex !== -1) {
           hist[existingTodayIndex].weight = newWeight;
         } else if (newWeight > 0) {
           hist.push({ day: dayLabel, weight: newWeight });
         }
-
         saveState();
-        showToast(`Carga registrada: ${ex.name} (${newWeight} kg)`, "info");
       }
     }
 
     function renderGym() {
       const currentDayId = appState.currentDay;
       const dayGymData = appState.gymStructured && appState.gymStructured[currentDayId];
-      
       const focusBadge = document.getElementById('gymDayFocusBadge');
       const el = document.getElementById('gymRoutineList');
       const activeDayObj = DAYS_CONFIG.find(d => d.id === currentDayId);
@@ -968,7 +1687,7 @@
 
       if (!dayGymData || !dayGymData.exercises || dayGymData.exercises.length === 0) {
         focusBadge.textContent = "Enfoque: Día de descanso o sin rutina asignada";
-        el.innerHTML = `<p class="text-xs text-slate-400 italic">No hay ejercicios programados para este día.</p>`;
+        el.innerHTML = `<p class="text-xs text-slate-400 italic">Genera una rutina con IA arriba o agrega un ejercicio manualmente.</p>`;
         return;
       }
 
@@ -988,12 +1707,17 @@
 
         return `
           <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 text-xs space-y-2">
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between gap-2">
               <label class="flex items-center gap-2.5 cursor-pointer">
                 <input type="checkbox" ${ex.done ? 'checked' : ''} onchange="toggleGymEx(${i})" class="w-4 h-4 accent-blue-500 rounded">
                 <span class="font-bold ${ex.done ? 'line-through text-slate-400' : ''}">${ex.name}</span>
               </label>
-              <button onclick="deleteGymEx(${i})" class="text-slate-400 hover:text-rose-500">✕</button>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <button onclick="showExerciseDemo('${ex.name.replace(/'/g, "\\'")}')" class="text-[10px] text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1 bg-blue-500/15 px-2.5 py-1 rounded-lg border border-blue-500/30 shadow-sm transition">
+                  <span>Ver Animación</span>
+                </button>
+                <button onclick="deleteGymEx(${i})" class="text-slate-400 hover:text-rose-500 px-1">✕</button>
+              </div>
             </div>
             <div class="flex items-center justify-between pt-1.5 border-t border-slate-200 dark:border-slate-600">
               <div class="space-y-0.5">
@@ -1012,7 +1736,7 @@
 
     function toggleGymEx(i) {
       const currentDayId = appState.currentDay;
-      if(appState.gymStructured && appState.gymStructured[currentDayId]) {
+      if (appState.gymStructured && appState.gymStructured[currentDayId]) {
         appState.gymStructured[currentDayId].exercises[i].done = !appState.gymStructured[currentDayId].exercises[i].done;
         saveState();
       }
@@ -1020,14 +1744,14 @@
 
     function deleteGymEx(i) {
       const currentDayId = appState.currentDay;
-      if(appState.gymStructured && appState.gymStructured[currentDayId]) {
+      if (appState.gymStructured && appState.gymStructured[currentDayId]) {
         appState.gymStructured[currentDayId].exercises.splice(i, 1);
         saveState();
       }
     }
 
     function exportToCalendar() {
-      if(!appState.gymStructured || Object.keys(appState.gymStructured).length === 0) { showToast("Primero genera una rutina con IA", "warning"); return; }
+      if (!appState.gymStructured || Object.keys(appState.gymStructured).length === 0) { showToast("Primero genera una rutina", "warning"); return; }
       let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Allan TCC App//ES\n";
       Object.keys(appState.gymStructured).forEach(dayId => {
         const dayInfo = appState.gymStructured[dayId];
@@ -1054,7 +1778,31 @@
       showToast("Calendario ICS descargado", "success");
     }
 
-    // ==================== 4. HÁBITOS, RACHAS & BITÁCORA TCC ====================
+    // ==================== 4. HÁBITOS, RACHAS & SOS RESPIRACIÓN ====================
+    let breatheTimer = null;
+    function toggleBreathingExercise() {
+      const box = document.getElementById('breatheBox');
+      const btn = document.getElementById('breatheBtn');
+      const text = document.getElementById('breatheInstruction');
+
+      if (!box.classList.contains('hidden')) {
+        box.classList.add('hidden');
+        btn.textContent = 'Iniciar';
+        clearInterval(breatheTimer);
+        return;
+      }
+
+      box.classList.remove('hidden');
+      btn.textContent = 'Detener';
+      let phase = 0;
+      const phases = ['Inhala 4s', 'Mantén 4s', 'Exhala 4s'];
+      text.textContent = phases[0];
+      breatheTimer = setInterval(() => {
+        phase = (phase + 1) % phases.length;
+        text.textContent = phases[phase];
+      }, 4000);
+    }
+
     function calculateHabitStreak(habitId) {
       const currentIdx = DAYS_CONFIG.findIndex(d => d.id === appState.currentDay);
       if (currentIdx === -1) return 0;
@@ -1062,23 +1810,20 @@
       for (let i = currentIdx; i >= 0; i--) {
         const dId = DAYS_CONFIG[i].id;
         const checked = appState.days[dId]?.habitsState?.[habitId];
-        if (checked) {
-          streak++;
-        } else {
-          if (i !== currentIdx) break;
-        }
+        if (checked) streak++;
+        else if (i !== currentIdx) break;
       }
       return streak;
     }
 
     function renderHabits() {
-      if(!appState.habitsList) appState.habitsList = [];
+      if (!appState.habitsList) appState.habitsList = [];
       const dayData = appState.days[appState.currentDay];
-      if(!dayData.habitsState) dayData.habitsState = {};
+      if (!dayData.habitsState) dayData.habitsState = {};
 
       const el = document.getElementById('habitsList');
-      if(appState.habitsList.length === 0) {
-        el.innerHTML = `<p class="text-xs text-slate-400 italic">Agrega tus hábitos conductuales manualmente uno por uno.</p>`;
+      if (appState.habitsList.length === 0) {
+        el.innerHTML = `<p class="text-xs text-slate-400 italic">Agrega tus hábitos conductuales arriba.</p>`;
       } else {
         el.innerHTML = appState.habitsList.map((h, i) => {
           const checked = !!dayData.habitsState[h.id];
@@ -1100,7 +1845,6 @@
         }).join('');
       }
 
-      // Renderizar Bitácora TCC de Impulsos
       const impulsesEl = document.getElementById('impulseLogsList');
       const impulses = dayData.impulses || [];
       if (impulses.length === 0) {
@@ -1112,8 +1856,8 @@
               <span class="text-[10px] font-bold text-amber-400 uppercase">${imp.category} • ${imp.time}</span>
               <button onclick="deleteImpulseLog(${idx})" class="text-slate-400 hover:text-rose-500">✕</button>
             </div>
-            <p class="text-slate-300"><strong class="text-slate-100">Gatillo:</strong> ${imp.trigger}</p>
-            <p class="text-emerald-400"><strong class="text-emerald-300">Acción Alternativa:</strong> ${imp.action}</p>
+            <p class="text-slate-500 dark:text-slate-300"><strong class="text-slate-800 dark:text-slate-100">Gatillo:</strong> ${imp.trigger}</p>
+            <p class="text-emerald-500 dark:text-emerald-400"><strong class="text-emerald-600 dark:text-emerald-300">Acción Alternativa:</strong> ${imp.action}</p>
           </div>
         `).join('');
       }
@@ -1121,11 +1865,11 @@
 
     function addHabit() {
       const input = document.getElementById('newHabitInput');
-      if(!input.value.trim()) return;
+      if (!input.value.trim()) return;
       appState.habitsList.push({ id: 'h_' + Date.now(), name: input.value.trim() });
       input.value = '';
       saveState();
-      showToast("Hábito registrado", "success");
+      showToast("Hábito agregado", "success");
     }
 
     function toggleHabitState(id) {
@@ -1144,7 +1888,7 @@
       const triggerInput = document.getElementById('impulseTrigger');
       const actionInput = document.getElementById('impulseAction');
       if (!triggerInput.value.trim() || !actionInput.value.trim()) {
-        showToast("Completa el gatillo y la conducta alternativa", "warning");
+        showToast("Completa el gatillo y la acción alternativa", "warning");
         return;
       }
       const now = new Date();
@@ -1166,10 +1910,9 @@
       saveState();
     }
 
-    // ==================== 5. DESPENSA & MENÚ SEMANAL ====================
+    // ==================== 5. DESPENSA ====================
     async function generateGroceryWithGemini() {
-      if(!appState.apiKey) { showToast("Configura tu API Key en Ajustes", "warning"); switchTab('settings'); return; }
-
+      if (!appState.apiKey) { showToast("Configura tu API Key en Ajustes", "warning"); switchTab('settings'); return; }
       const budget = document.getElementById('groceryBudget').value || "1500";
       const days = document.getElementById('groceryDays').value || "10";
       const store = document.getElementById('groceryStore').value || "Tiendas 3B";
@@ -1177,33 +1920,33 @@
 
       const btn = document.getElementById('groceryBtn');
       const originalText = btn.innerHTML;
-      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner"></div><span>Generando Despensa y Menú...</span>`;
+      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner"></div><span>Generando...</span>`;
       btn.disabled = true;
 
       try {
-        const prompt = `Actúa como nutriólogo clínico. Presupuesto: $${budget} MXN para ${days} días en ${store}. Meta: "${goal}" (${appState.targetKcal} kcal, ${appState.targetProt}g proteína, ${appState.targetCarb}g carbos, ${appState.targetFat}g grasas).
-        Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta (sin texto extra):
+        const prompt = `Actúa como nutriólogo. Presupuesto: $${budget} MXN para ${days} días en ${store}. Meta: "${goal}" (${appState.targetKcal} kcal, ${appState.targetProt}g proteína).
+        Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta:
         {
           "groceries": [{"text": "producto (cantidad) - precio aprox"}],
           "mealPlan": [
             {
               "day": "Día 1",
-              "breakfast": "Desayuno con cantidades",
-              "snack1": "Colación matutina",
-              "lunch": "Comida con cantidades",
-              "snack2": "Colación vespertina",
-              "dinner": "Cena con cantidades"
+              "breakfast": "Desayuno",
+              "snack1": "Colación 1",
+              "lunch": "Comida",
+              "snack2": "Colación 2",
+              "dinner": "Cena"
             }
           ]
         }`;
-        
+
         const textResult = await callGeminiAPI(prompt, null);
         const parsedData = JSON.parse(textResult);
 
         appState.groceries = (parsedData.groceries || []).map((it, idx) => ({ id: Date.now() + idx, text: it.text, checked: false }));
         appState.mealPlanStructured = parsedData.mealPlan || [];
         saveState();
-        showToast("Despensa y menú semanal actualizados", "success");
+        showToast("Despensa generada", "success");
       } catch (err) {
         showToast("Error IA: " + err.message, "error");
       } finally {
@@ -1214,14 +1957,14 @@
 
     function renderGroceries() {
       const el = document.getElementById('groceryList');
-      if(appState.groceries.length === 0) { 
-        el.innerHTML = `<p class="text-xs text-slate-400 italic">No hay productos en la lista.</p>`; 
+      if (appState.groceries.length === 0) {
+        el.innerHTML = `<p class="text-xs text-slate-400 italic">Lista vacía.</p>`;
       } else {
         el.innerHTML = appState.groceries.map((g, i) => `
           <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 text-xs">
             <label class="flex items-center gap-3 flex-1 cursor-pointer">
               <input type="checkbox" ${g.checked ? 'checked' : ''} onchange="toggleGrocery(${i})" class="w-4 h-4 accent-emerald-500 rounded">
-              <span class="${g.checked ? 'line-through text-slate-400' : 'font-medium text-slate-700 dark:text-slate-200'}">${g.text}</span>
+              <span class="${g.checked ? 'line-through text-slate-400' : 'font-medium'}">${g.text}</span>
             </label>
             <button onclick="deleteGrocery(${i})" class="text-slate-400 hover:text-rose-500">✕</button>
           </div>
@@ -1229,17 +1972,17 @@
       }
 
       const planContainer = document.getElementById('mealPlanContainer');
-      if(!appState.mealPlanStructured || appState.mealPlanStructured.length === 0) {
-        planContainer.innerHTML = `<p class="text-xs text-slate-400 italic">Genera tu despensa para visualizar el menú estructurado.</p>`;
+      if (!appState.mealPlanStructured || appState.mealPlanStructured.length === 0) {
+        planContainer.innerHTML = `<p class="text-xs text-slate-400 italic">Genera tu despensa para ver el menú.</p>`;
       } else {
         planContainer.innerHTML = appState.mealPlanStructured.map(day => `
-          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 space-y-1.5 shadow-sm">
-            <h4 class="font-bold text-xs text-blue-500 dark:text-blue-400 uppercase tracking-wide border-b border-slate-200 dark:border-slate-600 pb-1">${day.day}</h4>
-            <p class="text-xs text-slate-600 dark:text-slate-300"><strong class="text-slate-900 dark:text-white">Desayuno:</strong> ${day.breakfast}</p>
-            <p class="text-xs text-slate-600 dark:text-slate-300"><strong class="text-slate-900 dark:text-white">Colación 1:</strong> ${day.snack1}</p>
-            <p class="text-xs text-slate-600 dark:text-slate-300"><strong class="text-slate-900 dark:text-white">Comida:</strong> ${day.lunch}</p>
-            <p class="text-xs text-slate-600 dark:text-slate-300"><strong class="text-slate-900 dark:text-white">Colación 2:</strong> ${day.snack2}</p>
-            <p class="text-xs text-slate-600 dark:text-slate-300"><strong class="text-slate-900 dark:text-white">Cena:</strong> ${day.dinner}</p>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-1.5 shadow-sm">
+            <h4 class="font-bold text-xs text-blue-400 uppercase tracking-wide border-b border-slate-200 dark:border-slate-700 pb-1">${day.day}</h4>
+            <p class="text-xs"><strong class="text-blue-400">Desayuno:</strong> ${day.breakfast}</p>
+            <p class="text-xs"><strong class="text-blue-400">Colación 1:</strong> ${day.snack1}</p>
+            <p class="text-xs"><strong class="text-blue-400">Comida:</strong> ${day.lunch}</p>
+            <p class="text-xs"><strong class="text-blue-400">Colación 2:</strong> ${day.snack2}</p>
+            <p class="text-xs"><strong class="text-blue-400">Cena:</strong> ${day.dinner}</p>
           </div>
         `).join('');
       }
@@ -1248,78 +1991,76 @@
     function toggleGrocery(i) { appState.groceries[i].checked = !appState.groceries[i].checked; saveState(); }
     function deleteGrocery(i) { appState.groceries.splice(i, 1); saveState(); }
 
-    // ==================== 6. AJUSTES & AUTOCÁLCULO DE CALORÍAS, AGUA Y MACROS ====================
-    async function calculateMacrosWithGemini() {
-      if(!appState.apiKey) { showToast("Primero guarda tu API Key arriba", "warning"); return; }
-
-      const weight = document.getElementById('calcWeight').value;
-      const height = document.getElementById('calcHeight').value;
-      const age = document.getElementById('calcAge').value;
-      const activity = document.getElementById('calcActivity').value;
-      const goal = document.getElementById('calcGoalSelect').value;
-
-      const btn = document.getElementById('calcBtn');
-      const originalText = btn.innerHTML;
-      btn.innerHTML = `<div class="w-4 h-4 border-2 border-indigo-700 border-t-transparent rounded-full spinner"></div><span>Calculando Calorías y Macros...</span>`;
-      btn.disabled = true;
-
-      try {
-        const prompt = `Calcula las calorías diarias exactas, mililitros de agua y gramos diarios de macronutrientes (proteína, carbohidratos y grasas) para una persona de ${weight}kg, ${height}cm, ${age} años, actividad: "${activity}", objetivo: "${goal}".
-        Devuelve ÚNICAMENTE un JSON válido sin texto adicional:
-        {
-          "targetKcal": número_entero,
-          "targetWater": número_entero_ml,
-          "targetProt": gramos_proteina_entero,
-          "targetCarb": gramos_carbohidratos_entero,
-          "targetFat": gramos_grasas_entero
-        }`;
-
-        const textResult = await callGeminiAPI(prompt, null);
-        const parsed = JSON.parse(textResult);
-
-        appState.targetKcal = Number(parsed.targetKcal) || 2100;
-        appState.targetWater = Number(parsed.targetWater) || 4000;
-        appState.targetProt = Number(parsed.targetProt) || 170;
-        appState.targetCarb = Number(parsed.targetCarb) || 160;
-        appState.targetFat = Number(parsed.targetFat) || 85;
-
-        saveState();
-        showToast(`Metas instaladas: ${appState.targetKcal} kcal | ${appState.targetProt}g P | ${appState.targetCarb}g C | ${appState.targetFat}g G`, "success");
-        switchTab('nutrition');
-      } catch (err) {
-        showToast("Error al calcular metas: " + err.message, "error");
-      } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-      }
-    }
-
+    // ==================== 6. AJUSTES, RESPALDO Y REINICIO DE CERO ====================
     function saveSettings() {
       appState.apiKey = document.getElementById('apiKeyInput').value.trim();
       appState.selectedModel = document.getElementById('modelSelect').value;
       saveState();
-      showToast("Token y modelo guardados correctamente", "success");
+      showToast("Token y modelo guardados", "success");
     }
 
     function renderSettings() {
       document.getElementById('apiKeyInput').value = appState.apiKey || '';
-      document.getElementById('modelSelect').value = appState.selectedModel || 'gemini-3.1-flash-live-preview';
-      document.getElementById('headerSubtitle').textContent = appState.apiKey ? `IA Activa (${appState.selectedModel})` : 'Configura tu Token API en Ajustes';
-      const badge = document.getElementById('aiModelBadge');
-      if (badge) badge.textContent = appState.selectedModel;
+      document.getElementById('modelSelect').value = appState.selectedModel || 'gemini-2.5-flash';
+      const p = appState.profile || {};
+      document.getElementById('headerTitle').textContent = p.name ? `Control TCC • ${p.name}` : 'Sistema TCC Master v42';
+      document.getElementById('headerSubtitle').textContent = `${p.goalText || 'Meta activa'} • ${appState.apiKey ? 'IA Conectada' : 'Sin Token IA'}`;
+
+      const summaryEl = document.getElementById('profileSummaryCard');
+      if (summaryEl) {
+        summaryEl.innerHTML = `
+          <p><strong>Usuario:</strong> ${p.name || 'Sin definir'} (${p.age || 28} años)</p>
+          <p><strong>Físico:</strong> ${p.weight || 120} kg | ${p.height || 182} cm | Gym: ${p.gymDays || 4} días/sem</p>
+          <p><strong>Objetivo:</strong> ${p.goalText || 'Déficit'}</p>
+          <p><strong>Metas:</strong> ${appState.targetKcal} kcal | ${appState.targetProt}g P | ${appState.targetCarb}g C | ${appState.targetFat}g G</p>
+        `;
+      }
+    }
+
+    function toggleFactoryResetConfirm() {
+      document.getElementById('factoryResetConfirmBox').classList.toggle('hidden');
+    }
+
+    function executeFactoryReset() {
+      localStorage.removeItem('allan_tcc_app_v42');
+      appState = createDefaultState();
+      document.getElementById('factoryResetConfirmBox').classList.add('hidden');
+      renderAll();
+      checkOnboarding();
+      switchTab('nutrition');
+      showToast("Sistema reiniciado de fábrica. Configura tus datos de cero.", "info");
+    }
+
+    function exportBackupJSON() {
+      const blob = new Blob([JSON.stringify(appState, null, 2)], { type: 'application/json' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `respaldo_tcc_${appState.currentDay}.json`;
+      link.click();
+      showToast("Respaldo descargado", "success");
+    }
+
+    function importBackupJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          appState = JSON.parse(e.target.result);
+          saveState();
+          showToast("Respaldo restaurado con éxito", "success");
+        } catch (err) {
+          showToast("Archivo de respaldo inválido", "error");
+        }
+      };
+      reader.readAsText(file);
     }
 
     function copyDailyReport() {
       const dayData = appState.days[appState.currentDay];
-      let totKcal = 0, totP = 0, totC = 0, totF = 0;
-      dayData.meals.forEach(m => {
-        totKcal += Number(m.kcal) || 0;
-        totP += Number(m.p) || 0;
-        totC += Number(m.c) || 0;
-        totF += Number(m.f) || 0;
-      });
+      const { totKcal, totP, totC, totF } = getTodayTotals();
       const impulsesCount = (dayData.impulses || []).length;
-      const report = `Reporte TCC (${appState.currentDay}):\n• Kcal: ${totKcal}/${appState.targetKcal}\n• Macros: ${totP}/${appState.targetProt}g P | ${totC}/${appState.targetCarb}g C | ${totF}/${appState.targetFat}g G\n• Agua: ${(dayData.water/1000).toFixed(2)}L\n• Impulsos controlados hoy: ${impulsesCount}`;
+      const report = `Reporte TCC (${appState.currentDay} - ${appState.profile.name || 'Usuario'}):\n• Kcal: ${totKcal}/${appState.targetKcal}\n• Macros: ${totP}/${appState.targetProt}g P | ${totC}/${appState.targetCarb}g C | ${totF}/${appState.targetFat}g G\n• Agua: ${(dayData.water/1000).toFixed(2)}L\n• Impulsos controlados hoy: ${impulsesCount}`;
       navigator.clipboard.writeText(report).then(() => showToast("Reporte copiado al portapapeles", "success"));
     }
 
@@ -1335,6 +2076,7 @@
     }
 
     renderAll();
+    checkOnboarding();
   </script>
 </body>
 </html>
