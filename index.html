@@ -3,7 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Control TCC - Master v42</title>
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Control TCC">
+  <title>Control TCC - Master v43</title>
+
+  <!-- FAVICON SVG INMEDIATO PARA LA PESTAÑA DE CHROME -->
+  <link id="faviconLink" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%232563eb'/%3E%3Cstop offset='100%25' stop-color='%2310b981'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='24' fill='%230f172a'/%3E%3Crect x='6' y='6' width='88' height='88' rx='20' fill='none' stroke='url(%23g)' stroke-width='5'/%3E%3Cpath d='M56 18L26 56h22l-6 26 32-38H52l4-26z' fill='url(%23g)'/%3E%3C/svg%3E">
+  <link id="appleTouchIconLink" rel="apple-touch-icon" href="">
+  <link id="manifestLink" rel="manifest" href="">
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -55,33 +65,33 @@
   <div id="onboardingModal" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto">
     <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 w-full max-w-md rounded-3xl p-6 space-y-5 shadow-2xl my-auto">
       <div class="flex items-center gap-3 border-b border-slate-200 dark:border-slate-700 pb-4">
-        <div class="w-11 h-11 rounded-2xl bg-blue-500/20 text-blue-500 flex items-center justify-center shrink-0">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-600 to-emerald-500 text-white flex items-center justify-center shrink-0 shadow-md">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
         </div>
         <div>
           <h2 class="text-base font-extrabold tracking-tight">Configuración Inicial TCC</h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400">Personaliza tus metas clínicas, nutricionales y de entrenamiento.</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Ingresa tus datos para configurar tus metas personalizadas.</p>
         </div>
       </div>
 
       <div class="space-y-3 text-xs">
         <div>
           <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Tu Nombre o Alias</label>
-          <input id="obName" type="text" placeholder="Ej. Allan" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 outline-none font-bold">
+          <input id="obName" type="text" placeholder="Ej. Allan" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 outline-none font-bold placeholder-slate-400 dark:placeholder-slate-500">
         </div>
 
         <div class="grid grid-cols-3 gap-2">
           <div>
             <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Peso (kg)</label>
-            <input id="obWeight" type="number" value="120" class="w-full px-2 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none">
+            <input id="obWeight" type="number" placeholder="Ej. 120" class="w-full px-2 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none placeholder-slate-400 dark:placeholder-slate-500">
           </div>
           <div>
             <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Altura (cm)</label>
-            <input id="obHeight" type="number" value="182" class="w-full px-2 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none">
+            <input id="obHeight" type="number" placeholder="Ej. 182" class="w-full px-2 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none placeholder-slate-400 dark:placeholder-slate-500">
           </div>
           <div>
             <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Edad</label>
-            <input id="obAge" type="number" value="28" class="w-full px-2 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none">
+            <input id="obAge" type="number" placeholder="Ej. 28" class="w-full px-2 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none placeholder-slate-400 dark:placeholder-slate-500">
           </div>
         </div>
 
@@ -89,15 +99,15 @@
           <div>
             <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Actividad Física</label>
             <select id="obActivity" class="w-full px-2.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 font-semibold outline-none">
+              <option value="1.55" selected>Moderada (3-4 días/sem)</option>
               <option value="1.2">Sedentaria (Oficina)</option>
               <option value="1.375">Ligera (1-2 días/sem)</option>
-              <option value="1.55" selected>Moderada (3-4 días/sem)</option>
               <option value="1.725">Intensa (5-6 días/sem)</option>
             </select>
           </div>
           <div>
             <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Días Gym / Sem</label>
-            <input id="obGymDays" type="number" value="4" min="1" max="7" class="w-full px-2.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none">
+            <input id="obGymDays" type="number" min="1" max="7" placeholder="Ej. 4" class="w-full px-2.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none placeholder-slate-400 dark:placeholder-slate-500">
           </div>
         </div>
 
@@ -113,8 +123,8 @@
 
         <div class="pt-2 border-t border-slate-200 dark:border-slate-700">
           <label class="text-[10px] font-bold uppercase text-blue-400 block mb-1">Clave API de Gemini (Opcional ahora, necesaria para IA)</label>
-          <input id="obApiKey" type="password" placeholder="AIzaSy..." class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 outline-none font-mono text-xs">
-          <p class="text-[10px] text-slate-400 mt-1">Calcularemos tus calorías, agua y macros automáticamente con base en tus datos.</p>
+          <input id="obApiKey" type="password" placeholder="Ej. AIzaSy..." class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 outline-none font-mono text-xs placeholder-slate-400 dark:placeholder-slate-500">
+          <p class="text-[10px] text-slate-400 mt-1">Modelo predeterminado activo: <strong>gemini-3.5-flash-lite</strong>.</p>
         </div>
       </div>
 
@@ -124,7 +134,7 @@
     </div>
   </div>
 
-  <!-- ==================== MODAL INTERNO DE DEMOSTRACIÓN VISUAL (GIFS + SIMULADOR 2D) ==================== -->
+  <!-- ==================== MODAL INTERNO DE DEMOSTRACIÓN VISUAL ==================== -->
   <div id="demoModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 w-full max-w-md rounded-2xl p-5 space-y-4 shadow-2xl relative">
       <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 pb-2.5">
@@ -146,11 +156,20 @@
     <div class="max-w-md mx-auto">
       <div class="flex justify-between items-center mb-3">
         <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center text-blue-500">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+          <!-- LOGO OFICIAL EN EL HEADER -->
+          <div class="w-9 h-9 rounded-xl bg-slate-900 border border-emerald-500/40 flex items-center justify-center shadow-sm shrink-0">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
+              <path d="M13 2L4 14h7l-2 8 9-12h-7l2-8z" fill="url(#headerLogoGrad)"/>
+              <defs>
+                <linearGradient id="headerLogoGrad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#3b82f6"/>
+                  <stop offset="100%" stop-color="#10b981"/>
+                </linearGradient>
+              </defs>
+            </svg>
           </div>
           <div>
-            <h1 id="headerTitle" class="text-sm font-bold tracking-tight">Sistema TCC Master v42</h1>
+            <h1 id="headerTitle" class="text-sm font-bold tracking-tight">Sistema TCC Master v43</h1>
             <p id="headerSubtitle" class="text-[11px] text-slate-500 dark:text-slate-400">Cargando...</p>
           </div>
         </div>
@@ -174,34 +193,34 @@
     <!-- ==================== PESTAÑA 1: NUTRICIÓN, ESCÁNER & CHEF IA ==================== -->
     <section id="tab-nutrition" class="space-y-4">
       
-      <!-- Panel de Metas Directas -->
+      <!-- Panel de Metas Directas (Con Placeholders en Gris) -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
         <div class="flex justify-between items-center">
           <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Metas Diarias Configuradas</span>
-          <button onclick="openOnboardingEdit()" class="text-[11px] text-blue-500 font-semibold hover:underline">Editar mi Perfil</button>
+          <button onclick="openOnboardingEdit()" class="text-[11px] text-blue-500 font-semibold hover:underline">Configurar Perfil</button>
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="text-[10px] text-slate-400 block mb-1 font-bold uppercase">Meta Kcal</label>
-            <input id="targetKcalInput" type="number" onchange="updateTargets()" class="w-full px-3 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 font-bold text-center outline-none">
+            <input id="targetKcalInput" type="number" placeholder="Ej. 2100" onchange="updateTargets()" class="w-full px-3 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 font-bold text-center outline-none placeholder-slate-400 dark:placeholder-slate-500">
           </div>
           <div>
             <label class="text-[10px] text-slate-400 block mb-1 font-bold uppercase">Meta Agua (ml)</label>
-            <input id="targetWaterInput" type="number" onchange="updateTargets()" class="w-full px-3 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 font-bold text-center outline-none">
+            <input id="targetWaterInput" type="number" placeholder="Ej. 4000" onchange="updateTargets()" class="w-full px-3 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 font-bold text-center outline-none placeholder-slate-400 dark:placeholder-slate-500">
           </div>
         </div>
         <div class="grid grid-cols-3 gap-2">
           <div>
             <label class="text-[10px] text-rose-400 block mb-1 font-bold uppercase text-center">Proteína (g)</label>
-            <input id="targetProtInput" type="number" onchange="updateTargets()" class="w-full px-2 py-1 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 font-bold text-center outline-none">
+            <input id="targetProtInput" type="number" placeholder="Ej. 170" onchange="updateTargets()" class="w-full px-2 py-1 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 font-bold text-center outline-none placeholder-slate-400 dark:placeholder-slate-500">
           </div>
           <div>
             <label class="text-[10px] text-amber-400 block mb-1 font-bold uppercase text-center">Carbos (g)</label>
-            <input id="targetCarbInput" type="number" onchange="updateTargets()" class="w-full px-2 py-1 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 font-bold text-center outline-none">
+            <input id="targetCarbInput" type="number" placeholder="Ej. 160" onchange="updateTargets()" class="w-full px-2 py-1 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 font-bold text-center outline-none placeholder-slate-400 dark:placeholder-slate-500">
           </div>
           <div>
             <label class="text-[10px] text-emerald-400 block mb-1 font-bold uppercase text-center">Grasas (g)</label>
-            <input id="targetFatInput" type="number" onchange="updateTargets()" class="w-full px-2 py-1 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 font-bold text-center outline-none">
+            <input id="targetFatInput" type="number" placeholder="Ej. 85" onchange="updateTargets()" class="w-full px-2 py-1 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 font-bold text-center outline-none placeholder-slate-400 dark:placeholder-slate-500">
           </div>
         </div>
       </div>
@@ -256,7 +275,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
             <h2 class="font-bold text-sm">Escáner de Alimentos IA</h2>
           </div>
-          <span id="aiModelBadge" class="text-[10px] bg-white/20 px-2 py-0.5 rounded font-mono">IA Activa</span>
+          <span id="aiModelBadge" class="text-[10px] bg-white/20 px-2 py-0.5 rounded font-mono">gemini-3.5-flash-lite</span>
         </div>
         <p class="text-xs text-blue-100">Sube una foto de tu comida o descríbela para registrar sus macros.</p>
         
@@ -292,7 +311,7 @@
         </div>
       </div>
 
-      <!-- NUEVO APARTADO: CHEF IA / QUÉ TENGO EN MI REFRI -->
+      <!-- APARTADO: CHEF IA / QUÉ TENGO EN MI REFRI -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
@@ -301,12 +320,12 @@
             </div>
             <div>
               <h2 class="font-bold text-sm">Chef IA: ¿Qué tengo en mi refri?</h2>
-              <p class="text-[10px] text-slate-400">Dime qué ingredientes tienes y te diré qué preparar y qué evitar según tu meta.</p>
+              <p class="text-[10px] text-slate-400">Escribe tus ingredientes para saber qué preparar y qué evitar hoy.</p>
             </div>
           </div>
         </div>
 
-        <textarea id="fridgeIngredients" rows="2" placeholder="Ej. Sopa de fideo, pierna de pollo en bistec, zanahoria, aguacate, lechuga y brócoli..." class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none resize-none"></textarea>
+        <textarea id="fridgeIngredients" rows="2" placeholder="Ej. Sopa de fideo, pierna de pollo en bistec, zanahoria, aguacate, lechuga y brócoli..." class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none resize-none placeholder-slate-400 dark:placeholder-slate-500"></textarea>
 
         <div class="flex flex-wrap gap-2 text-[11px]">
           <label class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-lg cursor-pointer">
@@ -389,7 +408,7 @@
           <button onclick="enableBrowserNotifications()" class="text-[11px] text-blue-500 font-semibold hover:underline">Permiso Alertas</button>
         </div>
         <div class="space-y-2">
-          <input id="newTaskInput" type="text" placeholder="Descripción de la tarea o entregable..." class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
+          <input id="newTaskInput" type="text" placeholder="Ej. Entregar reporte de sprint..." class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none placeholder-slate-400 dark:placeholder-slate-500">
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="text-[10px] text-slate-400 block mb-1">Hora Límite / Alarma</label>
@@ -427,21 +446,21 @@
         </div>
       </div>
 
-      <!-- Generador de Rutina -->
+      <!-- Generador de Rutina (Sin valores prellenados, solo placeholders) -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
         <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Generador IA de Rutina Semanal</h2>
         <div class="grid grid-cols-3 gap-2">
           <div>
             <label class="text-[10px] text-slate-400 block mb-0.5">Peso (kg)</label>
-            <input id="gymWeight" type="number" value="120" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none">
+            <input id="gymWeight" type="number" placeholder="Ej. 120" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none placeholder-slate-400 dark:placeholder-slate-500">
           </div>
           <div>
             <label class="text-[10px] text-slate-400 block mb-0.5">Altura (cm)</label>
-            <input id="gymHeight" type="number" value="182" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none">
+            <input id="gymHeight" type="number" placeholder="Ej. 182" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none placeholder-slate-400 dark:placeholder-slate-500">
           </div>
           <div>
             <label class="text-[10px] text-slate-400 block mb-0.5">Días / Sem</label>
-            <input id="gymDays" type="number" value="4" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none">
+            <input id="gymDays" type="number" placeholder="Ej. 4" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none placeholder-slate-400 dark:placeholder-slate-500">
           </div>
         </div>
         <div>
@@ -472,7 +491,7 @@
           Enfoque: Sin rutina asignada
         </div>
         <div id="newExerciseForm" class="hidden mb-3 p-3 rounded-xl bg-slate-100 dark:bg-slate-700/50 space-y-2">
-          <input id="manualExerciseName" type="text" placeholder="Nombre del ejercicio (ej. Sentadilla con barra)..." class="w-full px-3 py-1.5 text-xs rounded-lg bg-white dark:bg-slate-800 outline-none">
+          <input id="manualExerciseName" type="text" placeholder="Ej. Sentadilla con barra (4x10)..." class="w-full px-3 py-1.5 text-xs rounded-lg bg-white dark:bg-slate-800 outline-none placeholder-slate-400 dark:placeholder-slate-500">
           <div class="flex gap-2">
             <button onclick="addGymExercise()" class="flex-1 py-1.5 bg-blue-500 text-white text-xs font-bold rounded-lg">Guardar</button>
             <button onclick="toggleNewExerciseForm()" class="py-1.5 px-3 bg-slate-300 dark:bg-slate-600 text-xs font-bold rounded-lg">Cancelar</button>
@@ -509,7 +528,7 @@
           <span class="text-[10px] text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full">Gamificación TCC</span>
         </div>
         <div class="flex gap-2">
-          <input id="newHabitInput" type="text" placeholder="Agregar hábito diario..." class="flex-1 px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
+          <input id="newHabitInput" type="text" placeholder="Ej. Cero refrescos ni azúcares..." class="flex-1 px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none placeholder-slate-400 dark:placeholder-slate-500">
           <button onclick="addHabit()" class="bg-blue-500 text-white px-3.5 py-2 rounded-xl font-bold text-xs">+</button>
         </div>
         <div id="habitsList" class="space-y-2 mt-3"></div>
@@ -528,8 +547,8 @@
             <option value="Procrastinación / Bloqueo">Procrastinación / Bloqueo</option>
             <option value="Impulso Financiero / Gasto">Impulso Financiero / Gasto</option>
           </select>
-          <input id="impulseTrigger" type="text" placeholder="Gatillo: ¿Qué disparó el impulso?" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
-          <input id="impulseAction" type="text" placeholder="Conducta Alternativa: ¿Cómo lo venciste?" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
+          <input id="impulseTrigger" type="text" placeholder="Ej. Estrés laboral a las 6pm me dio antojo..." class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none placeholder-slate-400 dark:placeholder-slate-500">
+          <input id="impulseAction" type="text" placeholder="Ej. Tomé 500ml de agua fría e hice respiración..." class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none placeholder-slate-400 dark:placeholder-slate-500">
           <button onclick="addImpulseLog()" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-900 font-extrabold text-xs rounded-xl transition">
             Registrar Victoria Conductual
           </button>
@@ -538,22 +557,22 @@
       </div>
     </section>
 
-    <!-- ==================== PESTAÑA 5: DESPENSA ==================== -->
+    <!-- ==================== PESTAÑA 5: DESPENSA (SIN PRELLENADOS) ==================== -->
     <section id="tab-grocery" class="space-y-4 hidden">
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
         <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Generador IA de Despensa & Menú</h2>
         <div class="grid grid-cols-3 gap-2">
           <div>
             <label class="text-[10px] text-slate-400 block mb-0.5">Presupuesto ($)</label>
-            <input id="groceryBudget" type="number" value="1500" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none">
+            <input id="groceryBudget" type="number" placeholder="Ej. 1500" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none placeholder-slate-400 dark:placeholder-slate-500">
           </div>
           <div>
             <label class="text-[10px] text-slate-400 block mb-0.5">Días</label>
-            <input id="groceryDays" type="number" value="10" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none">
+            <input id="groceryDays" type="number" placeholder="Ej. 10" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none placeholder-slate-400 dark:placeholder-slate-500">
           </div>
           <div>
             <label class="text-[10px] text-slate-400 block mb-0.5">Tienda</label>
-            <input id="groceryStore" type="text" value="Tiendas 3B" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none">
+            <input id="groceryStore" type="text" placeholder="Ej. Tiendas 3B" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 text-center font-bold outline-none placeholder-slate-400 dark:placeholder-slate-500">
           </div>
         </div>
         <div>
@@ -579,33 +598,83 @@
       </div>
     </section>
 
-    <!-- ==================== PESTAÑA 6: AJUSTES, PERFIL Y REINICIO DE FÁBRICA ==================== -->
+    <!-- ==================== PESTAÑA 6: AJUSTES, MODELOS ORIGINALES & REINICIO DE CERO ==================== -->
     <section id="tab-settings" class="space-y-4 hidden">
       
-      <!-- Token & Modelo -->
+      <!-- Token & Modelos de IA (Con gemini-3.5-flash-lite por defecto) -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
-        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Configuración de Inteligencia Artificial</h2>
+        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Configuración & Token Gemini</h2>
         <div>
           <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1">Tu Clave API de Gemini (API Key):</label>
-          <input id="apiKeyInput" type="password" placeholder="AIzaSy..." class="w-full px-3 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none font-mono">
+          <input id="apiKeyInput" type="password" placeholder="Ej. AIzaSy..." class="w-full px-3 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none font-mono placeholder-slate-400 dark:placeholder-slate-500">
         </div>
         <div>
-          <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1">Modelo Gemini Activo:</label>
+          <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1">Selecciona el Modelo de tu Token:</label>
           <select id="modelSelect" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 outline-none font-semibold">
-            <option value="gemini-2.5-flash">gemini-2.5-flash (Recomendado Estándar)</option>
-            <option value="gemini-3.1-flash-live-preview">gemini-3.1-flash-live-preview (Rápido)</option>
-            <option value="gemini-2.5-pro">gemini-2.5-pro (Razonamiento Avanzado)</option>
+            <option value="gemini-3.5-flash-lite" selected>gemini-3.5-flash-lite (Ligero de alta velocidad - Predeterminado)</option>
+            <option value="gemini-3.1-flash-live-preview">gemini-3.1-flash-live-preview (Rápido y gratuito)</option>
+            <option value="gemini-3.8-live">gemini-3.8-live (Análisis fluido en vivo)</option>
+            <option value="gemini-3.8-flash">gemini-3.8-flash (Soporte de pensamiento alto)</option>
+            <option value="gemini-3.8-live-extended-thinking">gemini-3.8-live-extended-thinking (Pensamiento extendido)</option>
           </select>
         </div>
         <button onclick="saveSettings()" class="w-full py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs rounded-xl transition">Guardar Token y Modelo</button>
       </div>
 
+      <!-- Calculadora IA de Calorías, Agua y Macros (Con Placeholders en Gris) -->
+      <div class="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-2xl p-4 text-white shadow-md space-y-3">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+          <h2 class="font-bold text-sm">Calcular Calorías, Agua y Macros con IA</h2>
+        </div>
+        <p class="text-xs text-indigo-100">Introduce tus datos actuales para recalcular tus metas con Gemini IA.</p>
+        
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="text-[10px] text-indigo-200 block mb-0.5">Peso (kg)</label>
+            <input id="calcWeight" type="number" placeholder="Ej. 120" class="w-full px-2 py-1.5 text-xs rounded-xl bg-white/10 text-white placeholder-indigo-200/70 text-center font-bold outline-none border border-white/20">
+          </div>
+          <div>
+            <label class="text-[10px] text-indigo-200 block mb-0.5">Estatura (cm)</label>
+            <input id="calcHeight" type="number" placeholder="Ej. 182" class="w-full px-2 py-1.5 text-xs rounded-xl bg-white/10 text-white placeholder-indigo-200/70 text-center font-bold outline-none border border-white/20">
+          </div>
+          <div>
+            <label class="text-[10px] text-indigo-200 block mb-0.5">Edad</label>
+            <input id="calcAge" type="number" placeholder="Ej. 28" class="w-full px-2 py-1.5 text-xs rounded-xl bg-white/10 text-white placeholder-indigo-200/70 text-center font-bold outline-none border border-white/20">
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[10px] text-indigo-200 block mb-0.5 font-bold uppercase">Nivel de Actividad:</label>
+          <select id="calcActivity" class="w-full px-3 py-2 text-xs rounded-xl bg-white/10 text-white font-semibold outline-none border border-white/20">
+            <option value="Moderada (Entrenamiento 3 a 4 días por semana)" class="text-slate-900">Moderada (3 a 4 días / semana)</option>
+            <option value="Sedentaria (Poco o nada de ejercicio)" class="text-slate-900">Sedentaria</option>
+            <option value="Alta (Entrenamiento intenso 5 a 6 días por semana)" class="text-slate-900">Alta (5 a 6 días / semana)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="text-[10px] text-indigo-200 block mb-0.5 font-bold uppercase">Objetivo Principal:</label>
+          <select id="calcGoalSelect" class="w-full px-3 py-2 text-xs rounded-xl bg-white/10 text-white outline-none font-semibold border border-white/20">
+            <option value="Pérdida de grasa corporal y definición (Déficit calórico, alta proteína)" class="text-slate-900">Quema de grasa y definición (Déficit)</option>
+            <option value="Volumen y aumento de peso / masa muscular (Superávit calórico controlado)" class="text-slate-900">Volumen y aumento de peso (Superávit)</option>
+            <option value="Hipertrofia y ganancia muscular limpia" class="text-slate-900">Hipertrofia y masa muscular limpia</option>
+            <option value="Recomposición corporal (Bajar grasa y ganar músculo simultáneamente)" class="text-slate-900">Recomposición corporal</option>
+            <option value="Fuerza máxima y rendimiento deportivo" class="text-slate-900">Fuerza máxima y rendimiento</option>
+          </select>
+        </div>
+
+        <button id="calcBtn" onclick="calculateMacrosWithGemini()" class="w-full py-2.5 bg-white text-indigo-700 font-bold text-xs rounded-xl shadow-sm transition flex items-center justify-center gap-2">
+          <span>Calcular e Instalar Metas en Nutrición</span>
+        </button>
+      </div>
+
       <!-- Perfil Inicial y Recálculo -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
-        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Tu Perfil Inicial y Objetivos</h2>
+        <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Tu Perfil Inicial Configurado</h2>
         <div id="profileSummaryCard" class="p-3 rounded-xl bg-slate-100 dark:bg-slate-700/50 text-xs space-y-1"></div>
-        <button onclick="openOnboardingEdit()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition">
-          Reconfigurar Datos Iniciales y Metas
+        <button onclick="openOnboardingEdit()" class="w-full py-2.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 font-bold text-xs rounded-xl transition">
+          Abrir Pantalla de Configuración Inicial
         </button>
       </div>
 
@@ -625,7 +694,7 @@
             Reiniciar Todo de Cero (Borrar Datos)
           </button>
           <div id="factoryResetConfirmBox" class="hidden mt-3 p-3 rounded-xl bg-rose-950/60 border border-rose-500 text-xs space-y-2">
-            <p class="text-rose-200 font-bold">¿Confirmas que deseas borrar todos los registros y volver a la pantalla de bienvenida inicial?</p>
+            <p class="text-rose-200 font-bold">¿Confirmas que deseas borrar todos los registros y volver a la pantalla inicial en blanco?</p>
             <div class="flex gap-2">
               <button onclick="executeFactoryReset()" class="flex-1 py-2 bg-rose-600 text-white font-extrabold rounded-lg">Sí, Reiniciar de 0</button>
               <button onclick="toggleFactoryResetConfirm()" class="flex-1 py-2 bg-slate-700 text-white font-bold rounded-lg">Cancelar</button>
@@ -669,6 +738,67 @@
   </nav>
 
   <script>
+    // ==================== GENERADOR DINÁMICO DE ICONO PNG Y MANIFEST (CHROME + MÓVIL) ====================
+    (function setupAppIconsAndPWA() {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        const ctx = canvas.getContext('2d');
+
+        // Fondo oscuro redondeado
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.roundRect(0, 0, 512, 512, 115);
+        ctx.fill();
+
+        // Gradiente principal Azul -> Esmeralda
+        const grad = ctx.createLinearGradient(40, 40, 472, 472);
+        grad.addColorStop(0, '#3b82f6');
+        grad.addColorStop(1, '#10b981');
+
+        // Borde interior brillante
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 22;
+        ctx.beginPath();
+        ctx.roundRect(28, 28, 456, 456, 90);
+        ctx.stroke();
+
+        // Rayo TCC central
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.moveTo(290, 85);
+        ctx.lineTo(135, 285);
+        ctx.lineTo(248, 285);
+        ctx.lineTo(215, 427);
+        ctx.lineTo(377, 227);
+        ctx.lineTo(264, 227);
+        ctx.closePath();
+        ctx.fill();
+
+        const pngDataUrl = canvas.toDataURL('image/png');
+        document.getElementById('appleTouchIconLink').href = pngDataUrl;
+        document.getElementById('faviconLink').href = pngDataUrl;
+        document.getElementById('faviconLink').type = 'image/png';
+
+        const manifest = {
+          name: "Control TCC Master",
+          short_name: "Control TCC",
+          description: "Sistema integral de nutrición, enfoque, gimnasio y hábitos TCC",
+          start_url: window.location.href,
+          display: "standalone",
+          background_color: "#0f172a",
+          theme_color: "#0f172a",
+          icons: [
+            { src: pngDataUrl, sizes: "192x192", type: "image/png", purpose: "any maskable" },
+            { src: pngDataUrl, sizes: "512x512", type: "image/png", purpose: "any maskable" }
+          ]
+        };
+        const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+        document.getElementById('manifestLink').href = URL.createObjectURL(manifestBlob);
+      } catch (e) {}
+    })();
+
     // ==================== CONFIGURACIÓN DEL CALENDARIO ====================
     const DAYS_CONFIG = [
       { id: '2026-10-19', label: 'Lun 19', dayName: 'Lunes' },
@@ -695,31 +825,28 @@
         theme: 'dark',
         currentDay: '2026-10-19',
         apiKey: '',
-        selectedModel: 'gemini-2.5-flash',
+        selectedModel: 'gemini-3.5-flash-lite',
         onboardingComplete: false,
         profile: {
           name: '',
-          weight: 120,
-          height: 182,
-          age: 28,
+          weight: '',
+          height: '',
+          age: '',
           activity: 1.55,
-          gymDays: 4,
+          gymDays: '',
           goalKey: 'deficit',
           goalText: GOAL_LABELS.deficit
         },
-        targetKcal: 2150,
-        targetWater: 4000,
-        targetProt: 180,
-        targetCarb: 165,
-        targetFat: 85,
+        targetKcal: '',
+        targetWater: '',
+        targetProt: '',
+        targetCarb: '',
+        targetFat: '',
         days: {},
         tasks: [],
         gymStructured: {},
         exerciseHistory: {},
-        habitsList: [
-          { id: 'h_1', name: 'Cero refrescos ni azúcares líquidos' },
-          { id: 'h_2', name: 'Cumplir meta de proteína del día' }
-        ],
+        habitsList: [],
         groceries: [],
         mealPlanStructured: [],
         lastFridgePlan: null
@@ -730,9 +857,9 @@
       return state;
     }
 
-    let appState = JSON.parse(localStorage.getItem('allan_tcc_app_v42')) || createDefaultState();
-    // Asegurar integridad de datos si viene de una versión previa
+    let appState = JSON.parse(localStorage.getItem('allan_tcc_app_v43')) || createDefaultState();
     if (!appState.profile) appState.profile = createDefaultState().profile;
+    if (!appState.selectedModel) appState.selectedModel = 'gemini-3.5-flash-lite';
     DAYS_CONFIG.forEach(d => {
       if (!appState.days[d.id]) appState.days[d.id] = { water: 0, meals: [], habitsState: {}, impulses: [] };
       if (!appState.days[d.id].impulses) appState.days[d.id].impulses = [];
@@ -743,7 +870,7 @@
     let cachedFreeExerciseDb = null;
     let flipbookInterval = null;
 
-    // ==================== SONIDO SINTETIZADO (WEB AUDIO API) ====================
+    // ==================== SONIDO SINTETIZADO ====================
     function playBeep() {
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -780,20 +907,20 @@
     }
 
     function saveState() {
-      localStorage.setItem('allan_tcc_app_v42', JSON.stringify(appState));
+      localStorage.setItem('allan_tcc_app_v43', JSON.stringify(appState));
       renderAll();
     }
 
-    // ==================== ONBOARDING Y PERFIL INICIAL ====================
+    // ==================== ONBOARDING Y PERFIL INICIAL (SIN PRELLENADOS) ====================
     function checkOnboarding() {
       const modal = document.getElementById('onboardingModal');
       if (!appState.onboardingComplete) {
         document.getElementById('obName').value = appState.profile.name || '';
-        document.getElementById('obWeight').value = appState.profile.weight || 120;
-        document.getElementById('obHeight').value = appState.profile.height || 182;
-        document.getElementById('obAge').value = appState.profile.age || 28;
+        document.getElementById('obWeight').value = appState.profile.weight || '';
+        document.getElementById('obHeight').value = appState.profile.height || '';
+        document.getElementById('obAge').value = appState.profile.age || '';
         document.getElementById('obActivity').value = appState.profile.activity || '1.55';
-        document.getElementById('obGymDays').value = appState.profile.gymDays || 4;
+        document.getElementById('obGymDays').value = appState.profile.gymDays || '';
         document.getElementById('obGoal').value = appState.profile.goalKey || 'deficit';
         document.getElementById('obApiKey').value = appState.apiKey || '';
         modal.classList.remove('hidden');
@@ -808,24 +935,35 @@
     }
 
     function completeOnboarding() {
-      const name = document.getElementById('obName').value.trim() || 'Usuario';
-      const weight = parseFloat(document.getElementById('obWeight').value) || 120;
-      const height = parseFloat(document.getElementById('obHeight').value) || 182;
-      const age = parseInt(document.getElementById('obAge').value) || 28;
+      const name = document.getElementById('obName').value.trim();
+      const weightVal = parseFloat(document.getElementById('obWeight').value);
+      const heightVal = parseFloat(document.getElementById('obHeight').value);
+      const ageVal = parseInt(document.getElementById('obAge').value);
+      const gymDaysVal = parseInt(document.getElementById('obGymDays').value);
+
+      if (!weightVal || !heightVal || !ageVal) {
+        showToast("Por favor ingresa tu peso, altura y edad para calcular tus metas", "warning");
+        return;
+      }
+
       const activity = parseFloat(document.getElementById('obActivity').value) || 1.55;
-      const gymDays = parseInt(document.getElementById('obGymDays').value) || 4;
       const goalKey = document.getElementById('obGoal').value;
       const apiKey = document.getElementById('obApiKey').value.trim();
 
       appState.profile = {
-        name, weight, height, age, activity, gymDays,
+        name: name || 'Usuario',
+        weight: weightVal,
+        height: heightVal,
+        age: ageVal,
+        activity,
+        gymDays: gymDaysVal || 4,
         goalKey,
         goalText: GOAL_LABELS[goalKey] || GOAL_LABELS.deficit
       };
       if (apiKey) appState.apiKey = apiKey;
 
-      // Fórmula clínica Mifflin-St Jeor para configurar metas al instante
-      const bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
+      // Fórmula clínica Mifflin-St Jeor
+      const bmr = (10 * weightVal) + (6.25 * heightVal) - (5 * ageVal) + 5;
       const tdee = bmr * activity;
       let targetKcal = Math.round(tdee);
       let protPerKg = 1.6;
@@ -844,11 +982,11 @@
         protPerKg = 1.7;
       }
 
-      const targetProt = Math.round(weight * protPerKg);
+      const targetProt = Math.round(weightVal * protPerKg);
       const targetFat = Math.round((targetKcal * 0.28) / 9);
       const remainingKcalForCarbs = Math.max(400, targetKcal - (targetProt * 4) - (targetFat * 9));
       const targetCarb = Math.round(remainingKcalForCarbs / 4);
-      const targetWater = Math.round(weight * 35);
+      const targetWater = Math.round(weightVal * 35);
 
       appState.targetKcal = targetKcal;
       appState.targetProt = targetProt;
@@ -857,15 +995,9 @@
       appState.targetWater = targetWater;
       appState.onboardingComplete = true;
 
-      // Sincronizar con pestaña de Gimnasio
-      document.getElementById('gymWeight').value = weight;
-      document.getElementById('gymHeight').value = height;
-      document.getElementById('gymDays').value = gymDays;
-      document.getElementById('gymGoalSelect').value = appState.profile.goalText;
-
       saveState();
       document.getElementById('onboardingModal').classList.add('hidden');
-      showToast(`Bienvenido, ${name}. Tus metas fueron configuradas.`, 'success');
+      showToast(`Perfil configurado. Meta: ${targetKcal} kcal`, 'success');
     }
 
     // ==================== TEMA Y NAVEGACIÓN ====================
@@ -922,7 +1054,7 @@
     // ==================== MOTOR CENTRAL GEMINI API ====================
     async function callGeminiAPI(promptText, imageBase64) {
       const apiKey = appState.apiKey;
-      const model = appState.selectedModel || 'gemini-2.5-flash';
+      const model = appState.selectedModel || 'gemini-3.5-flash-lite';
       let parts = [{ text: promptText }];
 
       if (imageBase64) {
@@ -945,7 +1077,7 @@
 
         if (!res.ok) {
           const errData = await res.json();
-          throw new Error(errData.error?.message || "Error al conectar con Gemini API.");
+          throw new Error(errData.error?.message || "Error al conectar con la API.");
         }
 
         const data = await res.json();
@@ -996,24 +1128,25 @@
     }
 
     function renderNutrition() {
-      const maxKcal = appState.targetKcal || 2100;
-      const maxWater = appState.targetWater || 4000;
-      const maxP = appState.targetProt || 170;
-      const maxC = appState.targetCarb || 160;
-      const maxF = appState.targetFat || 85;
+      // Si el usuario no ha llenado metas, el input queda vacío mostrando el placeholder gris
+      document.getElementById('targetKcalInput').value = appState.targetKcal || '';
+      document.getElementById('targetWaterInput').value = appState.targetWater || '';
+      document.getElementById('targetProtInput').value = appState.targetProt || '';
+      document.getElementById('targetCarbInput').value = appState.targetCarb || '';
+      document.getElementById('targetFatInput').value = appState.targetFat || '';
 
-      document.getElementById('targetKcalInput').value = maxKcal;
-      document.getElementById('targetWaterInput').value = maxWater;
-      document.getElementById('targetProtInput').value = maxP;
-      document.getElementById('targetCarbInput').value = maxC;
-      document.getElementById('targetFatInput').value = maxF;
+      const maxKcal = Number(appState.targetKcal) || 2100;
+      const maxWater = Number(appState.targetWater) || 4000;
+      const maxP = Number(appState.targetProt) || 170;
+      const maxC = Number(appState.targetCarb) || 160;
+      const maxF = Number(appState.targetFat) || 85;
 
       const { totKcal, totP, totC, totF } = getTodayTotals();
       const remKcal = Math.max(0, maxKcal - totKcal);
       const remP = Math.max(0, maxP - totP);
 
       document.getElementById('kcalText').textContent = `${totKcal} / ${maxKcal} kcal`;
-      document.getElementById('remainingMacrosSummary').textContent = `Restante hoy: ${remKcal} kcal y ${remP}g de proteína para cumplir tu meta.`;
+      document.getElementById('remainingMacrosSummary').textContent = `Restante hoy: ${remKcal} kcal y ${remP}g de proteína.`;
       document.getElementById('kcalBar').style.width = `${Math.min(100, (totKcal / maxKcal) * 100)}%`;
 
       document.getElementById('protText').textContent = `${totP}/${maxP}g`;
@@ -1051,11 +1184,17 @@
     }
 
     function updateTargets() {
-      appState.targetKcal = parseInt(document.getElementById('targetKcalInput').value) || 2100;
-      appState.targetWater = parseInt(document.getElementById('targetWaterInput').value) || 4000;
-      appState.targetProt = parseInt(document.getElementById('targetProtInput').value) || 170;
-      appState.targetCarb = parseInt(document.getElementById('targetCarbInput').value) || 160;
-      appState.targetFat = parseInt(document.getElementById('targetFatInput').value) || 85;
+      const k = document.getElementById('targetKcalInput').value;
+      const w = document.getElementById('targetWaterInput').value;
+      const p = document.getElementById('targetProtInput').value;
+      const c = document.getElementById('targetCarbInput').value;
+      const f = document.getElementById('targetFatInput').value;
+
+      appState.targetKcal = k ? parseInt(k) : '';
+      appState.targetWater = w ? parseInt(w) : '';
+      appState.targetProt = p ? parseInt(p) : '';
+      appState.targetCarb = c ? parseInt(c) : '';
+      appState.targetFat = f ? parseInt(f) : '';
       saveState();
       showToast("Metas actualizadas", "success");
     }
@@ -1075,7 +1214,7 @@
         label.classList.remove('bg-white/20');
         label.classList.add('bg-emerald-500', 'text-slate-950', 'border-emerald-300');
         document.getElementById('uploadPhotoBtnText').textContent = 'Cambiar Foto';
-        showToast("Foto cargada con éxito. Presiona Calcular con IA.", "success");
+        showToast("Foto cargada. Presiona Calcular con IA.", "success");
       };
       reader.readAsDataURL(file);
     }
@@ -1137,9 +1276,11 @@
 
       if (mealsRequested.length === 0) { showToast("Marca al menos una comida a planificar", "warning"); return; }
 
-      const { totKcal, totP, totC, totF } = getTodayTotals();
-      const remKcal = Math.max(300, appState.targetKcal - totKcal);
-      const remP = Math.max(20, appState.targetProt - totP);
+      const maxKcal = Number(appState.targetKcal) || 2100;
+      const maxP = Number(appState.targetProt) || 170;
+      const { totKcal, totP } = getTodayTotals();
+      const remKcal = Math.max(300, maxKcal - totKcal);
+      const remP = Math.max(20, maxP - totP);
 
       const btn = document.getElementById('fridgeBtn');
       const originalText = btn.innerHTML;
@@ -1148,15 +1289,15 @@
 
       try {
         const prompt = `Actúa como nutriólogo clínico deportivo.
-        Perfil del usuario: Peso ${appState.profile.weight}kg, Altura ${appState.profile.height}cm, Objetivo: "${appState.profile.goalText}".
-        Metas diarias: ${appState.targetKcal} kcal, ${appState.targetProt}g Proteína, ${appState.targetCarb}g Carbos, ${appState.targetFat}g Grasas.
+        Perfil del usuario: Peso ${appState.profile.weight || 120}kg, Altura ${appState.profile.height || 182}cm, Objetivo: "${appState.profile.goalText}".
+        Metas diarias: ${maxKcal} kcal, ${maxP}g Proteína.
         Calorías restantes para hoy: ${remKcal} kcal (${remP}g proteína restantes).
         Ingredientes disponibles del usuario: "${ingredients}".
         Comidas solicitadas: ${mealsRequested.join(', ')}.
 
         Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta:
         {
-          "avoidWarning": "Explicación clara y directa de qué ingrediente moderar o evitar en ciertos horarios (ej. evitar carbohidratos simples en la cena) y qué bebida o extra no tomar.",
+          "avoidWarning": "Explicación clara y directa de qué ingrediente moderar o evitar en ciertos horarios y qué bebida o extra no tomar.",
           "proposals": [
             {
               "mealTime": "Cena de hoy",
@@ -1371,7 +1512,7 @@
       if (!appState.gymStructured[currentDayId]) {
         appState.gymStructured[currentDayId] = { focus: "Entrenamiento Personalizado", exercises: [] };
       }
-      appState.gymStructured[currentDayId].exercises.push({ id: Date.now(), name, weight: 0, done: false });
+      appState.gymStructured[currentDayId].exercises.push({ id: Date.now(), name, weight: '', done: false });
       input.value = '';
       document.getElementById('newExerciseForm').classList.add('hidden');
       saveState();
@@ -1380,9 +1521,9 @@
 
     async function generateGymRoutineWithGemini() {
       if (!appState.apiKey) { showToast("Configura tu API Key en Ajustes", "warning"); switchTab('settings'); return; }
-      const weight = document.getElementById('gymWeight').value;
-      const height = document.getElementById('gymHeight').value;
-      const daysCount = parseInt(document.getElementById('gymDays').value) || 4;
+      const weight = document.getElementById('gymWeight').value || appState.profile.weight || 120;
+      const height = document.getElementById('gymHeight').value || appState.profile.height || 182;
+      const daysCount = parseInt(document.getElementById('gymDays').value) || appState.profile.gymDays || 4;
       const goal = document.getElementById('gymGoalSelect').value;
 
       const btn = document.getElementById('gymBtn');
@@ -1398,7 +1539,7 @@
           {
             "dayName": "Lunes",
             "focus": "Tren Superior - Empuje",
-            "exercises": [{"name": "Press de banca plano (4x10)", "weight": 0}]
+            "exercises": [{"name": "Press de banca plano (4x10)", "weight": ""}]
           }
         ]`;
 
@@ -1413,7 +1554,7 @@
               focus: d.focus,
               exercises: (d.exercises || []).map((ex, idx) => {
                 const prevHist = appState.exerciseHistory[ex.name] || [];
-                const lastWeight = prevHist.length > 0 ? prevHist[prevHist.length - 1].weight : (ex.weight || 0);
+                const lastWeight = prevHist.length > 0 ? prevHist[prevHist.length - 1].weight : '';
                 return { id: Date.now() + idx + Math.random(), name: ex.name, weight: lastWeight, done: false };
               })
             };
@@ -1430,7 +1571,6 @@
       }
     }
 
-    // MOTOR BIOMECÁNICO ANIMADO 2D + BUSCADOR EN REPOSITORIOS GITHUB SIN IMÁGENES ROTAS
     function getBiomechanicalAnimationSVG(exerciseName) {
       const q = exerciseName.toLowerCase();
       let type = 'press';
@@ -1454,18 +1594,13 @@
       const svgs = {
         press: `
           <svg viewBox="0 0 160 120" class="w-48 h-36">
-            <!-- Banco -->
             <rect x="25" y="78" width="95" height="8" rx="3" fill="#475569"/>
             <rect x="35" y="86" width="8" height="24" fill="#334155"/>
             <rect x="100" y="86" width="8" height="24" fill="#334155"/>
-            <!-- Torso y Cabeza -->
             <circle cx="42" cy="68" r="9" fill="#94a3b8"/>
             <rect x="53" y="64" width="48" height="14" rx="6" fill="#64748b"/>
-            <!-- Músculo Pectoral Activo -->
             <circle cx="66" cy="68" r="9" fill="#ef4444" class="muscle-active"/>
-            <!-- Piernas -->
             <path d="M101 70 L125 70 L132 105" stroke="#64748b" stroke-width="8" stroke-linecap="round" fill="none"/>
-            <!-- Brazos y Barra Animados -->
             <g class="anim-press">
               <line x1="65" y1="68" x2="65" y2="38" stroke="#3b82f6" stroke-width="6" stroke-linecap="round"/>
               <line x1="40" y1="36" x2="90" y2="36" stroke="#e2e8f0" stroke-width="4" stroke-linecap="round"/>
@@ -1475,33 +1610,25 @@
           </svg>`,
         squat: `
           <svg viewBox="0 0 160 120" class="w-48 h-36">
-            <!-- Piso -->
             <line x1="20" y1="108" x2="140" y2="108" stroke="#475569" stroke-width="4"/>
-            <!-- Cuerpo superior y barra que bajan -->
             <g class="anim-squat">
               <circle cx="80" cy="24" r="9" fill="#94a3b8"/>
               <line x1="45" y1="35" x2="115" y2="35" stroke="#e2e8f0" stroke-width="4"/>
               <rect x="40" y="26" width="7" height="18" rx="2" fill="#3b82f6"/>
               <rect x="113" y="26" width="7" height="18" rx="2" fill="#3b82f6"/>
               <rect x="71" y="34" width="18" height="34" rx="6" fill="#64748b"/>
-              <!-- Glúteo / Cuádriceps activo -->
               <circle cx="80" cy="66" r="10" fill="#ef4444" class="muscle-active"/>
             </g>
-            <!-- Base piernas -->
             <line x1="73" y1="75" x2="68" y2="106" stroke="#3b82f6" stroke-width="7" stroke-linecap="round"/>
             <line x1="87" y1="75" x2="92" y2="106" stroke="#3b82f6" stroke-width="7" stroke-linecap="round"/>
           </svg>`,
         pull: `
           <svg viewBox="0 0 160 120" class="w-48 h-36">
-            <!-- Estructura Polea -->
             <line x1="80" y1="5" x2="80" y2="45" stroke="#64748b" stroke-width="2" stroke-dasharray="3 3"/>
-            <!-- Torso -->
             <circle cx="80" cy="52" r="9" fill="#94a3b8"/>
             <polygon points="62,64 98,64 90,104 70,104" fill="#475569"/>
-            <!-- Dorsal activo -->
             <circle cx="70" cy="78" r="8" fill="#ef4444" class="muscle-active"/>
             <circle cx="90" cy="78" r="8" fill="#ef4444" class="muscle-active"/>
-            <!-- Barra y Brazos Traccionando -->
             <g class="anim-pull">
               <line x1="35" y1="36" x2="125" y2="36" stroke="#e2e8f0" stroke-width="5" stroke-linecap="round"/>
               <line x1="45" y1="36" x2="64" y2="66" stroke="#3b82f6" stroke-width="6" stroke-linecap="round"/>
@@ -1510,12 +1637,9 @@
           </svg>`,
         curl: `
           <svg viewBox="0 0 160 120" class="w-48 h-36">
-            <!-- Torso lateral -->
             <circle cx="50" cy="22" r="9" fill="#94a3b8"/>
             <rect x="40" y="34" width="20" height="48" rx="6" fill="#475569"/>
-            <!-- Músculo activo -->
             <circle cx="53" cy="50" r="8" fill="#ef4444" class="muscle-active"/>
-            <!-- Antebrazo y mancuerna articulados -->
             <g class="anim-curl">
               <line x1="50" y1="45" x2="50" y2="82" stroke="#3b82f6" stroke-width="7" stroke-linecap="round"/>
               <rect x="42" y="80" width="16" height="8" rx="2" fill="#e2e8f0"/>
@@ -1526,7 +1650,6 @@
       return { svg: svgs[type], muscleLabel, cue };
     }
 
-    // Mapeo de palabras en español a términos de búsqueda en los repositorios públicos
     function getEnglishSearchKeywords(spanishName) {
       const q = spanishName.toLowerCase();
       if (q.includes('banca') && q.includes('inclinad')) return ['incline', 'bench', 'press'];
@@ -1545,7 +1668,7 @@
       if (q.includes('bíceps') || q.includes('biceps') || q.includes('curl')) return ['bicep', 'curl'];
       if (q.includes('tríceps') || q.includes('triceps') || q.includes('copa') || q.includes('polea')) return ['tricep', 'pushdown'];
       if (q.includes('peso muerto')) return ['deadlift'];
-      if (q.includes('zancada') || q.includes(' desplante')) return ['lunge'];
+      if (q.includes('zancada') || q.includes('desplante')) return ['lunge'];
       if (q.includes('pantorrilla') || q.includes('gemelo')) return ['calf', 'raise'];
       return ['bench', 'press'];
     }
@@ -1559,16 +1682,13 @@
       title.textContent = exerciseName;
       const bio = getBiomechanicalAnimationSVG(exerciseName);
 
-      // Renderizamos de inmediato el Simulador Biomecánico Animado (nunca falla) + contenedor para GIF/Secuencia real
       content.innerHTML = `
         <div class="space-y-3">
-          <!-- Contenedor de GIF / Secuencia Real (Oculto hasta que el archivo cargue al 100% sin error) -->
           <div id="realMediaBox" class="hidden w-full bg-slate-950 rounded-2xl overflow-hidden border border-blue-500/40 flex flex-col items-center p-2 shadow-inner">
-            <span id="realMediaBadge" class="text-[10px] font-bold uppercase text-emerald-400 mb-1">Demostración Oficial Cargada</span>
+            <span id="realMediaBadge" class="text-[10px] font-bold uppercase text-emerald-400 mb-1">Demostración Oficial en Movimiento</span>
             <img id="realExerciseImg" src="" alt="${exerciseName}" class="max-h-56 object-contain rounded-xl">
           </div>
 
-          <!-- Simulador Biomecánico Cinemático 2D (Siempre activo y en movimiento) -->
           <div class="w-full bg-slate-950 rounded-2xl border border-slate-700 p-3 flex flex-col items-center justify-center">
             <div class="flex items-center justify-between w-full mb-1">
               <span class="text-[10px] font-bold uppercase text-blue-400">Simulador Biomecánico en Vivo</span>
@@ -1590,7 +1710,6 @@
       const imgEl = document.getElementById('realExerciseImg');
       const boxEl = document.getElementById('realMediaBox');
 
-      // 1. Intentar descubrir el archivo .gif real en el árbol de GitHub de JahelCuadrado/ExerciseGymGifsDB
       try {
         if (!cachedExerciseRepoTree) {
           const treeRes = await fetch('https://api.github.com/repos/JahelCuadrado/ExerciseGymGifsDB/git/trees/main?recursive=1');
@@ -1617,7 +1736,6 @@
         }
       } catch (e) {}
 
-      // 2. Respaldo automático con la base de datos abierta verificada yuhonas/free-exercise-db (Animación cuadro por cuadro)
       try {
         if (!cachedFreeExerciseDb) {
           const dbRes = await fetch('https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json');
@@ -1658,7 +1776,7 @@
       const currentDayId = appState.currentDay;
       const dayObj = DAYS_CONFIG.find(d => d.id === currentDayId);
       const dayLabel = dayObj ? dayObj.label : currentDayId;
-      const newWeight = parseFloat(val) || 0;
+      const newWeight = val ? parseFloat(val) : '';
 
       if (appState.gymStructured && appState.gymStructured[currentDayId]) {
         const ex = appState.gymStructured[currentDayId].exercises[i];
@@ -1667,9 +1785,9 @@
         if (!appState.exerciseHistory[ex.name]) appState.exerciseHistory[ex.name] = [];
         const hist = appState.exerciseHistory[ex.name];
         const existingTodayIndex = hist.findIndex(h => h.day === dayLabel);
-        if (existingTodayIndex !== -1) {
+        if (existingTodayIndex !== -1 && newWeight !== '') {
           hist[existingTodayIndex].weight = newWeight;
-        } else if (newWeight > 0) {
+        } else if (newWeight !== '' && newWeight > 0) {
           hist.push({ day: dayLabel, weight: newWeight });
         }
         saveState();
@@ -1705,6 +1823,8 @@
           }
         }
 
+        const weightValueAttr = (ex.weight !== undefined && ex.weight !== null && ex.weight !== 0 && ex.weight !== '') ? ex.weight : '';
+
         return `
           <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 text-xs space-y-2">
             <div class="flex items-center justify-between gap-2">
@@ -1726,7 +1846,7 @@
               </div>
               <div class="flex items-center gap-1.5">
                 <span class="text-[10px] text-slate-400">Kg:</span>
-                <input type="number" step="0.5" value="${ex.weight || 0}" onchange="updateGymWeight(${i}, this.value)" class="w-16 px-2 py-1 text-center font-bold text-xs bg-slate-200 dark:bg-slate-600 rounded-lg outline-none">
+                <input type="number" step="0.5" value="${weightValueAttr}" placeholder="Ej. 25" onchange="updateGymWeight(${i}, this.value)" class="w-16 px-2 py-1 text-center font-bold text-xs bg-slate-200 dark:bg-slate-600 rounded-lg outline-none placeholder-slate-400 dark:placeholder-slate-400">
               </div>
             </div>
           </div>
@@ -1823,7 +1943,7 @@
 
       const el = document.getElementById('habitsList');
       if (appState.habitsList.length === 0) {
-        el.innerHTML = `<p class="text-xs text-slate-400 italic">Agrega tus hábitos conductuales arriba.</p>`;
+        el.innerHTML = `<p class="text-xs text-slate-400 italic">Agrega tus hábitos conductuales arriba uno por uno.</p>`;
       } else {
         el.innerHTML = appState.habitsList.map((h, i) => {
           const checked = !!dayData.habitsState[h.id];
@@ -1913,9 +2033,9 @@
     // ==================== 5. DESPENSA ====================
     async function generateGroceryWithGemini() {
       if (!appState.apiKey) { showToast("Configura tu API Key en Ajustes", "warning"); switchTab('settings'); return; }
-      const budget = document.getElementById('groceryBudget').value || "1500";
-      const days = document.getElementById('groceryDays').value || "10";
-      const store = document.getElementById('groceryStore').value || "Tiendas 3B";
+      const budget = document.getElementById('groceryBudget').value.trim() || "1500";
+      const days = document.getElementById('groceryDays').value.trim() || "10";
+      const store = document.getElementById('groceryStore').value.trim() || "Tiendas 3B";
       const goal = document.getElementById('groceryGoalSelect').value;
 
       const btn = document.getElementById('groceryBtn');
@@ -1924,7 +2044,9 @@
       btn.disabled = true;
 
       try {
-        const prompt = `Actúa como nutriólogo. Presupuesto: $${budget} MXN para ${days} días en ${store}. Meta: "${goal}" (${appState.targetKcal} kcal, ${appState.targetProt}g proteína).
+        const maxKcal = Number(appState.targetKcal) || 2100;
+        const maxP = Number(appState.targetProt) || 170;
+        const prompt = `Actúa como nutriólogo. Presupuesto: $${budget} MXN para ${days} días en ${store}. Meta: "${goal}" (${maxKcal} kcal, ${maxP}g proteína).
         Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta:
         {
           "groceries": [{"text": "producto (cantidad) - precio aprox"}],
@@ -1991,7 +2113,57 @@
     function toggleGrocery(i) { appState.groceries[i].checked = !appState.groceries[i].checked; saveState(); }
     function deleteGrocery(i) { appState.groceries.splice(i, 1); saveState(); }
 
-    // ==================== 6. AJUSTES, RESPALDO Y REINICIO DE CERO ====================
+    // ==================== 6. AJUSTES, CALCULADORA IA Y REINICIO DE CERO ====================
+    async function calculateMacrosWithGemini() {
+      if (!appState.apiKey) { showToast("Primero guarda tu API Key arriba", "warning"); return; }
+
+      const weight = document.getElementById('calcWeight').value || appState.profile.weight;
+      const height = document.getElementById('calcHeight').value || appState.profile.height;
+      const age = document.getElementById('calcAge').value || appState.profile.age;
+      const activity = document.getElementById('calcActivity').value;
+      const goal = document.getElementById('calcGoalSelect').value;
+
+      if (!weight || !height || !age) {
+        showToast("Escribe peso, estatura y edad en los campos", "warning");
+        return;
+      }
+
+      const btn = document.getElementById('calcBtn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<div class="w-4 h-4 border-2 border-indigo-700 border-t-transparent rounded-full spinner"></div><span>Calculando Metas...</span>`;
+      btn.disabled = true;
+
+      try {
+        const prompt = `Calcula las calorías diarias exactas, mililitros de agua y gramos diarios de macronutrientes (proteínas, carbohidratos y grasas) para una persona de ${weight}kg, ${height}cm, ${age} años, actividad: "${activity}", objetivo: "${goal}".
+        Devuelve ÚNICAMENTE un JSON válido sin texto adicional:
+        {
+          "targetKcal": número_entero,
+          "targetWater": número_entero_ml,
+          "targetProt": gramos_proteina_entero,
+          "targetCarb": gramos_carbohidratos_entero,
+          "targetFat": gramos_grasas_entero
+        }`;
+
+        const textResult = await callGeminiAPI(prompt, null);
+        const parsed = JSON.parse(textResult);
+
+        appState.targetKcal = Number(parsed.targetKcal) || 2100;
+        appState.targetWater = Number(parsed.targetWater) || 4000;
+        appState.targetProt = Number(parsed.targetProt) || 170;
+        appState.targetCarb = Number(parsed.targetCarb) || 160;
+        appState.targetFat = Number(parsed.targetFat) || 85;
+
+        saveState();
+        showToast(`Metas instaladas: ${appState.targetKcal} kcal`, "success");
+        switchTab('nutrition');
+      } catch (err) {
+        showToast("Error al calcular metas: " + err.message, "error");
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+
     function saveSettings() {
       appState.apiKey = document.getElementById('apiKeyInput').value.trim();
       appState.selectedModel = document.getElementById('modelSelect').value;
@@ -2001,18 +2173,23 @@
 
     function renderSettings() {
       document.getElementById('apiKeyInput').value = appState.apiKey || '';
-      document.getElementById('modelSelect').value = appState.selectedModel || 'gemini-2.5-flash';
+      document.getElementById('modelSelect').value = appState.selectedModel || 'gemini-3.5-flash-lite';
       const p = appState.profile || {};
-      document.getElementById('headerTitle').textContent = p.name ? `Control TCC • ${p.name}` : 'Sistema TCC Master v42';
-      document.getElementById('headerSubtitle').textContent = `${p.goalText || 'Meta activa'} • ${appState.apiKey ? 'IA Conectada' : 'Sin Token IA'}`;
+      const modelName = appState.selectedModel || 'gemini-3.5-flash-lite';
+
+      document.getElementById('headerTitle').textContent = p.name ? `Control TCC • ${p.name}` : 'Sistema TCC Master v43';
+      document.getElementById('headerSubtitle').textContent = appState.apiKey ? `IA Activa (${modelName})` : `Modelo: ${modelName} (Falta API Key)`;
+
+      const badge = document.getElementById('aiModelBadge');
+      if (badge) badge.textContent = modelName;
 
       const summaryEl = document.getElementById('profileSummaryCard');
       if (summaryEl) {
         summaryEl.innerHTML = `
-          <p><strong>Usuario:</strong> ${p.name || 'Sin definir'} (${p.age || 28} años)</p>
-          <p><strong>Físico:</strong> ${p.weight || 120} kg | ${p.height || 182} cm | Gym: ${p.gymDays || 4} días/sem</p>
-          <p><strong>Objetivo:</strong> ${p.goalText || 'Déficit'}</p>
-          <p><strong>Metas:</strong> ${appState.targetKcal} kcal | ${appState.targetProt}g P | ${appState.targetCarb}g C | ${appState.targetFat}g G</p>
+          <p><strong>Usuario:</strong> ${p.name || 'Sin configurar'} ${p.age ? `(${p.age} años)` : ''}</p>
+          <p><strong>Físico:</strong> ${p.weight ? p.weight + ' kg' : '---'} | ${p.height ? p.height + ' cm' : '---'} | Gym: ${p.gymDays ? p.gymDays + ' días/sem' : '---'}</p>
+          <p><strong>Objetivo:</strong> ${p.goalText || 'Sin configurar'}</p>
+          <p><strong>Metas Activas:</strong> ${appState.targetKcal || '---'} kcal | ${appState.targetProt || '---'}g P | ${appState.targetCarb || '---'}g C | ${appState.targetFat || '---'}g G</p>
         `;
       }
     }
@@ -2022,13 +2199,13 @@
     }
 
     function executeFactoryReset() {
-      localStorage.removeItem('allan_tcc_app_v42');
+      localStorage.removeItem('allan_tcc_app_v43');
       appState = createDefaultState();
       document.getElementById('factoryResetConfirmBox').classList.add('hidden');
       renderAll();
       checkOnboarding();
       switchTab('nutrition');
-      showToast("Sistema reiniciado de fábrica. Configura tus datos de cero.", "info");
+      showToast("Sistema reiniciado de cero.", "info");
     }
 
     function exportBackupJSON() {
@@ -2060,7 +2237,7 @@
       const dayData = appState.days[appState.currentDay];
       const { totKcal, totP, totC, totF } = getTodayTotals();
       const impulsesCount = (dayData.impulses || []).length;
-      const report = `Reporte TCC (${appState.currentDay} - ${appState.profile.name || 'Usuario'}):\n• Kcal: ${totKcal}/${appState.targetKcal}\n• Macros: ${totP}/${appState.targetProt}g P | ${totC}/${appState.targetCarb}g C | ${totF}/${appState.targetFat}g G\n• Agua: ${(dayData.water/1000).toFixed(2)}L\n• Impulsos controlados hoy: ${impulsesCount}`;
+      const report = `Reporte TCC (${appState.currentDay} - ${appState.profile.name || 'Usuario'}):\n• Kcal: ${totKcal}/${appState.targetKcal || 2100}\n• Macros: ${totP}/${appState.targetProt || 170}g P | ${totC}/${appState.targetCarb || 160}g C | ${totF}/${appState.targetFat || 85}g G\n• Agua: ${(dayData.water/1000).toFixed(2)}L\n• Impulsos controlados hoy: ${impulsesCount}`;
       navigator.clipboard.writeText(report).then(() => showToast("Reporte copiado al portapapeles", "success"));
     }
 
