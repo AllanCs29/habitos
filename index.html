@@ -725,9 +725,9 @@
 
         <!-- Paso 1: Configuración del Proyecto Firebase -->
         <details id="firebaseConfigDetails" class="text-xs bg-slate-100 dark:bg-slate-700/50 rounded-xl p-3">
-          <summary class="font-bold cursor-pointer text-blue-400">1. Pegar Credenciales de tu Firebase (Solo 1 vez)</summary>
+          <summary class="font-bold cursor-pointer text-blue-400">1. Credenciales de Firebase Conectadas (control-tcc)</summary>
           <div class="mt-2.5 space-y-2">
-            <p class="text-[11px] text-slate-400">Pega aquí el objeto <code>firebaseConfig</code> o el JSON de tu proyecto de Firebase Console:</p>
+            <p class="text-[11px] text-slate-400">Tu proyecto <code>control-tcc</code> ya está vinculado por defecto. Puedes cambiarlo aquí si lo necesitas:</p>
             <textarea id="firebaseConfigInput" rows="4" placeholder='{"apiKey": "AIza...", "authDomain": "tu-app.firebaseapp.com", "projectId": "tu-app"}' class="w-full p-2 rounded-lg bg-white dark:bg-slate-800 font-mono text-[10px] outline-none border border-slate-300 dark:border-slate-600"></textarea>
             <button onclick="saveFirebaseConfig()" class="w-full py-2 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-lg text-xs">Guardar Conexión Firebase</button>
           </div>
@@ -1101,6 +1101,15 @@
     }
 
     // ==================== FIREBASE CLOUD SYNC (PC + TELÉFONO EN GITHUB PAGES) ====================
+    const DEFAULT_FIREBASE_CONFIG = {
+      apiKey: "AIzaSyC4CQ-PW9nRfVl3ZZ1PyR2NwXcRUas-I7o",
+      authDomain: "control-tcc.firebaseapp.com",
+      projectId: "control-tcc",
+      storageBucket: "control-tcc.firebasestorage.app",
+      messagingSenderId: "161724547834",
+      appId: "1:161724547834:web:0fe73c589f0252f598ff43"
+    };
+
     let fbAuth = null;
     let fbDb = null;
     let fbUser = null;
@@ -1108,8 +1117,11 @@
     let isApplyingRemoteUpdate = false;
 
     function initFirebaseIfConfigured() {
-      const rawCfg = localStorage.getItem('allan_tcc_firebase_config');
-      if (!rawCfg) return;
+      let rawCfg = localStorage.getItem('allan_tcc_firebase_config');
+      if (!rawCfg) {
+        rawCfg = JSON.stringify(DEFAULT_FIREBASE_CONFIG);
+        localStorage.setItem('allan_tcc_firebase_config', rawCfg);
+      }
       try {
         const cfg = JSON.parse(rawCfg);
         document.getElementById('firebaseConfigInput').value = JSON.stringify(cfg, null, 2);
