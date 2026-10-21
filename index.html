@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Control TCC">
-  <title>Control TCC - Master v43</title>
+  <title>Control TCC - Master Cloud</title>
 
   <!-- FAVICON SVG INMEDIATO PARA LA PESTAÑA DE CHROME -->
   <link id="faviconLink" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%232563eb'/%3E%3Cstop offset='100%25' stop-color='%2310b981'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='24' fill='%230f172a'/%3E%3Crect x='6' y='6' width='88' height='88' rx='20' fill='none' stroke='url(%23g)' stroke-width='5'/%3E%3Cpath d='M56 18L26 56h22l-6 26 32-38H52l4-26z' fill='url(%23g)'/%3E%3C/svg%3E">
@@ -34,7 +34,8 @@
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .spinner { animation: spin 1s linear infinite; }
-    @keyframes slideDown { from { transform: translate(-50%, -100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+    /* CORRECCIÓN DE CENTRADO EN MÓVIL Y PC PARA NOTIFICACIONES TOAST */
+    @keyframes slideDown { from { transform: translateY(-24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     .toast-enter { animation: slideDown 0.25s ease-out forwards; }
 
     /* Animaciones Cinemáticas para el Simulador Biomecánico */
@@ -58,20 +59,100 @@
 </head>
 <body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen pb-28 transition-colors duration-200">
 
-  <!-- CONTENEDOR DE NOTIFICACIONES INTERNAS (TOAST) -->
-  <div id="toastContainer" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none w-11/12 max-w-sm space-y-2"></div>
+  <!-- CONTENEDOR DE NOTIFICACIONES INTERNAS 100% CENTRADO EN MÓVIL Y PC -->
+  <div id="toastContainer" class="fixed top-4 inset-x-0 mx-auto z-[100] pointer-events-none w-11/12 max-w-sm flex flex-col items-center space-y-2"></div>
+
+  <!-- ==================== MODAL DE ALARMA Y FORMATO DE TRABAJO POR TAREA ==================== -->
+  <div id="taskFormatModal" class="fixed inset-0 z-[90] bg-slate-950/90 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white dark:bg-slate-800 border-2 border-blue-500 w-full max-w-md rounded-3xl p-5 space-y-4 shadow-2xl my-auto">
+      <div id="alarmBannerBox" class="hidden bg-amber-500/20 border border-amber-400 rounded-2xl p-3 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-lg animate-bounce">⏰</span>
+          <div>
+            <p class="text-xs font-extrabold text-amber-300 uppercase">¡Es hora de tu actividad!</p>
+            <p class="text-[11px] text-amber-100">Registra los avances en tu formato de trabajo.</p>
+          </div>
+        </div>
+        <button onclick="stopAlarmSound()" class="px-2.5 py-1 bg-amber-500 text-slate-950 font-bold text-[10px] rounded-lg">Silenciar</button>
+      </div>
+
+      <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 pb-2.5">
+        <div>
+          <span class="text-[10px] font-bold uppercase text-blue-400 block">Formato de Registro Laboral</span>
+          <h3 id="formatModalTaskTitle" class="font-extrabold text-sm text-slate-800 dark:text-slate-100">Actividad</h3>
+        </div>
+        <button onclick="closeTaskFormatModal()" class="text-slate-400 hover:text-rose-500 font-bold text-sm px-2 py-1">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Proyecto / Área / Folio</label>
+            <input id="wfProject" type="text" placeholder="Ej. Ticket #402 / Sprint 4" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 outline-none font-semibold placeholder-slate-400">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Estatus de Actividad</label>
+            <select id="wfStatus" class="w-full px-2.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 outline-none font-bold">
+              <option value="Completado">✅ Completado</option>
+              <option value="En Progreso">⏳ En Progreso</option>
+              <option value="Pendiente / Bloqueo">⚠️ Pendiente / Bloqueo</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Hora Inicio</label>
+            <input id="wfStartTime" type="time" class="w-full px-2 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-700 outline-none text-center font-bold">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Hora Fin</label>
+            <input id="wfEndTime" type="time" class="w-full px-2 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-700 outline-none text-center font-bold">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Duración (min)</label>
+            <input id="wfDuration" type="number" placeholder="Ej. 45" class="w-full px-2 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-700 outline-none text-center font-bold placeholder-slate-400">
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Trabajo Realizado / Entregable / Evidencia</label>
+          <textarea id="wfDeliverable" rows="3" placeholder="Ej. Se realizó validación de base de datos, corrección de incidencias y entrega de reporte..." class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 outline-none resize-none placeholder-slate-400"></textarea>
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Observaciones / Comentarios Adicionales</label>
+          <input id="wfNotes" type="text" placeholder="Ej. Sin contratiempos / Revisado con líder" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 outline-none placeholder-slate-400">
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button onclick="saveTaskWorkFormat()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow-md transition">
+          Guardar Formato y Marcar Lista
+        </button>
+        <button onclick="closeTaskFormatModal()" class="px-4 py-2.5 bg-slate-200 dark:bg-slate-700 font-bold text-xs rounded-xl">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ==================== MODAL ONBOARDING (BIENVENIDA POR PRIMERA VEZ) ==================== -->
   <div id="onboardingModal" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto">
     <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 w-full max-w-md rounded-3xl p-6 space-y-5 shadow-2xl my-auto">
-      <div class="flex items-center gap-3 border-b border-slate-200 dark:border-slate-700 pb-4">
-        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-600 to-emerald-500 text-white flex items-center justify-center shrink-0 shadow-md">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-600 to-emerald-500 text-white flex items-center justify-center shrink-0 shadow-md">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+          </div>
+          <div>
+            <h2 class="text-base font-extrabold tracking-tight">Configuración Inicial TCC</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Configura tu perfil o inicia sesión en la nube.</p>
+          </div>
         </div>
-        <div>
-          <h2 class="text-base font-extrabold tracking-tight">Configuración Inicial TCC</h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400">Ingresa tus datos para configurar tus metas personalizadas.</p>
-        </div>
+        <button onclick="goToCloudLoginFromOnboarding()" class="text-[11px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-1.5 rounded-xl font-bold shrink-0">
+          ☁️ Ya tengo cuenta
+        </button>
       </div>
 
       <div class="space-y-3 text-xs">
@@ -156,7 +237,6 @@
     <div class="max-w-md mx-auto">
       <div class="flex justify-between items-center mb-3">
         <div class="flex items-center gap-2.5">
-          <!-- LOGO OFICIAL EN EL HEADER -->
           <div class="w-9 h-9 rounded-xl bg-slate-900 border border-emerald-500/40 flex items-center justify-center shadow-sm shrink-0">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
               <path d="M13 2L4 14h7l-2 8 9-12h-7l2-8z" fill="url(#headerLogoGrad)"/>
@@ -169,7 +249,10 @@
             </svg>
           </div>
           <div>
-            <h1 id="headerTitle" class="text-sm font-bold tracking-tight">Sistema TCC Master v43</h1>
+            <div class="flex items-center gap-1.5">
+              <h1 id="headerTitle" class="text-sm font-bold tracking-tight">Control TCC</h1>
+              <button onclick="switchTab('settings')" id="cloudStatusBadge" class="text-[9px] px-1.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-300 font-bold">⚪ Local</button>
+            </div>
             <p id="headerSubtitle" class="text-[11px] text-slate-500 dark:text-slate-400">Cargando...</p>
           </div>
         </div>
@@ -193,7 +276,7 @@
     <!-- ==================== PESTAÑA 1: NUTRICIÓN, ESCÁNER & CHEF IA ==================== -->
     <section id="tab-nutrition" class="space-y-4">
       
-      <!-- Panel de Metas Directas (Con Placeholders en Gris) -->
+      <!-- Panel de Metas Directas -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
         <div class="flex justify-between items-center">
           <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Metas Diarias Configuradas</span>
@@ -282,7 +365,6 @@
         <div class="space-y-2.5">
           <input id="aiFoodInput" type="text" placeholder="Ej. 200g pechuga de pollo con arroz y aguacate..." class="w-full px-3 py-2 text-xs rounded-xl bg-white/10 text-white placeholder-blue-200 outline-none border border-white/20">
           
-          <!-- TARJETA NOTORIA DE VISTA PREVIA DE FOTO -->
           <div id="photoPreviewCard" class="hidden bg-emerald-950/90 border-2 border-emerald-400 rounded-xl p-3 flex items-center gap-3 shadow-lg">
             <img id="photoThumbnail" src="" alt="Vista previa" class="w-16 h-16 object-cover rounded-lg border border-emerald-300 shrink-0">
             <div class="flex-1 min-w-0">
@@ -382,7 +464,7 @@
       </div>
     </section>
 
-    <!-- ==================== PESTAÑA 2: ENFOQUE & POMODORO ==================== -->
+    <!-- ==================== PESTAÑA 2: ENFOQUE, ALARMAS & FORMATO DE TRABAJO ==================== -->
     <section id="tab-focus" class="space-y-4 hidden">
       
       <!-- Temporizador Pomodoro Deep Focus -->
@@ -401,38 +483,70 @@
         </div>
       </div>
 
-      <!-- Tareas con Horario Límite -->
+      <!-- Tareas con Alarma Real y Formato de Trabajo -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
         <div class="flex justify-between items-center">
-          <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Tareas con Horario Límite</h2>
-          <button onclick="enableBrowserNotifications()" class="text-[11px] text-blue-500 font-semibold hover:underline">Permiso Alertas</button>
+          <div>
+            <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Tareas y Alarmas de Registro</h2>
+            <p class="text-[10px] text-slate-400">A la hora programada sonará y abrirá tu formato de trabajo.</p>
+          </div>
+          <button onclick="enableBrowserNotifications()" id="notifPermBtn" class="text-[10px] bg-blue-500/15 text-blue-400 border border-blue-500/30 px-2.5 py-1 rounded-lg font-bold">
+            🔔 Activar Alertas
+          </button>
         </div>
+
         <div class="space-y-2">
-          <input id="newTaskInput" type="text" placeholder="Ej. Entregar reporte de sprint..." class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none placeholder-slate-400 dark:placeholder-slate-500">
-          <div class="grid grid-cols-2 gap-2">
+          <input id="newTaskInput" type="text" placeholder="Ej. Entregar reporte de sprint / Revisión de base..." class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none placeholder-slate-400 dark:placeholder-slate-500">
+          <div class="grid grid-cols-3 gap-2">
             <div>
-              <label class="text-[10px] text-slate-400 block mb-1">Hora Límite / Alarma</label>
-              <input id="newTaskTime" type="time" class="w-full px-2.5 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none">
+              <label class="text-[10px] text-slate-400 block mb-1">Hora de Alarma</label>
+              <input id="newTaskTime" type="time" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none font-bold">
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400 block mb-1">Proyecto / Folio</label>
+              <input id="newTaskProject" type="text" placeholder="Ej. Folio #12" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none placeholder-slate-400">
             </div>
             <div>
               <label class="text-[10px] text-slate-400 block mb-1">Categoría</label>
-              <select id="newTaskTag" class="w-full px-2.5 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none font-semibold">
+              <select id="newTaskTag" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-700/60 outline-none font-semibold">
                 <option value="Trabajo">Trabajo</option>
-                <option value="Personal">Personal / Casa</option>
-                <option value="Estudio">Estudio / Proyecto</option>
+                <option value="Personal">Personal</option>
+                <option value="Estudio">Proyecto</option>
               </select>
             </div>
           </div>
-          <button onclick="addTask()" class="w-full py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs rounded-xl transition">+ Agregar Tarea</button>
+          <button onclick="addTask()" class="w-full py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs rounded-xl transition">+ Programar Tarea con Alarma</button>
         </div>
-        <div id="tasksList" class="space-y-2 mt-3"></div>
+
+        <div id="tasksList" class="space-y-2.5 mt-3"></div>
+      </div>
+
+      <!-- Generador de Reporte del Formato de Trabajo -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
+        <div class="flex justify-between items-center">
+          <div>
+            <h2 class="font-bold text-sm uppercase tracking-wider text-emerald-400">Exportar Formato de Trabajo</h2>
+            <p class="text-[10px] text-slate-400">Genera el concentrado de todas las tareas registradas.</p>
+          </div>
+          <span id="workReportCountBadge" class="text-[10px] font-bold bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded-full">0 registros</span>
+        </div>
+
+        <div id="workReportPreview" class="p-3 rounded-xl bg-slate-100 dark:bg-slate-900/70 font-mono text-[11px] text-slate-600 dark:text-slate-300 whitespace-pre-wrap max-h-48 overflow-y-auto border border-slate-200 dark:border-slate-700"></div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="copyWorkFormatReport()" class="py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5">
+            <span>📋 Copiar Formato</span>
+          </button>
+          <button onclick="downloadWorkFormatCSV()" class="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5">
+            <span>📊 Descargar Excel (CSV)</span>
+          </button>
+        </div>
       </div>
     </section>
 
     <!-- ==================== PESTAÑA 3: GIMNASIO, CRONÓMETRO & DEMOS ANIMADAS ==================== -->
     <section id="tab-gym" class="space-y-4 hidden">
       
-      <!-- Cronómetro de Descanso entre Series -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-3.5 shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-between">
         <div>
           <span class="text-[10px] font-bold uppercase text-slate-400 block">Descanso entre series</span>
@@ -446,7 +560,6 @@
         </div>
       </div>
 
-      <!-- Generador de Rutina (Sin valores prellenados, solo placeholders) -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
         <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Generador IA de Rutina Semanal</h2>
         <div class="grid grid-cols-3 gap-2">
@@ -481,7 +594,6 @@
         </button>
       </div>
 
-      <!-- Lista de Ejercicios del Día -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
         <div class="flex justify-between items-center mb-2">
           <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400" id="currentGymDayTitle">Entrenamiento de Hoy</h2>
@@ -504,7 +616,6 @@
     <!-- ==================== PESTAÑA 4: HÁBITOS, RACHAS & SOS TCC ==================== -->
     <section id="tab-habits" class="space-y-4 hidden">
       
-      <!-- Botón de Pánico / Respiración Guiada Anti-Ansiedad -->
       <div class="bg-gradient-to-r from-amber-500/20 to-emerald-500/20 rounded-2xl p-4 border border-amber-500/30 space-y-3">
         <div class="flex justify-between items-center">
           <div>
@@ -521,7 +632,6 @@
         </div>
       </div>
 
-      <!-- Hábitos y Rachas -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
         <div class="flex justify-between items-center">
           <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Hábitos y Control de Rachas</h2>
@@ -534,7 +644,6 @@
         <div id="habitsList" class="space-y-2 mt-3"></div>
       </div>
 
-      <!-- Bitácora TCC -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
         <div class="flex items-center gap-2">
           <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
@@ -557,7 +666,7 @@
       </div>
     </section>
 
-    <!-- ==================== PESTAÑA 5: DESPENSA (SIN PRELLENADOS) ==================== -->
+    <!-- ==================== PESTAÑA 5: DESPENSA ==================== -->
     <section id="tab-grocery" class="space-y-4 hidden">
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
         <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Generador IA de Despensa & Menú</h2>
@@ -598,10 +707,53 @@
       </div>
     </section>
 
-    <!-- ==================== PESTAÑA 6: AJUSTES, MODELOS ORIGINALES & REINICIO DE CERO ==================== -->
+    <!-- ==================== PESTAÑA 6: AJUSTES, LOGIN FIREBASE CLOUD & REINICIO ==================== -->
     <section id="tab-settings" class="space-y-4 hidden">
-      
-      <!-- Token & Modelos de IA (Con gemini-3.5-flash-lite por defecto) -->
+
+      <!-- MÓDULO DE LOGIN Y SINCRONIZACIÓN EN LA NUBE (FIREBASE + GITHUB PAGES) -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border-2 border-emerald-500/40 space-y-3">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-2">
+            <span class="text-base">☁️</span>
+            <div>
+              <h2 class="font-bold text-sm text-emerald-400">Cuenta y Sincronización Cloud (PC + Teléfono)</h2>
+              <p class="text-[10px] text-slate-400">Tus avances se guardan en Firebase sin perderse al actualizar código.</p>
+            </div>
+          </div>
+          <span id="firebaseAuthStatus" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700">Sin sesión</span>
+        </div>
+
+        <!-- Paso 1: Configuración del Proyecto Firebase -->
+        <details id="firebaseConfigDetails" class="text-xs bg-slate-100 dark:bg-slate-700/50 rounded-xl p-3">
+          <summary class="font-bold cursor-pointer text-blue-400">1. Pegar Credenciales de tu Firebase (Solo 1 vez)</summary>
+          <div class="mt-2.5 space-y-2">
+            <p class="text-[11px] text-slate-400">Pega aquí el objeto <code>firebaseConfig</code> o el JSON de tu proyecto de Firebase Console:</p>
+            <textarea id="firebaseConfigInput" rows="4" placeholder='{"apiKey": "AIza...", "authDomain": "tu-app.firebaseapp.com", "projectId": "tu-app"}' class="w-full p-2 rounded-lg bg-white dark:bg-slate-800 font-mono text-[10px] outline-none border border-slate-300 dark:border-slate-600"></textarea>
+            <button onclick="saveFirebaseConfig()" class="w-full py-2 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-lg text-xs">Guardar Conexión Firebase</button>
+          </div>
+        </details>
+
+        <!-- Paso 2: Formulario de Login / Registro -->
+        <div id="authLoggedOutBox" class="space-y-2 pt-1">
+          <input id="authEmail" type="email" placeholder="Tu correo electrónico (ej. allan@correo.com)" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 outline-none placeholder-slate-400">
+          <input id="authPass" type="password" placeholder="Contraseña (mínimo 6 caracteres)" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 outline-none placeholder-slate-400">
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="loginWithFirebase()" class="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition">Iniciar Sesión</button>
+            <button onclick="registerWithFirebase()" class="py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl transition">Crear Cuenta</button>
+          </div>
+        </div>
+
+        <!-- Estado Conectado -->
+        <div id="authLoggedInBox" class="hidden space-y-2 pt-1 border-t border-slate-200 dark:border-slate-700">
+          <p class="text-xs">Conectado como: <strong id="authUserEmail" class="text-emerald-400"></strong></p>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="forceCloudSyncNow()" class="py-2 bg-blue-500/20 text-blue-400 border border-blue-500/30 font-bold text-xs rounded-xl">🔄 Sincronizar Ahora</button>
+            <button onclick="logoutFirebase()" class="py-2 bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold text-xs rounded-xl">Cerrar Sesión</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Token & Modelos de IA -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
         <h2 class="font-bold text-sm uppercase tracking-wider text-slate-400">Configuración & Token Gemini</h2>
         <div>
@@ -621,7 +773,7 @@
         <button onclick="saveSettings()" class="w-full py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs rounded-xl transition">Guardar Token y Modelo</button>
       </div>
 
-      <!-- Calculadora IA de Calorías, Agua y Macros (Con Placeholders en Gris) -->
+      <!-- Calculadora IA de Calorías, Agua y Macros -->
       <div class="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-2xl p-4 text-white shadow-md space-y-3">
         <div class="flex items-center gap-2">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
@@ -694,7 +846,7 @@
             Reiniciar Todo de Cero (Borrar Datos)
           </button>
           <div id="factoryResetConfirmBox" class="hidden mt-3 p-3 rounded-xl bg-rose-950/60 border border-rose-500 text-xs space-y-2">
-            <p class="text-rose-200 font-bold">¿Confirmas que deseas borrar todos los registros y volver a la pantalla inicial en blanco?</p>
+            <p class="text-rose-200 font-bold">¿Confirmas que deseas borrar todos los registros locales?</p>
             <div class="flex gap-2">
               <button onclick="executeFactoryReset()" class="flex-1 py-2 bg-rose-600 text-white font-extrabold rounded-lg">Sí, Reiniciar de 0</button>
               <button onclick="toggleFactoryResetConfirm()" class="flex-1 py-2 bg-slate-700 text-white font-bold rounded-lg">Cancelar</button>
@@ -737,8 +889,14 @@
     </div>
   </nav>
 
+  <!-- SDK DE FIREBASE (COMPATIBLE CON GITHUB PAGES) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
   <script>
     // ==================== GENERADOR DINÁMICO DE ICONO PNG Y MANIFEST (CHROME + MÓVIL) ====================
+    let globalAppIconPng = '';
     (function setupAppIconsAndPWA() {
       try {
         const canvas = document.createElement('canvas');
@@ -746,25 +904,21 @@
         canvas.height = 512;
         const ctx = canvas.getContext('2d');
 
-        // Fondo oscuro redondeado
         ctx.fillStyle = '#0f172a';
         ctx.beginPath();
         ctx.roundRect(0, 0, 512, 512, 115);
         ctx.fill();
 
-        // Gradiente principal Azul -> Esmeralda
         const grad = ctx.createLinearGradient(40, 40, 472, 472);
         grad.addColorStop(0, '#3b82f6');
         grad.addColorStop(1, '#10b981');
 
-        // Borde interior brillante
         ctx.strokeStyle = grad;
         ctx.lineWidth = 22;
         ctx.beginPath();
         ctx.roundRect(28, 28, 456, 456, 90);
         ctx.stroke();
 
-        // Rayo TCC central
         ctx.fillStyle = grad;
         ctx.beginPath();
         ctx.moveTo(290, 85);
@@ -776,9 +930,9 @@
         ctx.closePath();
         ctx.fill();
 
-        const pngDataUrl = canvas.toDataURL('image/png');
-        document.getElementById('appleTouchIconLink').href = pngDataUrl;
-        document.getElementById('faviconLink').href = pngDataUrl;
+        globalAppIconPng = canvas.toDataURL('image/png');
+        document.getElementById('appleTouchIconLink').href = globalAppIconPng;
+        document.getElementById('faviconLink').href = globalAppIconPng;
         document.getElementById('faviconLink').type = 'image/png';
 
         const manifest = {
@@ -790,8 +944,8 @@
           background_color: "#0f172a",
           theme_color: "#0f172a",
           icons: [
-            { src: pngDataUrl, sizes: "192x192", type: "image/png", purpose: "any maskable" },
-            { src: pngDataUrl, sizes: "512x512", type: "image/png", purpose: "any maskable" }
+            { src: globalAppIconPng, sizes: "192x192", type: "image/png", purpose: "any maskable" },
+            { src: globalAppIconPng, sizes: "512x512", type: "image/png", purpose: "any maskable" }
           ]
         };
         const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
@@ -823,7 +977,7 @@
     function createDefaultState() {
       const state = {
         theme: 'dark',
-        currentDay: '2026-10-19',
+        currentDay: '2026-10-21',
         apiKey: '',
         selectedModel: 'gemini-3.5-flash-lite',
         onboardingComplete: false,
@@ -849,7 +1003,8 @@
         habitsList: [],
         groceries: [],
         mealPlanStructured: [],
-        lastFridgePlan: null
+        lastFridgePlan: null,
+        updatedAt: 0
       };
       DAYS_CONFIG.forEach(d => {
         state.days[d.id] = { water: 0, meals: [], habitsState: {}, impulses: [] };
@@ -857,7 +1012,24 @@
       return state;
     }
 
-    let appState = JSON.parse(localStorage.getItem('allan_tcc_app_v43')) || createDefaultState();
+    // LLAVE PERMANENTE + MIGRACIÓN AUTOMÁTICA PARA NO PERDER DATOS NUNCA AL ACTUALIZAR CÓDIGO
+    const STORAGE_KEY = 'allan_tcc_master_permanent_store';
+    function loadInitialState() {
+      const perm = localStorage.getItem(STORAGE_KEY);
+      if (perm) return JSON.parse(perm);
+      // Rescatar datos de versiones previas automáticamente
+      const legacyKeys = ['allan_tcc_app_v43', 'allan_tcc_app_v45', 'allan_tcc_app_v44', 'allan_tcc_app_v42'];
+      for (const k of legacyKeys) {
+        const oldData = localStorage.getItem(k);
+        if (oldData) {
+          localStorage.setItem(STORAGE_KEY, oldData);
+          return JSON.parse(oldData);
+        }
+      }
+      return createDefaultState();
+    }
+
+    let appState = loadInitialState();
     if (!appState.profile) appState.profile = createDefaultState().profile;
     if (!appState.selectedModel) appState.selectedModel = 'gemini-3.5-flash-lite';
     DAYS_CONFIG.forEach(d => {
@@ -869,8 +1041,10 @@
     let cachedExerciseRepoTree = null;
     let cachedFreeExerciseDb = null;
     let flipbookInterval = null;
+    let activeFormatTaskIndex = null;
+    let alarmAudioInterval = null;
 
-    // ==================== SONIDO SINTETIZADO ====================
+    // ==================== SONIDO DE ALARMA Y BEEP ====================
     function playBeep() {
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -878,7 +1052,7 @@
         const gain = ctx.createGain();
         osc.type = 'sine';
         osc.frequency.setValueAtTime(880, ctx.currentTime);
-        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.setValueAtTime(0.18, ctx.currentTime);
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start();
@@ -886,7 +1060,27 @@
       } catch (e) {}
     }
 
-    // ==================== NOTIFICACIONES INTERNAS (TOAST) ====================
+    function startAlarmSound() {
+      stopAlarmSound();
+      playBeep();
+      if (navigator.vibrate) navigator.vibrate([400, 150, 400, 150, 400]);
+      let count = 0;
+      alarmAudioInterval = setInterval(() => {
+        playBeep();
+        if (navigator.vibrate) navigator.vibrate([300, 100, 300]);
+        count++;
+        if (count > 8) stopAlarmSound();
+      }, 1500);
+    }
+
+    function stopAlarmSound() {
+      if (alarmAudioInterval) {
+        clearInterval(alarmAudioInterval);
+        alarmAudioInterval = null;
+      }
+    }
+
+    // ==================== NOTIFICACIONES INTERNAS 100% CENTRADAS ====================
     function showToast(message, type = 'info') {
       const container = document.getElementById('toastContainer');
       const colors = {
@@ -896,22 +1090,192 @@
         warning: 'bg-amber-500 text-slate-950 border-amber-300'
       };
       const toast = document.createElement('div');
-      toast.className = `toast-enter px-4 py-3 rounded-xl shadow-lg border text-xs font-bold flex items-center justify-between ${colors[type] || colors.info}`;
-      toast.innerHTML = `<span>${message}</span>`;
+      toast.className = `toast-enter w-full px-4 py-3 rounded-2xl shadow-xl border text-xs font-bold text-center flex items-center justify-center ${colors[type] || colors.info}`;
+      toast.innerHTML = `<span class="leading-snug">${message}</span>`;
       container.appendChild(toast);
       setTimeout(() => {
         toast.style.opacity = '0';
         toast.style.transition = 'opacity 0.3s ease';
         setTimeout(() => toast.remove(), 300);
-      }, 3200);
+      }, 3400);
+    }
+
+    // ==================== FIREBASE CLOUD SYNC (PC + TELÉFONO EN GITHUB PAGES) ====================
+    let fbAuth = null;
+    let fbDb = null;
+    let fbUser = null;
+    let unsubscribeFirestore = null;
+    let isApplyingRemoteUpdate = false;
+
+    function initFirebaseIfConfigured() {
+      const rawCfg = localStorage.getItem('allan_tcc_firebase_config');
+      if (!rawCfg) return;
+      try {
+        const cfg = JSON.parse(rawCfg);
+        document.getElementById('firebaseConfigInput').value = JSON.stringify(cfg, null, 2);
+        if (!firebase.apps.length) {
+          firebase.initializeApp(cfg);
+        }
+        fbAuth = firebase.auth();
+        fbDb = firebase.firestore();
+
+        fbAuth.onAuthStateChanged(user => {
+          fbUser = user;
+          updateCloudUI();
+          if (user) {
+            document.getElementById('firebaseConfigDetails').removeAttribute('open');
+            subscribeToUserCloudData(user.uid);
+          } else if (unsubscribeFirestore) {
+            unsubscribeFirestore();
+            unsubscribeFirestore = null;
+          }
+        });
+      } catch (e) {
+        console.warn("Configuración Firebase pendiente:", e);
+      }
+    }
+
+    function saveFirebaseConfig() {
+      let raw = document.getElementById('firebaseConfigInput').value.trim();
+      if (!raw) { showToast("Pega las credenciales de tu proyecto Firebase", "warning"); return; }
+      try {
+        // Permite pegar tanto JSON puro como el bloque const firebaseConfig = { ... }
+        if (raw.includes('{')) {
+          raw = raw.substring(raw.indexOf('{'), raw.lastIndexOf('}') + 1);
+        }
+        // Convertir claves sin comillas de JS a JSON válido si el usuario pegó directo desde Firebase Console
+        const normalizedJson = raw
+          .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?\s*:/g, '"$2":')
+          .replace(/'/g, '"')
+          .replace(/,\s*}/g, '}');
+        const parsed = JSON.parse(normalizedJson);
+        if (!parsed.apiKey || !parsed.projectId) {
+          showToast("El bloque debe incluir al menos apiKey y projectId", "error");
+          return;
+        }
+        localStorage.setItem('allan_tcc_firebase_config', JSON.stringify(parsed));
+        showToast("Firebase conectado. Ahora crea tu cuenta o inicia sesión abajo.", "success");
+        initFirebaseIfConfigured();
+      } catch (e) {
+        showToast("Formato inválido. Asegúrate de copiar desde { hasta }", "error");
+      }
+    }
+
+    function updateCloudUI() {
+      const headerBadge = document.getElementById('cloudStatusBadge');
+      const settingsStatus = document.getElementById('firebaseAuthStatus');
+      const outBox = document.getElementById('authLoggedOutBox');
+      const inBox = document.getElementById('authLoggedInBox');
+      const emailEl = document.getElementById('authUserEmail');
+
+      if (fbUser) {
+        headerBadge.textContent = '🟢 Nube Activa';
+        headerBadge.className = 'text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold';
+        settingsStatus.textContent = 'Conectado';
+        settingsStatus.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400';
+        outBox.classList.add('hidden');
+        inBox.classList.remove('hidden');
+        emailEl.textContent = fbUser.email;
+      } else {
+        headerBadge.textContent = '⚪ Local';
+        headerBadge.className = 'text-[9px] px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-300 font-bold';
+        settingsStatus.textContent = 'Sin sesión';
+        settingsStatus.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700';
+        outBox.classList.remove('hidden');
+        inBox.classList.add('hidden');
+      }
+    }
+
+    async function registerWithFirebase() {
+      if (!fbAuth) { showToast("Primero guarda las credenciales en el paso 1 arriba", "warning"); document.getElementById('firebaseConfigDetails').setAttribute('open', true); return; }
+      const email = document.getElementById('authEmail').value.trim();
+      const pass = document.getElementById('authPass').value.trim();
+      if (!email || pass.length < 6) { showToast("Ingresa un correo válido y contraseña de 6+ caracteres", "warning"); return; }
+      try {
+        const cred = await fbAuth.createUserWithEmailAndPassword(email, pass);
+        appState.updatedAt = Date.now();
+        await fbDb.collection('tcc_users').doc(cred.user.uid).set({ stateJson: JSON.stringify(appState), updatedAt: appState.updatedAt });
+        showToast("¡Cuenta creada y datos subidos a la nube!", "success");
+      } catch (e) {
+        showToast("Error: " + e.message, "error");
+      }
+    }
+
+    async function loginWithFirebase() {
+      if (!fbAuth) { showToast("Primero guarda las credenciales en el paso 1 arriba", "warning"); document.getElementById('firebaseConfigDetails').setAttribute('open', true); return; }
+      const email = document.getElementById('authEmail').value.trim();
+      const pass = document.getElementById('authPass').value.trim();
+      if (!email || !pass) { showToast("Ingresa tu correo y contraseña", "warning"); return; }
+      try {
+        await fbAuth.signInWithEmailAndPassword(email, pass);
+        showToast("¡Sesión iniciada! Sincronizando datos...", "success");
+      } catch (e) {
+        showToast("Error al iniciar sesión: " + e.message, "error");
+      }
+    }
+
+    async function logoutFirebase() {
+      if (fbAuth) await fbAuth.signOut();
+      showToast("Sesión cerrada", "info");
+    }
+
+    function subscribeToUserCloudData(uid) {
+      if (unsubscribeFirestore) unsubscribeFirestore();
+      unsubscribeFirestore = fbDb.collection('tcc_users').doc(uid).onSnapshot(doc => {
+        if (doc.exists) {
+          const data = doc.data();
+          if (data && data.stateJson) {
+            const remoteState = JSON.parse(data.stateJson);
+            // Si la nube tiene datos más recientes o nuestra app local estaba sin configurar, aplicamos los de la nube
+            if ((remoteState.updatedAt || 0) > (appState.updatedAt || 0) || !appState.onboardingComplete) {
+              isApplyingRemoteUpdate = true;
+              appState = remoteState;
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+              renderAll();
+              checkOnboarding();
+              isApplyingRemoteUpdate = false;
+            }
+          }
+        } else {
+          // Si el documento aún no existe en la nube, subimos el estado local actual
+          pushStateToCloud();
+        }
+      });
+    }
+
+    async function pushStateToCloud() {
+      if (!fbUser || !fbDb || isApplyingRemoteUpdate) return;
+      try {
+        await fbDb.collection('tcc_users').doc(fbUser.uid).set({
+          stateJson: JSON.stringify(appState),
+          updatedAt: appState.updatedAt || Date.now()
+        });
+      } catch (e) {
+        console.warn("Error sincronizando con Firebase:", e);
+      }
+    }
+
+    async function forceCloudSyncNow() {
+      appState.updatedAt = Date.now();
+      await pushStateToCloud();
+      showToast("Datos sincronizados en la nube correctamente", "success");
+    }
+
+    function goToCloudLoginFromOnboarding() {
+      appState.onboardingComplete = true;
+      document.getElementById('onboardingModal').classList.add('hidden');
+      switchTab('settings');
+      showToast("Inicia sesión con tu cuenta en Ajustes para descargar tus datos", "info");
     }
 
     function saveState() {
-      localStorage.setItem('allan_tcc_app_v43', JSON.stringify(appState));
+      appState.updatedAt = Date.now();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
       renderAll();
+      pushStateToCloud();
     }
 
-    // ==================== ONBOARDING Y PERFIL INICIAL (SIN PRELLENADOS) ====================
+    // ==================== ONBOARDING Y PERFIL INICIAL ====================
     function checkOnboarding() {
       const modal = document.getElementById('onboardingModal');
       if (!appState.onboardingComplete) {
@@ -962,7 +1326,6 @@
       };
       if (apiKey) appState.apiKey = apiKey;
 
-      // Fórmula clínica Mifflin-St Jeor
       const bmr = (10 * weightVal) + (6.25 * heightVal) - (5 * ageVal) + 5;
       const tdee = bmr * activity;
       let targetKcal = Math.round(tdee);
@@ -1051,53 +1414,73 @@
       saveState();
     }
 
-    // ==================== MOTOR CENTRAL GEMINI API ====================
-    async function callGeminiAPI(promptText, imageBase64) {
-      const apiKey = appState.apiKey;
-      const model = appState.selectedModel || 'gemini-3.5-flash-lite';
-      let parts = [{ text: promptText }];
+    // ==================== MOTOR CENTRAL GEMINI API (CON ENRUTADOR INTELIGENTE) ====================
+    function getModelFallbackChain(selectedAlias) {
+      const aliasMap = {
+        'gemini-3.5-flash-lite': ['gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash'],
+        'gemini-3.1-flash-live-preview': ['gemini-2.5-flash', 'gemini-2.0-flash'],
+        'gemini-3.8-live': ['gemini-2.5-flash', 'gemini-2.0-flash'],
+        'gemini-3.8-flash': ['gemini-2.5-flash', 'gemini-2.0-flash'],
+        'gemini-3.8-live-extended-thinking': ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash']
+      };
+      return aliasMap[selectedAlias] || [selectedAlias, 'gemini-2.5-flash-lite', 'gemini-2.5-flash'];
+    }
 
+    async function callGeminiAPI(promptText, imageBase64) {
+      const apiKey = (appState.apiKey || '').trim();
+      const selectedAlias = appState.selectedModel || 'gemini-3.5-flash-lite';
+      const candidateModels = getModelFallbackChain(selectedAlias);
+
+      let parts = [{ text: promptText }];
       if (imageBase64) {
         const base64Data = imageBase64.split(',')[1];
         const mimeType = imageBase64.split(';')[0].split(':')[1];
         parts.push({ inline_data: { mime_type: mimeType, data: base64Data } });
       }
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 28000);
+      let lastErr = "Error al conectar con la API.";
+      for (const endpointModel of candidateModels) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 24000);
+        try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${endpointModel}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: parts }] }),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
 
-      try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: parts }] }),
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            lastErr = errData.error?.message || `Error HTTP ${res.status}`;
+            if (res.status === 403 || lastErr.toLowerCase().includes('api key not valid')) {
+              throw new Error("Tu Clave API de Gemini no es válida.");
+            }
+            continue;
+          }
 
-        if (!res.ok) {
-          const errData = await res.json();
-          throw new Error(errData.error?.message || "Error al conectar con la API.");
+          const data = await res.json();
+          let rawText = data.candidates[0].content.parts[0].text;
+          const jsonStart = rawText.indexOf('[');
+          const jsonObjectStart = rawText.indexOf('{');
+
+          if (jsonStart !== -1 && (jsonObjectStart === -1 || jsonStart < jsonObjectStart)) {
+            const jsonEnd = rawText.lastIndexOf(']');
+            if (jsonEnd !== -1) rawText = rawText.substring(jsonStart, jsonEnd + 1);
+          } else if (jsonObjectStart !== -1) {
+            const jsonEnd = rawText.lastIndexOf('}');
+            if (jsonEnd !== -1) rawText = rawText.substring(jsonObjectStart, jsonEnd + 1);
+          }
+
+          return rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+        } catch (err) {
+          clearTimeout(timeoutId);
+          if (err.message.includes('Clave API')) throw err;
+          lastErr = err.name === 'AbortError' ? "Tiempo de espera agotado." : err.message;
         }
-
-        const data = await res.json();
-        let rawText = data.candidates[0].content.parts[0].text;
-        const jsonStart = rawText.indexOf('[');
-        const jsonObjectStart = rawText.indexOf('{');
-
-        if (jsonStart !== -1 && (jsonObjectStart === -1 || jsonStart < jsonObjectStart)) {
-          const jsonEnd = rawText.lastIndexOf(']');
-          if (jsonEnd !== -1) rawText = rawText.substring(jsonStart, jsonEnd + 1);
-        } else if (jsonObjectStart !== -1) {
-          const jsonEnd = rawText.lastIndexOf('}');
-          if (jsonEnd !== -1) rawText = rawText.substring(jsonObjectStart, jsonEnd + 1);
-        }
-
-        return rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-      } catch (err) {
-        if (err.name === 'AbortError') throw new Error("Tiempo de espera agotado.");
-        throw err;
       }
+      throw new Error(lastErr);
     }
 
     // ==================== 1. NUTRICIÓN, FOTO NOTORIA & CHEF IA ====================
@@ -1128,7 +1511,6 @@
     }
 
     function renderNutrition() {
-      // Si el usuario no ha llenado metas, el input queda vacío mostrando el placeholder gris
       document.getElementById('targetKcalInput').value = appState.targetKcal || '';
       document.getElementById('targetWaterInput').value = appState.targetWater || '';
       document.getElementById('targetProtInput').value = appState.targetProt || '';
@@ -1199,22 +1581,32 @@
       showToast("Metas actualizadas", "success");
     }
 
-    // GESTIÓN VISUAL NOTORIA DE LA FOTO SUBIDA
     function handleImageUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
       reader.onload = function(e) {
-        currentUploadedImageBase64 = e.target.result;
-        document.getElementById('photoThumbnail').src = currentUploadedImageBase64;
-        document.getElementById('photoFileName').textContent = file.name;
-        document.getElementById('photoPreviewCard').classList.remove('hidden');
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const maxDim = 900;
+          let w = img.width, h = img.height;
+          if (w > h && w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim; }
+          else if (h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; }
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          currentUploadedImageBase64 = canvas.toDataURL('image/jpeg', 0.82);
+          document.getElementById('photoThumbnail').src = currentUploadedImageBase64;
+          document.getElementById('photoFileName').textContent = file.name;
+          document.getElementById('photoPreviewCard').classList.remove('hidden');
 
-        const label = document.getElementById('uploadPhotoLabel');
-        label.classList.remove('bg-white/20');
-        label.classList.add('bg-emerald-500', 'text-slate-950', 'border-emerald-300');
-        document.getElementById('uploadPhotoBtnText').textContent = 'Cambiar Foto';
-        showToast("Foto cargada. Presiona Calcular con IA.", "success");
+          const label = document.getElementById('uploadPhotoLabel');
+          label.classList.remove('bg-white/20');
+          label.classList.add('bg-emerald-500', 'text-slate-950', 'border-emerald-300');
+          document.getElementById('uploadPhotoBtnText').textContent = 'Cambiar Foto';
+          showToast("Foto cargada. Presiona Calcular con IA.", "success");
+        };
+        img.src = e.target.result;
       };
       reader.readAsDataURL(file);
     }
@@ -1259,7 +1651,6 @@
       }
     }
 
-    // CHEF IA: RECOMENDADOR SEGÚN INGREDIENTES Y PERFIL INICIAL
     async function recommendFromFridge() {
       const ingredients = document.getElementById('fridgeIngredients').value.trim();
       if (!ingredients) { showToast("Escribe qué ingredientes tienes disponibles", "warning"); return; }
@@ -1384,7 +1775,7 @@
       saveState();
     }
 
-    // ==================== 2. ENFOQUE, POMODORO Y TAREAS ====================
+    // ==================== 2. ENFOQUE, ALARMAS REALES EN TELÉFONO Y FORMATO DE TRABAJO ====================
     let pomoSeconds = 25 * 60;
     let pomoInterval = null;
 
@@ -1419,54 +1810,328 @@
             clearInterval(pomoInterval);
             pomoInterval = null;
             btn.textContent = 'Iniciar';
-            playBeep();
+            startAlarmSound();
+            sendPhoneNotification("⏰ Pomodoro Finalizado", "Sesión de enfoque terminada. Registra tus avances.");
             showToast("Sesión de enfoque completada", "success");
           }
         }, 1000);
       }
     }
 
-    function enableBrowserNotifications() {
-      if (!("Notification" in window)) { showToast("Navegador sin soporte de notificaciones", "warning"); return; }
-      Notification.requestPermission().then(p => {
-        if (p === "granted") showToast("Alertas de horario activadas", "success");
+    // REGISTRO DE SERVICE WORKER LIGERO PARA NOTIFICACIONES NATIVAS EN TELÉFONO
+    async function enableBrowserNotifications() {
+      if (!("Notification" in window)) {
+        showToast("Tu navegador no soporta notificaciones directas. Usa el botón 📅 Alarma en cada tarea.", "warning");
+        return;
+      }
+      const perm = await Notification.requestPermission();
+      if (perm === "granted") {
+        document.getElementById('notifPermBtn').textContent = "✅ Alertas Activas";
+        showToast("¡Notificaciones activadas en este dispositivo!", "success");
+        sendPhoneNotification("Control TCC Activo", "Recibirás alertas a la hora exacta de cada tarea.");
+      } else {
+        showToast("Permiso denegado en el navegador. Actívalo en configuración del sitio.", "warning");
+      }
+    }
+
+    function sendPhoneNotification(title, bodyText) {
+      if ("Notification" in window && Notification.permission === "granted") {
+        try {
+          const n = new Notification(title, {
+            body: bodyText,
+            icon: globalAppIconPng || undefined,
+            vibrate: [300, 100, 300, 100, 400],
+            requireInteraction: true
+          });
+          n.onclick = function() {
+            window.focus();
+            this.close();
+          };
+        } catch (e) {}
+      }
+    }
+
+    // MOTOR VIGILANTE DE HORARIOS DE TAREAS (SE EJECUTA CADA 5 SEGUNDOS)
+    setInterval(() => {
+      const now = new Date();
+      const currentHHMM = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      let changed = false;
+
+      appState.tasks.forEach((t, idx) => {
+        if (!t.done && t.time && t.time === currentHHMM && !t.notified) {
+          t.notified = true;
+          changed = true;
+          startAlarmSound();
+          sendPhoneNotification(`⏰ Hora de actividad: ${t.text}`, "¡Ya es hora de registrar los datos de tu formato de trabajo!");
+          showToast(`⏰ ¡Alarma de Tarea: ${t.text}! Registra tu formato.`, "warning");
+          openTaskFormatModal(idx, true);
+        }
       });
+
+      if (changed) saveState();
+    }, 5000);
+
+    // DESCARGAR ALARMA NATIVA AL RELOJ/CALENDARIO DEL TELÉFONO (ICS CON VALARM)
+    function downloadTaskPhoneAlarm(idx) {
+      const t = appState.tasks[idx];
+      if (!t) return;
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const [hh, min] = (t.time || '12:00').split(':');
+
+      const startStr = `${yyyy}${mm}${dd}T${hh}${min}00`;
+      const ics = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Control TCC//Alarm//ES",
+        "BEGIN:VEVENT",
+        `SUMMARY:📋 Registrar Tarea: ${t.text}`,
+        `DESCRIPTION:Proyecto/Folio: ${t.project || 'General'} - Abrir Control TCC para llenar formato de trabajo.`,
+        `DTSTART:${startStr}`,
+        `DTEND:${startStr}`,
+        "BEGIN:VALARM",
+        "TRIGGER:-PT0M",
+        "ACTION:DISPLAY",
+        `DESCRIPTION:¡Hora de registrar tu actividad: ${t.text}!`,
+        "END:VALARM",
+        "END:VEVENT",
+        "END:VCALENDAR"
+      ].join("\n");
+
+      const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `alarma_${t.text.substring(0, 15).replace(/\s+/g, '_')}.ics`;
+      link.click();
+      showToast("Alarma descargada para el calendario de tu teléfono", "success");
+    }
+
+    function openTaskFormatModal(idx, isFromAlarm = false) {
+      activeFormatTaskIndex = idx;
+      const t = appState.tasks[idx];
+      if (!t) return;
+
+      const alarmBanner = document.getElementById('alarmBannerBox');
+      if (isFromAlarm) alarmBanner.classList.remove('hidden');
+      else alarmBanner.classList.add('hidden');
+
+      document.getElementById('formatModalTaskTitle').textContent = t.text;
+      const wf = t.workFormat || {};
+      const now = new Date();
+      const nowHHMM = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+      document.getElementById('wfProject').value = wf.project || t.project || '';
+      document.getElementById('wfStatus').value = wf.status || 'Completado';
+      document.getElementById('wfStartTime').value = wf.startTime || t.time || '';
+      document.getElementById('wfEndTime').value = wf.endTime || nowHHMM;
+      document.getElementById('wfDuration').value = wf.duration || '';
+      document.getElementById('wfDeliverable').value = wf.deliverable || '';
+      document.getElementById('wfNotes').value = wf.notes || '';
+
+      document.getElementById('taskFormatModal').classList.remove('hidden');
+    }
+
+    function closeTaskFormatModal() {
+      stopAlarmSound();
+      document.getElementById('taskFormatModal').classList.add('hidden');
+      activeFormatTaskIndex = null;
+    }
+
+    function saveTaskWorkFormat() {
+      if (activeFormatTaskIndex === null || !appState.tasks[activeFormatTaskIndex]) return;
+      const t = appState.tasks[activeFormatTaskIndex];
+
+      const startVal = document.getElementById('wfStartTime').value;
+      const endVal = document.getElementById('wfEndTime').value;
+      let calcDur = document.getElementById('wfDuration').value;
+
+      if (!calcDur && startVal && endVal) {
+        const [sh, sm] = startVal.split(':').map(Number);
+        const [eh, em] = endVal.split(':').map(Number);
+        const diff = (eh * 60 + em) - (sh * 60 + sm);
+        if (diff > 0) calcDur = diff;
+      }
+
+      t.project = document.getElementById('wfProject').value.trim();
+      t.workFormat = {
+        date: appState.currentDay,
+        project: t.project || 'General',
+        status: document.getElementById('wfStatus').value,
+        startTime: startVal,
+        endTime: endVal,
+        duration: calcDur || '---',
+        deliverable: document.getElementById('wfDeliverable').value.trim(),
+        notes: document.getElementById('wfNotes').value.trim()
+      };
+      t.done = (t.workFormat.status === 'Completado');
+
+      closeTaskFormatModal();
+      saveState();
+      showToast("Formato de trabajo guardado en la tarea", "success");
     }
 
     function renderTasks() {
       const el = document.getElementById('tasksList');
-      if (appState.tasks.length === 0) { el.innerHTML = `<p class="text-xs text-slate-400 italic">Sin tareas pendientes.</p>`; return; }
-      el.innerHTML = appState.tasks.map((t, i) => `
-        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 text-xs">
-          <label class="flex items-center gap-3 flex-1 cursor-pointer">
-            <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${i})" class="w-4 h-4 accent-blue-500 rounded">
-            <div>
-              <span class="${t.done ? 'line-through text-slate-400' : 'font-semibold'}">${t.text}</span>
-              <div class="flex items-center gap-2 mt-0.5">
-                <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300 font-medium">${t.tag || 'General'}</span>
-                ${t.time ? `<span class="text-[10px] text-blue-500 font-bold">Límite: ${t.time}</span>` : ''}
+      if (appState.tasks.length === 0) {
+        el.innerHTML = `<p class="text-xs text-slate-400 italic">Sin tareas programadas.</p>`;
+      } else {
+        el.innerHTML = appState.tasks.map((t, i) => {
+          const hasFormat = t.workFormat && (t.workFormat.deliverable || t.workFormat.project);
+          return `
+            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border ${hasFormat ? 'border-emerald-500/40' : 'border-slate-200 dark:border-slate-700'} text-xs space-y-2">
+              <div class="flex items-start justify-between gap-2">
+                <label class="flex items-start gap-2.5 flex-1 cursor-pointer">
+                  <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${i})" class="w-4 h-4 mt-0.5 accent-blue-500 rounded">
+                  <div>
+                    <span class="${t.done ? 'line-through text-slate-400' : 'font-bold text-slate-800 dark:text-slate-100'}">${t.text}</span>
+                    <div class="flex flex-wrap items-center gap-1.5 mt-1">
+                      <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300 font-medium">${t.tag || 'Trabajo'}</span>
+                      ${t.project ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/15 text-indigo-400 font-bold">${t.project}</span>` : ''}
+                      ${t.time ? `<span class="text-[10px] text-amber-400 font-bold">⏰ ${t.time}</span>` : ''}
+                      ${hasFormat ? `<span class="text-[10px] text-emerald-400 font-bold">✔ Formato Lleno</span>` : ''}
+                    </div>
+                  </div>
+                </label>
+                <button onclick="deleteTask(${i})" class="text-slate-400 hover:text-rose-500 px-1.5">✕</button>
+              </div>
+
+              ${hasFormat ? `
+                <div class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800/80 text-[11px] text-slate-500 dark:text-slate-300 space-y-0.5">
+                  <p><strong>Entregable:</strong> ${t.workFormat.deliverable || '---'}</p>
+                  <p class="text-[10px] text-slate-400">Horario: ${t.workFormat.startTime || '--'} a ${t.workFormat.endTime || '--'} (${t.workFormat.duration} min) • ${t.workFormat.status}</p>
+                </div>
+              ` : ''}
+
+              <div class="flex gap-1.5 pt-1 border-t border-slate-200 dark:border-slate-600/60">
+                <button onclick="openTaskFormatModal(${i})" class="flex-1 py-1.5 bg-blue-500/15 hover:bg-blue-500/25 text-blue-400 border border-blue-500/30 rounded-lg font-bold text-[10px] transition">
+                  📋 ${hasFormat ? 'Editar Formato de Trabajo' : 'Llenar Formato de Trabajo'}
+                </button>
+                ${t.time ? `
+                  <button onclick="downloadTaskPhoneAlarm(${i})" class="px-2.5 py-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 border border-amber-500/30 rounded-lg font-bold text-[10px] transition" title="Guardar alarma en el reloj/calendario del teléfono">
+                    📅 Alarma Teléfono
+                  </button>
+                ` : ''}
               </div>
             </div>
-          </label>
-          <button onclick="deleteTask(${i})" class="text-slate-400 hover:text-rose-500 px-2">✕</button>
-        </div>
-      `).join('');
+          `;
+        }).join('');
+      }
+      renderWorkReportPreview();
     }
 
     function addTask() {
       const input = document.getElementById('newTaskInput');
       const timeInput = document.getElementById('newTaskTime').value;
+      const projInput = document.getElementById('newTaskProject').value.trim();
       const tagInput = document.getElementById('newTaskTag').value;
-      if (!input.value.trim()) return;
-      appState.tasks.unshift({ id: Date.now(), text: input.value.trim(), time: timeInput, tag: tagInput, done: false, notified: false });
+      if (!input.value.trim()) { showToast("Escribe la descripción de la tarea", "warning"); return; }
+
+      if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission();
+      }
+
+      appState.tasks.unshift({
+        id: Date.now(),
+        text: input.value.trim(),
+        time: timeInput,
+        project: projInput,
+        tag: tagInput,
+        done: false,
+        notified: false,
+        workFormat: null
+      });
       input.value = '';
       document.getElementById('newTaskTime').value = '';
+      document.getElementById('newTaskProject').value = '';
       saveState();
-      showToast("Tarea agregada", "success");
+      showToast(timeInput ? `Tarea programada. Sonará a las ${timeInput}.` : "Tarea agregada", "success");
     }
 
-    function toggleTask(i) { appState.tasks[i].done = !appState.tasks[i].done; saveState(); }
+    function toggleTask(i) {
+      appState.tasks[i].done = !appState.tasks[i].done;
+      saveState();
+      if (appState.tasks[i].done && !appState.tasks[i].workFormat) {
+        openTaskFormatModal(i, false);
+      }
+    }
+
     function deleteTask(i) { appState.tasks.splice(i, 1); saveState(); }
+
+    // GENERADOR DE REPORTE DEL FORMATO DE TRABAJO
+    function buildWorkReportText() {
+      const user = appState.profile.name || 'Usuario';
+      const lines = [
+        `=========================================`,
+        `REPORTE DE FORMATO DE TRABAJO - ${user.toUpperCase()}`,
+        `Fecha: ${appState.currentDay}`,
+        `=========================================`
+      ];
+
+      if (appState.tasks.length === 0) {
+        lines.push("Sin actividades registradas.");
+        return lines.join('\n');
+      }
+
+      appState.tasks.forEach((t, idx) => {
+        const wf = t.workFormat || {};
+        lines.push(
+          `\n${idx + 1}. ACTIVIDAD: ${t.text}`,
+          `   • Proyecto / Folio: ${wf.project || t.project || 'General'} (${t.tag || 'Trabajo'})`,
+          `   • Estatus: ${wf.status || (t.done ? 'Completado' : 'Pendiente')}`,
+          `   • Horario: ${wf.startTime || t.time || '--:--'} a ${wf.endTime || '--:--'} (Duración: ${wf.duration || '--'} min)`,
+          `   • Trabajo Realizado / Entregable: ${wf.deliverable || 'Sin especificar'}`,
+          wf.notes ? `   • Observaciones: ${wf.notes}` : null
+        );
+      });
+
+      return lines.filter(Boolean).join('\n');
+    }
+
+    function renderWorkReportPreview() {
+      const previewEl = document.getElementById('workReportPreview');
+      const badgeEl = document.getElementById('workReportCountBadge');
+      if (!previewEl || !badgeEl) return;
+      badgeEl.textContent = `${appState.tasks.length} actividades`;
+      previewEl.textContent = buildWorkReportText();
+    }
+
+    function copyWorkFormatReport() {
+      const text = buildWorkReportText();
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Formato de Trabajo copiado al portapapeles", "success");
+      });
+    }
+
+    function downloadWorkFormatCSV() {
+      if (appState.tasks.length === 0) { showToast("No hay tareas para exportar", "warning"); return; }
+      const headers = ["Fecha", "Categoria", "Proyecto_Folio", "Actividad", "Estatus", "Hora_Inicio", "Hora_Fin", "Duracion_Min", "Trabajo_Realizado_Entregable", "Observaciones"];
+      const rows = appState.tasks.map(t => {
+        const wf = t.workFormat || {};
+        const cols = [
+          wf.date || appState.currentDay,
+          t.tag || 'Trabajo',
+          wf.project || t.project || 'General',
+          t.text,
+          wf.status || (t.done ? 'Completado' : 'Pendiente'),
+          wf.startTime || t.time || '',
+          wf.endTime || '',
+          wf.duration || '',
+          wf.deliverable || '',
+          wf.notes || ''
+        ];
+        return cols.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',');
+      });
+
+      const csvContent = "\uFEFF" + [headers.join(','), ...rows].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `formato_trabajo_${appState.currentDay}.csv`;
+      link.click();
+      showToast("Archivo Excel (CSV) descargado", "success");
+    }
 
     // ==================== 3. GIMNASIO, CRONÓMETRO Y MOTOR BIOMECÁNICO + GIFS ====================
     let gymRestSeconds = 0;
@@ -2177,7 +2842,7 @@
       const p = appState.profile || {};
       const modelName = appState.selectedModel || 'gemini-3.5-flash-lite';
 
-      document.getElementById('headerTitle').textContent = p.name ? `Control TCC • ${p.name}` : 'Sistema TCC Master v43';
+      document.getElementById('headerTitle').textContent = p.name ? `Control TCC • ${p.name}` : 'Control TCC';
       document.getElementById('headerSubtitle').textContent = appState.apiKey ? `IA Activa (${modelName})` : `Modelo: ${modelName} (Falta API Key)`;
 
       const badge = document.getElementById('aiModelBadge');
@@ -2199,7 +2864,7 @@
     }
 
     function executeFactoryReset() {
-      localStorage.removeItem('allan_tcc_app_v43');
+      localStorage.removeItem(STORAGE_KEY);
       appState = createDefaultState();
       document.getElementById('factoryResetConfirmBox').classList.add('hidden');
       renderAll();
@@ -2254,6 +2919,7 @@
 
     renderAll();
     checkOnboarding();
+    initFirebaseIfConfigured();
   </script>
 </body>
 </html>
