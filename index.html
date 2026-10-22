@@ -2008,7 +2008,7 @@
       btn.disabled = true;
 
       try {
-        const prompt = `Actúa como nutriólogo clínico. Usuario con resistencia a la insulina, peso ${appState.profile.weight || 120}kg.
+        const prompt = `Actúa como nutriólogo clínico. , peso ${appState.profile.weight || 120}kg.
         Restante hoy: ${remKcal} kcal, ${remP}g proteína. Ingredientes: "${ingredients}". Comidas: ${mealsRequested.join(', ')}.
         Devuelve ÚNICAMENTE un JSON válido:
         {
