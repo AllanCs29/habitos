@@ -7,12 +7,11 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Control TCC">
-  <title>Control TCC - Master Cloud v48</title>
+  <title>Control TCC - Master Cloud v49</title>
 
   <!-- FAVICON SVG INMEDIATO -->
   <link id="faviconLink" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ea580c'/%3E%3Cstop offset='100%25' stop-color='%232563eb'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='24' fill='%230f172a'/%3E%3Crect x='6' y='6' width='88' height='88' rx='20' fill='none' stroke='url(%23g)' stroke-width='5'/%3E%3Cpath d='M56 18L26 56h22l-6 26 32-38H52l4-26z' fill='url(%23g)'/%3E%3C/svg%3E">
-  <link id="appleTouchIconLink" rel="apple-touch-icon" href="">
-  <link id="manifestLink" rel="manifest" href="">
+  <link id="appleTouchIconLink" rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%230f172a'/%3E%3C/svg%3E">
 
   <!-- ICONOS OFICIALES DE FLATICON (UICONS) -->
   <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
@@ -135,7 +134,7 @@
         <i class="fi fi-rr-user"></i>
         <span>Editar Perfil / Cuenta Inicial</span>
       </button>
-      <p class="text-[10px] text-center text-slate-400">Control TCC Master Cloud v48</p>
+      <p class="text-[10px] text-center text-slate-400">Control TCC Master Cloud v49</p>
     </div>
   </aside>
 
@@ -250,22 +249,56 @@
     </div>
   </div>
 
-  <!-- ==================== MODAL ONBOARDING (DATOS PERSONALES + CONDICIÓN MÉDICA + CLOUD/INVITADO) ==================== -->
+  <!-- ==================== MODAL ONBOARDING (ACCESO RÁPIDO CON CORREO PRIMERO + DATOS PERSONALES) ==================== -->
   <div id="onboardingModal" class="fixed inset-0 z-[90] bg-slate-950/95 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto">
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-md rounded-3xl p-6 space-y-4 shadow-2xl my-auto">
-      <div class="flex items-center gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
-        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-terra-500 to-blue-600 text-white flex items-center justify-center shrink-0 shadow-md font-black">
-          <i class="fi fi-sr-bolt text-lg"></i>
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-terra-500 to-blue-600 text-white flex items-center justify-center shrink-0 shadow-md font-black">
+            <i class="fi fi-sr-bolt text-lg"></i>
+          </div>
+          <div>
+            <h2 class="text-base font-extrabold tracking-tight">Configuración y Rescate TCC</h2>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">Recupera tu cuenta Cloud o configura tus metas.</p>
+          </div>
         </div>
-        <div>
-          <h2 class="text-base font-extrabold tracking-tight">Configuración Inicial TCC</h2>
-          <p class="text-[11px] text-slate-500 dark:text-slate-400">Personaliza tu perfil o inicia sesión para recuperar tu nube.</p>
+        <button onclick="dismissOnboardingModal()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-500 text-xs font-bold" title="Cerrar y entrar directo">
+          <i class="fi fi-rr-cross-small"></i>
+        </button>
+      </div>
+
+      <!-- 1. RECUPERACIÓN INMEDIATA EN LA NUBE O LOCAL (ARRIBA PARA QUE NUNCA TENGAS QUE LLENAR DATOS SI YA TENÍAS CUENTA) -->
+      <div class="p-3.5 rounded-2xl bg-emerald-500/10 border-2 border-emerald-500/40 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-extrabold uppercase text-emerald-400 flex items-center gap-1.5">
+            <i class="fi fi-rr-cloud-share"></i>
+            <span>¿Ya tenías datos guardados? Recupéralos aquí</span>
+          </span>
+          <button onclick="rescueLegacyLocalData()" class="px-2 py-0.5 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 text-[10px] font-bold">
+            Rescate Local
+          </button>
+        </div>
+        <p class="text-[11px] text-slate-400">Ingresa tu correo y contraseña y presiona <strong>"Ya tengo cuenta"</strong> para descargar todo tu historial sin volver a llenar el formulario:</p>
+        <div class="grid grid-cols-2 gap-2">
+          <input id="obEmail" type="email" placeholder="Correo electrónico" class="w-full px-2.5 py-2 rounded-xl bg-white dark:bg-slate-800 outline-none text-xs">
+          <input id="obPass" type="password" placeholder="Contraseña (6+)" class="w-full px-2.5 py-2 rounded-xl bg-white dark:bg-slate-800 outline-none text-xs">
+        </div>
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <button onclick="completeOnboardingWithCloud('login')" class="py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5">
+            <i class="fi fi-rr-key"></i>
+            <span>Ya tengo cuenta (Bajar)</span>
+          </button>
+          <button onclick="completeOnboardingWithCloud('register')" class="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5">
+            <i class="fi fi-rr-user-add"></i>
+            <span>Crear Cuenta Cloud</span>
+          </button>
         </div>
       </div>
 
-      <div class="space-y-2.5 text-xs">
+      <!-- 2. DATOS DE PERFIL -->
+      <div class="space-y-2.5 text-xs pt-1 border-t border-slate-200 dark:border-slate-800">
         <div>
-          <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">1. Tu Nombre o Alias (Para tus reportes)</label>
+          <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Tu Nombre o Alias (Para tus reportes)</label>
           <input id="obName" type="text" placeholder="Ej. Allan / Usuario" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 outline-none font-bold">
         </div>
 
@@ -319,34 +352,11 @@
           <label class="text-[10px] font-bold uppercase text-blue-400 block mb-1">Clave API de Gemini (Opcional ahora)</label>
           <input id="obApiKey" type="password" placeholder="Ej. AIzaSy..." class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 outline-none font-mono text-xs">
         </div>
-
-        <!-- OPCIÓN DE CUENTA EN LA NUBE O INVITADO -->
-        <div class="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-2 mt-2">
-          <span class="text-[10px] font-extrabold uppercase text-emerald-400 flex items-center gap-1.5">
-            <i class="fi fi-rr-cloud-share"></i>
-            <span>2. Sincronizar Cuenta Cloud (Opcional)</span>
-          </span>
-          <p class="text-[11px] text-slate-400">Si ya tienes cuenta, pon tu correo y contraseña y dale a "Ya tengo cuenta" (no necesitas llenar los datos de arriba para recuperar tu cuenta):</p>
-          <div class="grid grid-cols-2 gap-2">
-            <input id="obEmail" type="email" placeholder="Correo electrónico" class="w-full px-2.5 py-2 rounded-xl bg-white dark:bg-slate-800 outline-none text-xs">
-            <input id="obPass" type="password" placeholder="Contraseña (6+)" class="w-full px-2.5 py-2 rounded-xl bg-white dark:bg-slate-800 outline-none text-xs">
-          </div>
-          <div class="grid grid-cols-2 gap-2 pt-1">
-            <button onclick="completeOnboardingWithCloud('register')" class="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5">
-              <i class="fi fi-rr-user-add"></i>
-              <span>Crear Cuenta</span>
-            </button>
-            <button onclick="completeOnboardingWithCloud('login')" class="py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5">
-              <i class="fi fi-rr-key"></i>
-              <span>Ya tengo cuenta</span>
-            </button>
-          </div>
-        </div>
       </div>
 
-      <button onclick="completeOnboarding()" class="w-full py-3 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-extrabold text-xs rounded-2xl transition flex items-center justify-center gap-2">
-        <i class="fi fi-rr-user"></i>
-        <span>Guardar Datos e Iniciar como Invitado</span>
+      <button onclick="completeOnboarding()" class="w-full py-3 bg-terra-500 hover:bg-terra-600 text-white font-extrabold text-xs rounded-2xl transition flex items-center justify-center gap-2 shadow-md">
+        <i class="fi fi-rr-check"></i>
+        <span>Guardar Perfil e Iniciar</span>
       </button>
     </div>
   </div>
@@ -408,7 +418,7 @@
         <div class="flex justify-between items-center">
           <div>
             <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Registro de comidas</span>
-            <h2 class="text-lg font-black tracking-tight">Contador de calorías</h2>
+            <h2 class="text-lg font-black tracking-tight">Contador de calorías y macros</h2>
           </div>
           <button onclick="document.getElementById('goalsEditBox').classList.toggle('hidden')" class="text-[11px] font-bold text-terra-500 bg-terra-500/10 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
             <i class="fi fi-rr-sliders-h"></i>
@@ -418,8 +428,17 @@
 
         <div id="goalsEditBox" class="hidden p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2.5">
           <div class="flex justify-between items-center">
-            <span class="text-[10px] font-bold uppercase text-slate-400">Ajustar Metas Diarias</span>
+            <span class="text-[10px] font-bold uppercase text-slate-400">Ajustar Metas Diarias y Objetivo</span>
             <button onclick="openOnboardingEdit()" class="text-[10px] text-blue-500 font-bold underline">Asistente de Perfil</button>
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-0.5 font-bold">Tipo de Meta Nutricional (Rige cómo el Chef IA ajusta tus calorías)</label>
+            <select id="nutritionGoalModeSelect" onchange="updateNutritionGoalMode(this.value)" class="w-full px-2.5 py-1.5 text-xs rounded-xl bg-white dark:bg-slate-900 font-bold outline-none">
+              <option value="deficit">Bajar grasa corporal / Definición (Prioriza proteína; calorías pueden quedar cortas)</option>
+              <option value="recomp">Recomposición corporal (Cumplir proteína y acercarse a kcal meta)</option>
+              <option value="hypertrophy">Hipertrofia muscular limpia (Obligatorio llegar a kcal y macros)</option>
+              <option value="bulk">Volumen y fuerza máxima (Superávit: nunca quedar corto en kcal ni macros)</option>
+            </select>
           </div>
           <div class="grid grid-cols-2 gap-2">
             <div>
@@ -459,11 +478,12 @@
             </div>
           </div>
 
-          <div class="flex-1 space-y-2">
+          <div class="flex-1 space-y-1.5">
             <div>
-              <span class="text-[11px] text-slate-400 font-semibold block">Te quedan hoy</span>
+              <span id="goalRuleBadge" class="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400 inline-block mb-1">Meta: Déficit (Grasa)</span>
+              <span class="text-[11px] text-slate-400 font-semibold block">Disponible para cerrar el día</span>
               <span id="kcalRemainingBig" class="text-2xl font-black text-terra-500">2100 kcal</span>
-              <p id="remainingMacrosSummary" class="text-[11px] text-slate-400"></p>
+              <p id="remainingMacrosSummary" class="text-[11px] text-slate-400 leading-snug"></p>
             </div>
           </div>
         </div>
@@ -471,7 +491,7 @@
         <div class="space-y-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
           <div>
             <div class="flex justify-between font-bold mb-1">
-              <span>Proteínas</span>
+              <span>Proteínas <span id="protRemLabel" class="text-[10px] text-terra-500 font-normal"></span></span>
               <span id="protText" class="text-slate-500 dark:text-slate-300">0 / 170 g</span>
             </div>
             <div class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
@@ -480,7 +500,7 @@
           </div>
           <div>
             <div class="flex justify-between font-bold mb-1">
-              <span>Carbohidratos</span>
+              <span>Carbohidratos <span id="carbRemLabel" class="text-[10px] text-amber-500 font-normal"></span></span>
               <span id="carbText" class="text-slate-500 dark:text-slate-300">0 / 160 g</span>
             </div>
             <div class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
@@ -489,7 +509,7 @@
           </div>
           <div>
             <div class="flex justify-between font-bold mb-1">
-              <span>Grasas</span>
+              <span>Grasas <span id="fatRemLabel" class="text-[10px] text-emerald-500 font-normal"></span></span>
               <span id="fatText" class="text-slate-500 dark:text-slate-300">0 / 85 g</span>
             </div>
             <div class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
@@ -506,10 +526,18 @@
             <i class="fi fi-rr-camera text-terra-500"></i>
             <h2 class="font-extrabold text-sm">Foto del plato / Escáner IA</h2>
           </div>
-          <span id="aiModelBadge" class="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-300 px-2 py-0.5 rounded-full font-mono">gemini-3.5-flash-lite</span>
+          <span id="aiModelBadge" class="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-300 px-2 py-0.5 rounded-full font-mono">gemini-3.8-live-extended-thinking</span>
         </div>
 
-        <input id="aiFoodInput" type="text" placeholder="Describe tu plato o sube foto (ej. 200g bistec con ensalada)..." class="w-full px-3.5 py-2.5 text-xs rounded-2xl bg-slate-100 dark:bg-slate-800 outline-none">
+        <div class="grid grid-cols-3 gap-2">
+          <select id="mealTypeTagSelect" class="col-span-1 px-2.5 py-2.5 text-xs rounded-2xl bg-slate-100 dark:bg-slate-800 font-bold outline-none">
+            <option value="Desayuno">Desayuno</option>
+            <option value="Comida">Comida</option>
+            <option value="Cena">Cena</option>
+            <option value="Snack">Snack</option>
+          </select>
+          <input id="aiFoodInput" type="text" placeholder="Describe tu plato (ej. 200g bistec con arroz)..." class="col-span-2 px-3.5 py-2.5 text-xs rounded-2xl bg-slate-100 dark:bg-slate-800 outline-none">
+        </div>
 
         <div id="photoPreviewCard" class="hidden bg-slate-950 border-2 border-terra-500 rounded-2xl p-3 flex items-center gap-3">
           <img id="photoThumbnail" src="" alt="Plato" class="w-16 h-16 object-cover rounded-xl border border-terra-500 shrink-0">
@@ -536,7 +564,10 @@
       <!-- COMIDAS DE HOY -->
       <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3">
         <div class="flex justify-between items-center">
-          <h2 class="font-extrabold text-sm">Comidas de hoy</h2>
+          <div>
+            <h2 class="font-extrabold text-sm">Comidas registradas hoy</h2>
+            <p id="loggedMealTypesStatus" class="text-[10px] text-slate-400">Sin comidas registradas</p>
+          </div>
           <button onclick="clearTodayMeals()" class="text-[10px] text-rose-500 font-bold">Limpiar Día</button>
         </div>
         <div id="mealsList" class="space-y-2"></div>
@@ -564,15 +595,23 @@
         </div>
       </div>
 
-      <!-- CHEF IA PERSONALIZADO PARA CADA USUARIO -->
-      <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3">
-        <div class="flex items-center gap-2">
-          <i class="fi fi-rr-hat-chef text-emerald-500"></i>
-          <div>
-            <h2 class="font-extrabold text-sm">Chef IA: ¿Qué tienes en tu refri?</h2>
-            <p class="text-[11px] text-slate-400">Dile tus ingredientes y tu situación médica o alimentaria para armar tus comidas.</p>
+      <!-- CHEF IA INTELIGENTE ORIENTADO A COMPLETAR MACROS Y META -->
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border-2 border-emerald-500/30 space-y-3">
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <i class="fi fi-rr-hat-chef text-emerald-500 text-base"></i>
+            <div>
+              <h2 class="font-extrabold text-sm">Chef IA: Cuadrador Exacto de Macros</h2>
+              <p class="text-[11px] text-slate-400">Calcula gramajes exactos según lo que ya comiste hoy y tu meta física.</p>
+            </div>
           </div>
+          <button onclick="autoSelectRemainingMeals()" class="px-2.5 py-1 rounded-xl bg-emerald-500/15 text-emerald-400 font-bold text-[10px] shrink-0">
+            Auto-detectar faltantes
+          </button>
         </div>
+
+        <!-- TARJETA EN VIVO DE PRESUPUESTO DE MACROS PARA EL CHEF -->
+        <div id="chefMacroBudgetBanner" class="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-[11px] space-y-1"></div>
 
         <div>
           <label class="text-[10px] font-bold uppercase text-emerald-500 block mb-1">¿Cuentas con alguna condición médica, alergia o restricción? (Personalizado)</label>
@@ -580,23 +619,31 @@
         </div>
 
         <div>
-          <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Ingredientes disponibles en tu refri o alacena</label>
-          <textarea id="fridgeIngredients" rows="2" placeholder="Ej. Pan de linaza, huevo, jamón, fajitas de pollo, queso panela, yogurt griego, frutos rojos..." class="w-full px-3.5 py-2 text-xs rounded-2xl bg-slate-100 dark:bg-slate-800 outline-none resize-none"></textarea>
+          <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Ingredientes disponibles en tu refri o alacena (o lo que tienes a la mano)</label>
+          <textarea id="fridgeIngredients" rows="2" placeholder="Ej. Pechuga de pollo, huevo, claras, arroz, tortillas, aguacate, atún, avena, queso panela, yogurt griego..." class="w-full px-3.5 py-2 text-xs rounded-2xl bg-slate-100 dark:bg-slate-800 outline-none resize-none"></textarea>
         </div>
 
-        <div class="flex flex-wrap gap-2 text-[11px]">
-          <label class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-xl cursor-pointer">
-            <input type="checkbox" id="planDinner" checked class="accent-emerald-500"> <span>Cena hoy</span>
-          </label>
-          <label class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-xl cursor-pointer">
-            <input type="checkbox" id="planBreakfast" checked class="accent-emerald-500"> <span>Desayuno</span>
-          </label>
-          <label class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-xl cursor-pointer">
-            <input type="checkbox" id="planLunch" checked class="accent-emerald-500"> <span>Comida trabajo</span>
-          </label>
+        <div class="space-y-1.5">
+          <div class="flex justify-between items-center">
+            <span class="text-[10px] font-bold uppercase text-slate-400">¿Qué comidas quieres que arme con tus macros?</span>
+            <button onclick="selectAllThreeMealsForChef()" class="text-[10px] text-terra-500 font-extrabold underline">Pedir las 3 comidas del día</button>
+          </div>
+          <div class="grid grid-cols-3 gap-2 text-[11px]">
+            <label class="flex items-center justify-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2.5 py-2 rounded-xl cursor-pointer font-bold">
+              <input type="checkbox" id="planBreakfast" onchange="renderChefMacroBanner()" class="accent-emerald-500"> <span>Desayuno</span>
+            </label>
+            <label class="flex items-center justify-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2.5 py-2 rounded-xl cursor-pointer font-bold">
+              <input type="checkbox" id="planLunch" onchange="renderChefMacroBanner()" class="accent-emerald-500"> <span>Comida</span>
+            </label>
+            <label class="flex items-center justify-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2.5 py-2 rounded-xl cursor-pointer font-bold">
+              <input type="checkbox" id="planDinner" checked onchange="renderChefMacroBanner()" class="accent-emerald-500"> <span>Cena</span>
+            </label>
+          </div>
         </div>
-        <button id="fridgeBtn" onclick="recommendFromFridge()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-2xl transition">
-          Recomendar Platillos y Qué Evitar
+
+        <button id="fridgeBtn" onclick="recommendFromFridge()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-2xl shadow-md transition flex items-center justify-center gap-2">
+          <i class="fi fi-rr-magic-wand"></i>
+          <span>Diseñar Recetas para Cumplir mis Macros</span>
         </button>
         <div id="fridgeRecommendations" class="space-y-2.5 pt-1"></div>
       </div>
@@ -912,7 +959,10 @@
       <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200 dark:border-slate-800 space-y-3">
         <div class="flex items-center gap-2">
           <i class="fi fi-rr-shopping-cart text-terra-500"></i>
-          <h2 class="font-extrabold text-sm">Planificador de Comidas y Lista del Súper</h2>
+          <div>
+            <h2 class="font-extrabold text-sm">Planificador de 3 Comidas y Lista del Súper</h2>
+            <p class="text-[11px] text-slate-400">Calculado para cuadrar exactamente con tus macros diarias y meta.</p>
+          </div>
         </div>
         <div class="grid grid-cols-3 gap-2">
           <input id="groceryBudget" type="number" placeholder="Presupuesto $" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 text-center font-bold outline-none">
@@ -926,7 +976,7 @@
           <option value="Volumen económico">Volumen económico</option>
         </select>
         <button id="groceryBtn" onclick="generateGroceryWithGemini()" class="w-full py-2.5 bg-terra-500 hover:bg-terra-600 text-white font-extrabold text-xs rounded-2xl transition">
-          Generar Semana y Lista del Súper con IA
+          Generar Semana (3 Comidas con Macros) y Lista del Súper
         </button>
 
         <div class="pt-3">
@@ -935,13 +985,13 @@
         </div>
 
         <div class="pt-4 border-t border-slate-200 dark:border-slate-800">
-          <h3 class="font-extrabold text-xs uppercase text-slate-400 mb-2">Mi Semana (Almuerzos y Cenas)</h3>
+          <h3 class="font-extrabold text-xs uppercase text-slate-400 mb-2">Mi Semana (3 Comidas Cuadradas a tus Macros)</h3>
           <div id="mealPlanContainer" class="space-y-2.5"></div>
         </div>
       </div>
     </section>
 
-    <!-- ==================== PESTAÑA 7: AJUSTES, FIREBASE CLOUD & RESCATE DE DATOS ==================== -->
+    <!-- ==================== PESTAÑA 7: AJUSTES, FIREBASE CLOUD & MODELO EXTENDED THINKING ==================== -->
     <section id="tab-settings" class="space-y-4 hidden">
 
       <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border-2 border-emerald-500/40 space-y-3">
@@ -949,8 +999,8 @@
           <div class="flex items-center gap-2">
             <i class="fi fi-rr-cloud-share text-emerald-400 text-base"></i>
             <div>
-              <h2 class="font-extrabold text-sm text-emerald-400">Cuenta y Sincronización Cloud</h2>
-              <p class="text-[10px] text-slate-400">Protección anti-sobrescritura activa en <code>control-tcc</code>.</p>
+              <h2 class="font-extrabold text-sm text-emerald-400">Cuenta y Sincronización Cloud + Bóveda IndexedDB</h2>
+              <p class="text-[10px] text-slate-400">Doble respaldo activo: Nube <code>control-tcc</code> + Bóveda Local Permanente.</p>
             </div>
           </div>
           <span id="firebaseAuthStatus" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800">Sin sesión</span>
@@ -990,43 +1040,82 @@
           <button onclick="logoutFirebase()" class="w-full py-2 bg-rose-500/20 text-rose-400 font-bold text-xs rounded-xl">Cerrar Sesión</button>
         </div>
 
-        <!-- HERRAMIENTA DE RESCATE DE MEMORIA LOCAL -->
+        <!-- HERRAMIENTA DE RESCATE PROFUNDO DE MEMORIA LOCAL + INDEXEDDB -->
         <div class="pt-2 border-t border-slate-200 dark:border-slate-800">
-          <button onclick="rescueLegacyLocalData()" class="w-full py-2 bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-400 border border-indigo-500/30 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5">
+          <button onclick="rescueLegacyLocalData()" class="w-full py-2.5 bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-400 border border-indigo-500/30 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5">
             <i class="fi fi-rr-life-ring"></i>
-            <span>Buscar y Rescatar Datos de Versiones Anteriores en este Dispositivo</span>
+            <span>Escaneo Profundo: Rescatar Datos de Versiones Anteriores / IndexedDB</span>
           </button>
         </div>
       </div>
 
-      <!-- TOKEN & MODELOS DE IA -->
-      <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200 dark:border-slate-800 space-y-3">
-        <h2 class="font-extrabold text-sm">Configuración & Token Gemini</h2>
+      <!-- TOKEN & MODELOS DE IA CON PENSAMIENTO EXTENDIDO -->
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border-2 border-terra-500/40 space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="text-[10px] font-extrabold uppercase text-terra-500 block">Motor de Razonamiento Profundo</span>
+            <h2 class="font-extrabold text-sm">Configuración & Token Gemini (De Paga / Pro)</h2>
+          </div>
+          <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-terra-500/15 text-terra-500 font-bold">Thinking HIGH</span>
+        </div>
+
         <div>
           <label class="text-xs text-slate-400 block mb-1">Tu Clave API de Gemini (API Key):</label>
           <input id="apiKeyInput" type="password" placeholder="Ej. AIzaSy..." class="w-full px-3 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-800 outline-none font-mono">
         </div>
+
         <div>
           <label class="text-xs text-slate-400 block mb-1">Selecciona el Modelo de IA:</label>
           <select id="modelSelect" onchange="handleModelSelectionChange(this.value)" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 outline-none font-bold">
-            <option value="gemini-3.5-flash-lite" selected>gemini-3.5-flash-lite (Ligero de alta velocidad - Predeterminado)</option>
-            <option value="gemini-3.1-flash-live-preview">gemini-3.1-flash-live-preview (Rápido y gratuito)</option>
-            <option value="gemini-3.8-live">gemini-3.8-live (Análisis fluido en vivo)</option>
-            <option value="gemini-3.8-flash">gemini-3.8-flash (Soporte de pensamiento alto)</option>
-            <option value="gemini-3.8-live-extended-thinking">gemini-3.8-live-extended-thinking (Solo Gemini Premium)</option>
+            <option value="gemini-3.8-live-extended-thinking" selected>gemini-3.8-live-extended-thinking (Live API + Pensamiento Extendido - Recomendado)</option>
+            <option value="gemini-4-argon">gemini-4-argon (Flagship Gemini 4 - Razonamiento Máximo 1M Tokens)</option>
+            <option value="gemini-3.8-flash">gemini-3.8-flash (Pensamiento Profundo High - Multimodales/JSON)</option>
+            <option value="gemini-3.1-pro-preview">gemini-3.1-pro-preview (Gemini 3.1 Pro - Análisis Complejo)</option>
+            <option value="gemini-2.5-pro">gemini-2.5-pro (Pensamiento Dinámico 32k Thinking Budget)</option>
+            <option value="gemini-3.8-live">gemini-3.8-live (Live API Estándar)</option>
+            <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Ligero de alta velocidad)</option>
           </select>
         </div>
 
-        <div id="premiumModelNotice" class="hidden p-3 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-xs space-y-1">
-          <p class="font-extrabold text-amber-400 flex items-center gap-1.5">
-            <i class="fi fi-rr-triangle-warning"></i>
-            <span>Nota: Solo funciona en Gemini Premium</span>
-          </p>
-          <p class="text-[11px] text-slate-300">El modelo <code>gemini-3.8-live-extended-thinking</code> requiere una API Key con nivel de pago/Premium activo.</p>
-          <a href="https://ai.google.dev/gemini-api/docs/models/gemini-3.8-live-extended-thinking?hl=es-419#gemini-3.8-live-extended-thinking" target="_blank" class="text-[11px] text-blue-400 underline font-bold block pt-1">Ver documentación oficial de Google</a>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-1 font-bold uppercase">Nivel de Pensamiento (Thinking)</label>
+            <select id="thinkingLevelSelect" onchange="saveSettings()" class="w-full px-2.5 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 font-bold outline-none">
+              <option value="HIGH" selected>Alto (HIGH - Piensa al máximo)</option>
+              <option value="MEDIUM">Medio (MEDIUM - Equilibrado)</option>
+              <option value="LOW">Bajo (LOW - Más rápido)</option>
+            </select>
+          </div>
+          <div class="flex flex-col justify-end">
+            <button id="verifyModelBtn" onclick="verifyActiveModelConnection()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5">
+              <i class="fi fi-rr-shield-check"></i>
+              <span>Corroborar Modelo</span>
+            </button>
+          </div>
         </div>
 
-        <button onclick="saveSettings()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl transition">Guardar Token y Modelo</button>
+        <!-- TARJETA TÉCNICA OFICIAL DE GEMINI-3.8-LIVE-EXTENDED-THINKING -->
+        <div id="premiumModelNotice" class="p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800/90 border border-terra-500/40 text-xs space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-extrabold text-terra-500 flex items-center gap-1.5">
+              <i class="fi fi-sr-microchip"></i>
+              <span>Tarjeta Oficial: gemini-3.8-live-extended-thinking</span>
+            </span>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">Estable • Sept 2026</span>
+          </div>
+          <p class="text-[11px] text-slate-500 dark:text-slate-300 leading-relaxed">
+            Conectado mediante <strong>WebSocket Live API (<code>v1alpha BidiGenerateContent</code>)</strong> con <code>thinkingConfig.thinkingLevel = "HIGH"</code> y monitoreo de <code>interactionStatus: "IDLE"</code>. Para imágenes o cuando requiera salida JSON estructurada directa, utiliza automáticamente el motor de pensamiento profundo en paralelo para garantizar 100% de compatibilidad.
+          </p>
+          <div class="grid grid-cols-2 gap-1.5 text-[10px] pt-1 border-t border-slate-200 dark:border-slate-700">
+            <div><strong class="text-slate-400">Entrada:</strong> 131,072 tokens (Texto, imágenes, audio)</div>
+            <div><strong class="text-slate-400">Salida:</strong> 65,536 tokens (Texto y audio)</div>
+            <div><strong class="text-slate-400">Pensamiento:</strong> Admitido (Extended Thinking)</div>
+            <div><strong class="text-slate-400">Búsqueda / Live:</strong> Admitido (Async)</div>
+          </div>
+          <div id="modelVerificationResultBox" class="hidden p-2.5 rounded-xl bg-slate-900 text-emerald-300 font-mono text-[10px] border border-emerald-500/30"></div>
+        </div>
+
+        <button onclick="saveSettings()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl transition">Guardar Token, Modelo y Nivel de Pensamiento</button>
       </div>
 
       <!-- Calculadora IA de Calorías -->
@@ -1046,6 +1135,7 @@
           <option value="Pérdida de grasa corporal y definición (Déficit calórico, alta proteína)" class="text-slate-900">Quema de grasa y definición (Déficit)</option>
           <option value="Recomposición corporal" class="text-slate-900">Recomposición corporal</option>
           <option value="Hipertrofia y ganancia muscular limpia" class="text-slate-900">Hipertrofia y masa muscular limpia</option>
+          <option value="Volumen y aumento de fuerza máxima" class="text-slate-900">Volumen y aumento de fuerza máxima</option>
         </select>
         <input id="calcMedical" type="text" onchange="updateMedicalCondition(this.value)" placeholder="Condición médica o restricción (opcional)..." class="w-full px-3 py-2 text-xs rounded-xl bg-white/10 text-white placeholder-indigo-200 outline-none">
         <button id="calcBtn" onclick="calculateMacrosWithGemini()" class="w-full py-2.5 bg-white text-indigo-700 font-extrabold text-xs rounded-xl">
@@ -1127,10 +1217,10 @@
     ];
 
     const GOAL_LABELS = {
-      deficit: 'Pérdida de grasa abdominal y definición',
+      deficit: 'Pérdida de grasa corporal y definición (Déficit)',
       recomp: 'Recomposición corporal (Perder grasa y ganar músculo)',
-      hypertrophy: 'Hipertrofia y ganancia de masa muscular',
-      bulk: 'Volumen (Aumento de peso y fuerza)'
+      hypertrophy: 'Hipertrofia y ganancia de masa muscular limpia',
+      bulk: 'Volumen y aumento de fuerza máxima (Superávit)'
     };
 
     function createDefaultState() {
@@ -1138,12 +1228,13 @@
         theme: 'dark',
         currentDay: '2026-10-22',
         apiKey: '',
-        selectedModel: 'gemini-3.5-flash-lite',
+        selectedModel: 'gemini-3.8-live-extended-thinking',
+        thinkingLevel: 'HIGH',
         onboardingComplete: false,
         profile: {
           name: '', weight: '', height: '', age: '', activity: 1.55, gymDays: '', goalKey: 'deficit', goalText: GOAL_LABELS.deficit, medicalCondition: ''
         },
-        targetKcal: '', targetWater: '', targetProt: '', targetCarb: '', targetFat: '',
+        targetKcal: 2100, targetWater: 3500, targetProt: 170, targetCarb: 160, targetFat: 75,
         days: {},
         tasks: [],
         gymStructured: {},
@@ -1168,59 +1259,220 @@
       return state;
     }
 
-    // Evalúa cuántos registros reales tiene un estado para jamás sobreescribir un estado lleno con uno vacío
+    // Evalúa la riqueza de un estado para jamás perder información
     function getStateRichnessScore(st) {
-      if (!st) return 0;
+      if (!st || typeof st !== 'object') return 0;
       let score = 0;
-      if (st.profile && st.profile.name) score += 5;
-      if (st.apiKey) score += 5;
-      score += (st.tasks || []).length * 3;
-      score += (st.habitsList || []).length * 2;
-      score += (st.groceries || []).length;
-      if (st.days) {
+      if (st.profile && st.profile.name) score += 10;
+      if (st.profile && st.profile.weight) score += 5;
+      if (st.apiKey && st.apiKey.length > 8) score += 15;
+      score += (st.tasks || []).length * 6;
+      score += (st.habitsList || []).length * 4;
+      score += (st.groceries || []).length * 2;
+      if (st.lastFridgePlan) score += 4;
+      if (st.days && typeof st.days === 'object') {
         Object.values(st.days).forEach(d => {
-          score += (d.meals || []).length * 3;
-          if ((d.water || 0) > 0) score += 2;
-          score += (d.impulses || []).length * 2;
+          if (!d) return;
+          score += (d.meals || []).length * 5;
+          if ((d.water || 0) > 0) score += 3;
+          score += (d.impulses || []).length * 3;
+          score += Object.keys(d.habitsState || {}).filter(k => d.habitsState[k]).length * 2;
         });
       }
       return score;
     }
 
-    const STORAGE_KEY = 'allan_tcc_master_permanent_store';
-    function loadInitialState() {
-      const allKeys = ['allan_tcc_master_permanent_store', 'allan_tcc_app_v47', 'allan_tcc_app_v46', 'allan_tcc_app_v45', 'allan_tcc_app_v44', 'allan_tcc_app_v43', 'allan_tcc_app_v42'];
-      let bestState = null;
-      let bestScore = -1;
+    // Fusión no destructiva entre dos estados (rescata comidas, tareas, hábitos, perfil y API key de ambos)
+    function mergeStatesNonDestructively(baseSt, incomingSt) {
+      if (!incomingSt) return baseSt;
+      if (!baseSt) return incomingSt;
+      const merged = JSON.parse(JSON.stringify(baseSt));
 
-      for (const k of allKeys) {
-        try {
-          const raw = localStorage.getItem(k);
-          if (raw) {
-            const parsed = JSON.parse(raw);
-            const sc = getStateRichnessScore(parsed);
-            if (sc > bestScore) {
-              bestScore = sc;
-              bestState = parsed;
+      if (!merged.apiKey && incomingSt.apiKey) merged.apiKey = incomingSt.apiKey;
+      if (incomingSt.selectedModel) merged.selectedModel = incomingSt.selectedModel;
+      if (incomingSt.thinkingLevel) merged.thinkingLevel = incomingSt.thinkingLevel;
+
+      if (incomingSt.profile) {
+        if (!merged.profile) merged.profile = {};
+        ['name', 'weight', 'height', 'age', 'activity', 'gymDays', 'goalKey', 'goalText', 'medicalCondition'].forEach(k => {
+          if ((merged.profile[k] === '' || merged.profile[k] === undefined) && incomingSt.profile[k]) {
+            merged.profile[k] = incomingSt.profile[k];
+          }
+        });
+      }
+
+      ['targetKcal', 'targetWater', 'targetProt', 'targetCarb', 'targetFat'].forEach(tk => {
+        if ((!merged[tk] || merged[tk] === 2100) && incomingSt[tk]) merged[tk] = incomingSt[tk];
+      });
+
+      // Unir tareas sin duplicar
+      const existingTaskKeys = new Set((merged.tasks || []).map(t => `${t.text}_${t.project || ''}`));
+      (incomingSt.tasks || []).forEach(t => {
+        const key = `${t.text}_${t.project || ''}`;
+        if (!existingTaskKeys.has(key)) {
+          merged.tasks.push(t);
+          existingTaskKeys.add(key);
+        }
+      });
+
+      // Unir hábitos sin duplicar
+      const existingHabitNames = new Set((merged.habitsList || []).map(h => (h.name || '').toLowerCase()));
+      (incomingSt.habitsList || []).forEach(h => {
+        if (h.name && !existingHabitNames.has(h.name.toLowerCase())) {
+          merged.habitsList.push(h);
+          existingHabitNames.add(h.name.toLowerCase());
+        }
+      });
+
+      // Unir días (comidas, agua, impulsos, checks de hábitos)
+      if (incomingSt.days) {
+        if (!merged.days) merged.days = {};
+        Object.keys(incomingSt.days).forEach(dayId => {
+          const incDay = incomingSt.days[dayId];
+          if (!incDay) return;
+          if (!merged.days[dayId]) {
+            merged.days[dayId] = JSON.parse(JSON.stringify(incDay));
+          } else {
+            const mDay = merged.days[dayId];
+            mDay.water = Math.max(mDay.water || 0, incDay.water || 0);
+            const mealNames = new Set((mDay.meals || []).map(m => `${m.name}_${m.kcal}`));
+            (incDay.meals || []).forEach(m => {
+              const mk = `${m.name}_${m.kcal}`;
+              if (!mealNames.has(mk)) {
+                mDay.meals.push(m);
+                mealNames.add(mk);
+              }
+            });
+            mDay.habitsState = { ...(incDay.habitsState || {}), ...(mDay.habitsState || {}) };
+            if ((incDay.impulses || []).length > (mDay.impulses || []).length) {
+              mDay.impulses = incDay.impulses;
             }
           }
-        } catch (e) {}
+        });
       }
-      if (bestState) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(bestState));
-        return bestState;
+
+      if ((incomingSt.groceries || []).length > (merged.groceries || []).length) merged.groceries = incomingSt.groceries;
+      if ((incomingSt.mealPlanStructured || []).length > (merged.mealPlanStructured || []).length) merged.mealPlanStructured = incomingSt.mealPlanStructured;
+      if (!merged.lastFridgePlan && incomingSt.lastFridgePlan) merged.lastFridgePlan = incomingSt.lastFridgePlan;
+      if (getStateRichnessScore(merged) > 0) merged.onboardingComplete = true;
+
+      return merged;
+    }
+
+    const STORAGE_KEY = 'allan_tcc_master_permanent_store';
+    const IDB_NAME = 'ControlTCC_PermanentVault_DB';
+    const IDB_STORE = 'state_vault';
+
+    // ==================== BÓVEDA INDEXEDDB (SOBREVIVE CUANDO LOCALSTORAGE SE LIMPIA) ====================
+    function saveToIndexedDBVault(stateObj) {
+      try {
+        if (!window.indexedDB) return;
+        const req = indexedDB.open(IDB_NAME, 1);
+        req.onupgradeneeded = function(e) {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(IDB_STORE)) {
+            db.createObjectStore(IDB_STORE);
+          }
+        };
+        req.onsuccess = function(e) {
+          try {
+            const db = e.target.result;
+            const tx = db.transaction(IDB_STORE, 'readwrite');
+            tx.objectStore(IDB_STORE).put(JSON.stringify(stateObj), 'master_state');
+          } catch (err) {}
+        };
+      } catch (e) {}
+    }
+
+    function restoreFromIndexedDBVault() {
+      return new Promise((resolve) => {
+        try {
+          if (!window.indexedDB) return resolve(null);
+          const req = indexedDB.open(IDB_NAME, 1);
+          req.onupgradeneeded = function(e) {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(IDB_STORE)) {
+              db.createObjectStore(IDB_STORE);
+            }
+          };
+          req.onsuccess = function(e) {
+            try {
+              const db = e.target.result;
+              const tx = db.transaction(IDB_STORE, 'readonly');
+              const getReq = tx.objectStore(IDB_STORE).get('master_state');
+              getReq.onsuccess = function() {
+                if (getReq.result) {
+                  try { resolve(JSON.parse(getReq.result)); } catch (er) { resolve(null); }
+                } else resolve(null);
+              };
+              getReq.onerror = () => resolve(null);
+            } catch (err) { resolve(null); }
+          };
+          req.onerror = () => resolve(null);
+        } catch (e) { resolve(null); }
+      });
+    }
+
+    // Escanea TODAS las llaves de localStorage sin importar el nombre de versión anterior
+    function loadInitialState() {
+      let combinedState = createDefaultState();
+      let bestScore = -1;
+
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (!k || k === 'allan_tcc_firebase_config') continue;
+          try {
+            const raw = localStorage.getItem(k);
+            if (raw && raw.trim().startsWith('{')) {
+              const parsed = JSON.parse(raw);
+              if (parsed && (parsed.days || parsed.profile || parsed.tasks || parsed.targetKcal)) {
+                const sc = getStateRichnessScore(parsed);
+                if (sc > bestScore) {
+                  bestScore = sc;
+                  combinedState = mergeStatesNonDestructively(parsed, combinedState);
+                } else {
+                  combinedState = mergeStatesNonDestructively(combinedState, parsed);
+                }
+              }
+            }
+          } catch (e) {}
+        }
+      } catch (e) {}
+
+      // Asegurar que el modelo pedido por el usuario sea el predeterminado si tenía el lite por defecto
+      if (!combinedState.selectedModel || combinedState.selectedModel === 'gemini-3.5-flash-lite') {
+        combinedState.selectedModel = 'gemini-3.8-live-extended-thinking';
       }
-      return createDefaultState();
+      if (!combinedState.thinkingLevel) combinedState.thinkingLevel = 'HIGH';
+
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(combinedState));
+      } catch (e) {}
+      return combinedState;
     }
 
     let appState = loadInitialState();
     if (!appState.profile) appState.profile = createDefaultState().profile;
     if (appState.profile.medicalCondition === undefined) appState.profile.medicalCondition = '';
-    if (!appState.selectedModel) appState.selectedModel = 'gemini-3.5-flash-lite';
+    if (!appState.selectedModel) appState.selectedModel = 'gemini-3.8-live-extended-thinking';
+    if (!appState.thinkingLevel) appState.thinkingLevel = 'HIGH';
     if (!appState.tutorData) appState.tutorData = createDefaultState().tutorData;
     DAYS_CONFIG.forEach(d => {
       if (!appState.days[d.id]) appState.days[d.id] = { water: 0, meals: [], habitsState: {}, impulses: [] };
       if (!appState.days[d.id].impulses) appState.days[d.id].impulses = [];
+    });
+
+    // Hidratar desde la bóveda IndexedDB automáticamente al arrancar por si el navegador limpió localStorage
+    restoreFromIndexedDBVault().then(vaultState => {
+      if (vaultState && getStateRichnessScore(vaultState) > getStateRichnessScore(appState)) {
+        appState = mergeStatesNonDestructively(vaultState, appState);
+        appState.onboardingComplete = true;
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch (e) {}
+        renderAll();
+        checkOnboarding();
+        showToast("Datos recuperados automáticamente de la bóveda permanente", "success");
+      }
     });
 
     let currentUploadedImageBase64 = null;
@@ -1234,6 +1486,14 @@
       appState.profile.medicalCondition = (val || '').trim();
       saveState();
       showToast("Condición / restricción actualizada en tu perfil", "success");
+    }
+
+    function updateNutritionGoalMode(goalKey) {
+      if (!appState.profile) appState.profile = createDefaultState().profile;
+      appState.profile.goalKey = goalKey;
+      appState.profile.goalText = GOAL_LABELS[goalKey] || GOAL_LABELS.deficit;
+      saveState();
+      showToast(`Modo nutricional ajustado: ${appState.profile.goalText}`, "success");
     }
 
     // ==================== SIDEBAR Y SUBVISTAS ====================
@@ -1303,10 +1563,10 @@
       setTimeout(() => {
         toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s ease';
         setTimeout(() => toast.remove(), 300);
-      }, 3600);
+      }, 3800);
     }
 
-    // ==================== FIREBASE CLOUD SYNC (BLINDADO CONTRA PÉRDIDA DE DATOS) ====================
+    // ==================== FIREBASE CLOUD SYNC (FUSIÓN INTELIGENTE ANTI-BORRADO) ====================
     const DEFAULT_FIREBASE_CONFIG = {
       apiKey: "AIzaSyC4CQ-PW9nRfVl3ZZ1PyR2NwXcRUas-I7o",
       authDomain: "control-tcc.firebaseapp.com",
@@ -1318,13 +1578,14 @@
 
     let fbAuth = null, fbDb = null, fbUser = null, unsubscribeFirestore = null;
     let isApplyingRemoteUpdate = false;
-    let isCloudHydrated = false; // Impide subir estado vacío antes de descargar de Firebase
+    let isCloudHydrated = false;
 
     function initFirebaseIfConfigured() {
-      let rawCfg = localStorage.getItem('allan_tcc_firebase_config');
+      let rawCfg = null;
+      try { rawCfg = localStorage.getItem('allan_tcc_firebase_config'); } catch (e) {}
       if (!rawCfg) {
         rawCfg = JSON.stringify(DEFAULT_FIREBASE_CONFIG);
-        localStorage.setItem('allan_tcc_firebase_config', rawCfg);
+        try { localStorage.setItem('allan_tcc_firebase_config', rawCfg); } catch (e) {}
       }
       try {
         const cfg = JSON.parse(rawCfg);
@@ -1350,31 +1611,44 @@
       } catch (e) { console.warn("Firebase init:", e); }
     }
 
-    // DESCARGA ESTRICTA PRIMERO AL INICIAR SESIÓN (NUNCA SOBRESCRIBE LA NUBE AL ENTRAR)
+    // Descarga y FUSIONA sin destruir datos locales ni datos de backup en la nube
     async function pullCloudDataFirst(uid) {
       if (!fbDb) return;
       try {
         const doc = await fbDb.collection('tcc_users').doc(uid).get();
         if (doc.exists) {
           const data = doc.data();
-          const rawJson = data.stateJson || data.backupStateJson;
-          if (rawJson) {
-            const remoteState = JSON.parse(rawJson);
-            const remoteScore = getStateRichnessScore(remoteState);
-            const localScore = getStateRichnessScore(appState);
+          const candidates = [data.stateJson, data.backupStateJson].filter(Boolean);
+          let bestRemote = null;
+          let bestRemoteScore = -1;
 
-            // Si la nube tiene datos (o más datos que el local), siempre ganan los datos de la nube al hacer login
-            if (remoteScore > 0 || remoteScore >= localScore) {
-              isApplyingRemoteUpdate = true;
-              appState = remoteState;
-              appState.onboardingComplete = true;
-              if (!appState.tutorData) appState.tutorData = createDefaultState().tutorData;
-              if (appState.profile && appState.profile.medicalCondition === undefined) appState.profile.medicalCondition = '';
-              localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-              renderAll();
-              checkOnboarding();
-              isApplyingRemoteUpdate = false;
+          candidates.forEach(raw => {
+            try {
+              const parsed = JSON.parse(raw);
+              const sc = getStateRichnessScore(parsed);
+              if (sc > bestRemoteScore) {
+                bestRemoteScore = sc;
+                bestRemote = parsed;
+              }
+            } catch (e) {}
+          });
+
+          if (bestRemote) {
+            isApplyingRemoteUpdate = true;
+            const localScore = getStateRichnessScore(appState);
+            if (bestRemoteScore >= localScore) {
+              appState = mergeStatesNonDestructively(bestRemote, appState);
+            } else {
+              appState = mergeStatesNonDestructively(appState, bestRemote);
             }
+            appState.onboardingComplete = true;
+            if (!appState.tutorData) appState.tutorData = createDefaultState().tutorData;
+            if (appState.profile && appState.profile.medicalCondition === undefined) appState.profile.medicalCondition = '';
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch (e) {}
+            saveToIndexedDBVault(appState);
+            renderAll();
+            checkOnboarding();
+            isApplyingRemoteUpdate = false;
           }
         }
         isCloudHydrated = true;
@@ -1389,21 +1663,22 @@
         if (doc.exists) {
           const data = doc.data();
           if (data && data.stateJson) {
-            const remoteState = JSON.parse(data.stateJson);
-            const remoteScore = getStateRichnessScore(remoteState);
-            const localScore = getStateRichnessScore(appState);
+            try {
+              const remoteState = JSON.parse(data.stateJson);
+              const remoteScore = getStateRichnessScore(remoteState);
+              const localScore = getStateRichnessScore(appState);
 
-            if (((remoteState.updatedAt || 0) > (appState.updatedAt || 0) && remoteScore >= localScore) || (localScore === 0 && remoteScore > 0)) {
-              isApplyingRemoteUpdate = true;
-              appState = remoteState;
-              appState.onboardingComplete = true;
-              if (!appState.tutorData) appState.tutorData = createDefaultState().tutorData;
-              if (appState.profile && appState.profile.medicalCondition === undefined) appState.profile.medicalCondition = '';
-              localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-              renderAll();
-              checkOnboarding();
-              isApplyingRemoteUpdate = false;
-            }
+              if (((remoteState.updatedAt || 0) > (appState.updatedAt || 0) && remoteScore >= localScore) || (localScore === 0 && remoteScore > 0)) {
+                isApplyingRemoteUpdate = true;
+                appState = mergeStatesNonDestructively(remoteState, appState);
+                appState.onboardingComplete = true;
+                try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch (e) {}
+                saveToIndexedDBVault(appState);
+                renderAll();
+                checkOnboarding();
+                isApplyingRemoteUpdate = false;
+              }
+            } catch (e) {}
           }
           isCloudHydrated = true;
         } else {
@@ -1424,9 +1699,10 @@
           const prevRemote = JSON.parse(existingDoc.data().stateJson);
           const prevScore = getStateRichnessScore(prevRemote);
           const currentScore = getStateRichnessScore(appState);
-          // Si el estado anterior tenía más datos, lo guardamos en backupStateJson para nunca perderlo
+          // Protección estricta: si la nube tenía más datos que el estado actual, fusionamos antes de subir y guardamos respaldo
           if (prevScore > currentScore) {
             backupJson = existingDoc.data().stateJson;
+            appState = mergeStatesNonDestructively(prevRemote, appState);
           } else {
             backupJson = existingDoc.data().backupStateJson || existingDoc.data().stateJson;
           }
@@ -1446,49 +1722,63 @@
       if (!fbUser || !fbDb) { showToast("Inicia sesión primero", "warning"); return; }
       try {
         const doc = await fbDb.collection('tcc_users').doc(fbUser.uid).get();
-        if (doc.exists && doc.data().backupStateJson) {
-          appState = JSON.parse(doc.data().backupStateJson);
-          appState.updatedAt = Date.now();
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-          renderAll();
-          await pushStateToCloud();
-          showToast("Copia de respaldo en la nube restaurada", "success");
-        } else {
-          showToast("No se encontró una copia previa distinta en la nube", "info");
+        if (doc.exists) {
+          const data = doc.data();
+          const raw = data.backupStateJson || data.stateJson;
+          if (raw) {
+            const restored = JSON.parse(raw);
+            appState = mergeStatesNonDestructively(restored, appState);
+            appState.onboardingComplete = true;
+            appState.updatedAt = Date.now();
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch (e) {}
+            saveToIndexedDBVault(appState);
+            renderAll();
+            await pushStateToCloud();
+            showToast("Copia de respaldo en la nube fusionada y restaurada", "success");
+            return;
+          }
         }
+        showToast("No se encontró una copia previa en la nube", "info");
       } catch (e) { showToast("Error restaurando: " + e.message, "error"); }
     }
 
-    function rescueLegacyLocalData() {
-      let rescuedMeals = 0, rescuedTasks = 0, rescuedHabits = 0;
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (k && k.startsWith('allan_tcc') && k !== STORAGE_KEY) {
+    async function rescueLegacyLocalData() {
+      let beforeScore = getStateRichnessScore(appState);
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (!k || k === 'allan_tcc_firebase_config') continue;
           try {
-            const st = JSON.parse(localStorage.getItem(k));
-            if (st.profile && st.profile.name && !appState.profile.name) appState.profile = st.profile;
-            if (st.apiKey && !appState.apiKey) appState.apiKey = st.apiKey;
-            if (Array.isArray(st.tasks) && st.tasks.length > appState.tasks.length) {
-              appState.tasks = st.tasks;
-              rescuedTasks = st.tasks.length;
-            }
-            if (Array.isArray(st.habitsList) && st.habitsList.length > appState.habitsList.length) {
-              appState.habitsList = st.habitsList;
-              rescuedHabits = st.habitsList.length;
-            }
-            if (st.days) {
-              Object.keys(st.days).forEach(dId => {
-                if (st.days[dId]?.meals?.length > (appState.days[dId]?.meals?.length || 0)) {
-                  appState.days[dId] = st.days[dId];
-                  rescuedMeals += st.days[dId].meals.length;
-                }
-              });
+            const raw = localStorage.getItem(k);
+            if (raw && raw.trim().startsWith('{')) {
+              const st = JSON.parse(raw);
+              if (st && (st.days || st.profile || st.tasks || st.habitsList)) {
+                appState = mergeStatesNonDestructively(appState, st);
+              }
             }
           } catch (e) {}
         }
+      } catch (e) {}
+
+      const vaultSt = await restoreFromIndexedDBVault();
+      if (vaultSt) {
+        appState = mergeStatesNonDestructively(appState, vaultSt);
       }
+
+      if (fbUser && fbDb) {
+        await pullCloudDataFirst(fbUser.uid);
+      }
+
+      const afterScore = getStateRichnessScore(appState);
+      if (afterScore > 0) appState.onboardingComplete = true;
       saveState();
-      showToast(`Rescate completado: ${rescuedMeals} comidas, ${rescuedTasks} tareas, ${rescuedHabits} hábitos recuperados.`, "success");
+      checkOnboarding();
+
+      if (afterScore > beforeScore) {
+        showToast("Datos recuperados y fusionados con éxito", "success");
+      } else {
+        showToast("Escaneo completado: todos los datos disponibles en este navegador están cargados", "info");
+      }
     }
 
     function saveFirebaseConfig() {
@@ -1498,7 +1788,7 @@
         if (raw.includes('{')) raw = raw.substring(raw.indexOf('{'), raw.lastIndexOf('}') + 1);
         const normalizedJson = raw.replace(/(['"])?([a-zA-Z0-9_]+)(['"])?\s*:/g, '"$2":').replace(/'/g, '"').replace(/,\s*}/g, '}');
         const parsed = JSON.parse(normalizedJson);
-        localStorage.setItem('allan_tcc_firebase_config', JSON.stringify(parsed));
+        try { localStorage.setItem('allan_tcc_firebase_config', JSON.stringify(parsed)); } catch (e) {}
         showToast("Conexión Firebase actualizada", "success");
         initFirebaseIfConfigured();
       } catch (e) { showToast("Formato inválido", "error"); }
@@ -1522,13 +1812,13 @@
         emailEl.textContent = fbUser.email;
         if (drawerSub) drawerSub.textContent = fbUser.email;
       } else {
-        headerBadge.innerHTML = `<i class="fi fi-rr-user"></i> <span>Invitado</span>`;
+        headerBadge.innerHTML = `<i class="fi fi-rr-user"></i> <span>Bóveda Local</span>`;
         headerBadge.className = 'text-[9px] px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-300 font-bold flex items-center gap-1';
-        settingsStatus.textContent = 'Modo Invitado';
+        settingsStatus.textContent = 'Bóveda Local Activa';
         settingsStatus.className = 'text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800';
         outBox.classList.remove('hidden');
         inBox.classList.add('hidden');
-        if (drawerSub) drawerSub.textContent = 'Modo Invitado / Local';
+        if (drawerSub) drawerSub.textContent = 'Bóveda Local + IDB';
       }
     }
 
@@ -1561,7 +1851,7 @@
 
     async function logoutFirebase() {
       if (fbAuth) await fbAuth.signOut();
-      showToast("Sesión cerrada (Modo Invitado activo)", "info");
+      showToast("Sesión cerrada (Tus datos siguen guardados en este dispositivo)", "info");
     }
 
     async function forceCloudSyncNow() {
@@ -1573,7 +1863,11 @@
 
     function saveState() {
       appState.updatedAt = Date.now();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+        localStorage.setItem('allan_tcc_backup_mirror', JSON.stringify(appState));
+      } catch (e) {}
+      saveToIndexedDBVault(appState);
       renderAll();
       if (isCloudHydrated) {
         pushStateToCloud();
@@ -1583,6 +1877,9 @@
     // ==================== ONBOARDING ====================
     function checkOnboarding() {
       const modal = document.getElementById('onboardingModal');
+      if (getStateRichnessScore(appState) > 5) {
+        appState.onboardingComplete = true;
+      }
       if (!appState.onboardingComplete) {
         document.getElementById('obName').value = appState.profile.name || '';
         document.getElementById('obWeight').value = appState.profile.weight || '';
@@ -1599,6 +1896,12 @@
       }
     }
 
+    function dismissOnboardingModal() {
+      appState.onboardingComplete = true;
+      document.getElementById('onboardingModal').classList.add('hidden');
+      saveState();
+    }
+
     function openOnboardingEdit() {
       appState.onboardingComplete = false;
       checkOnboarding();
@@ -1613,7 +1916,7 @@
       const medicalVal = document.getElementById('obMedical').value.trim();
 
       if (!weightVal || !heightVal || !ageVal) {
-        showToast("Primero ingresa tu peso, altura y edad arriba", "warning");
+        showToast("Ingresa tu peso, altura y edad (o usa 'Ya tengo cuenta' arriba)", "warning");
         return false;
       }
 
@@ -1637,16 +1940,16 @@
       const bmr = (10 * weightVal) + (6.25 * heightVal) - (5 * ageVal) + 5;
       const tdee = bmr * activity;
       let targetKcal = Math.round(tdee);
-      let protPerKg = 1.6;
+      let protPerKg = 1.8;
 
-      if (goalKey === 'deficit') { targetKcal = Math.max(1600, Math.round(tdee - 650)); protPerKg = 1.5; }
-      else if (goalKey === 'recomp') { targetKcal = Math.round(tdee - 300); protPerKg = 1.6; }
-      else if (goalKey === 'hypertrophy') { targetKcal = Math.round(tdee + 250); protPerKg = 1.7; }
-      else if (goalKey === 'bulk') { targetKcal = Math.round(tdee + 450); protPerKg = 1.7; }
+      if (goalKey === 'deficit') { targetKcal = Math.max(1550, Math.round(tdee - 600)); protPerKg = 1.9; }
+      else if (goalKey === 'recomp') { targetKcal = Math.round(tdee - 250); protPerKg = 2.0; }
+      else if (goalKey === 'hypertrophy') { targetKcal = Math.round(tdee + 280); protPerKg = 1.9; }
+      else if (goalKey === 'bulk') { targetKcal = Math.round(tdee + 480); protPerKg = 1.8; }
 
       const targetProt = Math.round(weightVal * protPerKg);
-      const targetFat = Math.round((targetKcal * 0.28) / 9);
-      const remainingKcalForCarbs = Math.max(400, targetKcal - (targetProt * 4) - (targetFat * 9));
+      const targetFat = Math.round((targetKcal * 0.27) / 9);
+      const remainingKcalForCarbs = Math.max(360, targetKcal - (targetProt * 4) - (targetFat * 9));
       const targetCarb = Math.round(remainingKcalForCarbs / 4);
       const targetWater = Math.round(weightVal * 35);
 
@@ -1666,12 +1969,11 @@
       showToast(`Bienvenido ${appState.profile.name}. Meta: ${appState.targetKcal} kcal`, 'success');
     }
 
-    // CORREGIDO: Al darle "Ya tengo cuenta (Login)", descarga primero los datos de Firebase sin pisarlos jamás
     async function completeOnboardingWithCloud(mode) {
       const email = document.getElementById('obEmail').value.trim();
       const pass = document.getElementById('obPass').value.trim();
       if (!email || pass.length < 6) {
-        showToast("Ingresa un correo válido y contraseña de 6+ caracteres", "warning");
+        showToast("Ingresa tu correo y contraseña (6+ caracteres)", "warning");
         return;
       }
 
@@ -1687,13 +1989,11 @@
           document.getElementById('onboardingModal').classList.add('hidden');
           showToast("Cuenta creada y perfil guardado en la nube", "success");
         } else {
-          // Modo Login: NO llamamos saveState() antes de descargar de Firebase
           isCloudHydrated = false;
           const cred = await fbAuth.signInWithEmailAndPassword(email, pass);
           await pullCloudDataFirst(cred.user.uid);
           appState.onboardingComplete = true;
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-          renderAll();
+          saveState();
           document.getElementById('onboardingModal').classList.add('hidden');
           showToast("Sesión iniciada y datos descargados de tu nube", "success");
         }
@@ -1773,36 +2073,192 @@
       saveState();
     }
 
-    // ==================== MOTOR CENTRAL GEMINI API ====================
+    // ==================== MOTOR CENTRAL GEMINI API (SOPORTE REAL LIVE API WEBSOCKET + EXTENDED THINKING REST) ====================
     function handleModelSelectionChange(val) {
       const notice = document.getElementById('premiumModelNotice');
-      if (val === 'gemini-3.8-live-extended-thinking') {
-        if (notice) notice.classList.remove('hidden');
-        showToast("Nota: gemini-3.8-live-extended-thinking requiere cuenta Gemini Premium", "warning");
-      } else {
-        if (notice) notice.classList.add('hidden');
+      if (notice) {
+        notice.classList.toggle('hidden', val !== 'gemini-3.8-live-extended-thinking');
       }
     }
 
+    // Extrae el bloque JSON limpio sin importar si el modelo incluyó texto o pensamientos previos
+    function extractCleanJsonFromText(rawText) {
+      if (!rawText) throw new Error("Respuesta vacía del modelo.");
+      let cleaned = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+      const firstBracket = cleaned.indexOf('[');
+      const firstBrace = cleaned.indexOf('{');
+
+      if (firstBracket !== -1 && (firstBrace === -1 || firstBracket < firstBrace)) {
+        const lastBracket = cleaned.lastIndexOf(']');
+        if (lastBracket !== -1) return cleaned.substring(firstBracket, lastBracket + 1);
+      }
+      if (firstBrace !== -1) {
+        const lastBrace = cleaned.lastIndexOf('}');
+        if (lastBrace !== -1) return cleaned.substring(firstBrace, lastBrace + 1);
+      }
+      return cleaned;
+    }
+
+    // Conexión oficial WebSocket BidiGenerateContent para gemini-3.8-live-extended-thinking y gemini-3.8-live
+    function callGeminiLiveWebSocket(apiKey, modelName, promptText, thinkingLevel = 'HIGH') {
+      return new Promise((resolve, reject) => {
+        const wsUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${encodeURIComponent(apiKey)}`;
+        let ws;
+        try {
+          ws = new WebSocket(wsUrl);
+        } catch (err) {
+          return reject(err);
+        }
+
+        let collectedText = '';
+        let resolved = false;
+        const timeoutId = setTimeout(() => {
+          if (!resolved) {
+            resolved = true;
+            try { ws.close(); } catch (e) {}
+            if (collectedText.trim().includes('{') || collectedText.trim().includes('[')) {
+              resolve(extractCleanJsonFromText(collectedText));
+            } else {
+              reject(new Error("Tiempo de espera Live API agotado"));
+            }
+          }
+        }, 18000);
+
+        ws.onopen = () => {
+          const generationConfig = {
+            responseModalities: ["TEXT"]
+          };
+          if (modelName.includes('extended-thinking')) {
+            generationConfig.thinkingConfig = {
+              thinkingLevel: (thinkingLevel || 'HIGH').toUpperCase()
+            };
+          }
+          const setupMsg = {
+            setup: {
+              model: `models/${modelName}`,
+              generationConfig
+            }
+          };
+          ws.send(JSON.stringify(setupMsg));
+        };
+
+        ws.onmessage = async (event) => {
+          try {
+            let rawData = event.data;
+            if (rawData instanceof Blob) {
+              rawData = await rawData.text();
+            }
+            const msg = JSON.parse(rawData);
+
+            if (msg.setupComplete !== undefined) {
+              const clientMsg = {
+                clientContent: {
+                  turns: [{ role: "user", parts: [{ text: promptText }] }],
+                  turnComplete: true
+                }
+              };
+              ws.send(JSON.stringify(clientMsg));
+              return;
+            }
+
+            if (msg.serverContent) {
+              const sc = msg.serverContent;
+              if (sc.modelTurn && Array.isArray(sc.modelTurn.parts)) {
+                sc.modelTurn.parts.forEach(p => {
+                  if (p.text && !p.thought) collectedText += p.text;
+                });
+              }
+              if (sc.outputTranscription && sc.outputTranscription.text) {
+                collectedText += sc.outputTranscription.text;
+              }
+
+              const status = sc.interactionStatus || msg.interactionStatus;
+              const isDone = modelName.includes('extended-thinking')
+                ? (status === 'IDLE' || (sc.turnComplete && !status))
+                : sc.turnComplete;
+
+              if (isDone && collectedText.trim()) {
+                resolved = true;
+                clearTimeout(timeoutId);
+                try { ws.close(); } catch (e) {}
+                resolve(extractCleanJsonFromText(collectedText));
+              }
+            }
+          } catch (e) {}
+        };
+
+        ws.onerror = () => {
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeoutId);
+            reject(new Error("Live WebSocket requiere respaldo REST"));
+          }
+        };
+
+        ws.onclose = (ev) => {
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeoutId);
+            if (collectedText.trim()) {
+              resolve(extractCleanJsonFromText(collectedText));
+            } else {
+              reject(new Error(`Conexión Live cerrada (código ${ev.code})`));
+            }
+          }
+        };
+      });
+    }
+
+    // Cadena de modelos con soporte de Pensamiento Profundo (Thinking)
     function getModelFallbackChain(selectedAlias) {
-      const aliasMap = {
-        'gemini-3.5-flash-lite': ['gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash'],
-        'gemini-3.1-flash-live-preview': ['gemini-2.5-flash', 'gemini-2.0-flash'],
-        'gemini-3.8-live': ['gemini-2.5-flash', 'gemini-2.0-flash'],
-        'gemini-3.8-flash': ['gemini-2.5-flash', 'gemini-2.0-flash'],
-        'gemini-3.8-live-extended-thinking': ['gemini-3.8-live-extended-thinking', 'gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash']
+      const chains = {
+        'gemini-3.8-live-extended-thinking': [
+          'gemini-3.8-live-extended-thinking',
+          'gemini-4-argon',
+          'gemini-3.8-flash',
+          'gemini-3.1-pro-preview',
+          'gemini-2.5-pro',
+          'gemini-2.5-flash'
+        ],
+        'gemini-4-argon': ['gemini-4-argon', 'gemini-3.8-flash', 'gemini-3.1-pro-preview', 'gemini-2.5-pro'],
+        'gemini-3.8-flash': ['gemini-3.8-flash', 'gemini-4-argon', 'gemini-2.5-pro', 'gemini-2.5-flash'],
+        'gemini-3.1-pro-preview': ['gemini-3.1-pro-preview', 'gemini-3.8-flash', 'gemini-2.5-pro', 'gemini-2.5-flash'],
+        'gemini-2.5-pro': ['gemini-2.5-pro', 'gemini-3.8-flash', 'gemini-2.5-flash'],
+        'gemini-3.8-live': ['gemini-3.8-live', 'gemini-3.8-flash', 'gemini-2.5-flash'],
+        'gemini-3.5-flash-lite': ['gemini-3.5-flash-lite', 'gemini-2.5-flash-lite', 'gemini-2.5-flash']
       };
-      return aliasMap[selectedAlias] || [selectedAlias, 'gemini-2.5-flash-lite', 'gemini-2.5-flash'];
+      return chains[selectedAlias] || [selectedAlias, 'gemini-3.8-flash', 'gemini-2.5-pro', 'gemini-2.5-flash'];
+    }
+
+    // Construye el payload REST con thinkingConfig activado para que el modelo realmente piense más
+    function buildGenerateContentBody(endpointModel, parts, thinkingLevel) {
+      const lvlLower = (thinkingLevel || 'HIGH').toLowerCase();
+      const body = { contents: [{ parts }] };
+
+      if (endpointModel.startsWith('gemini-4') || endpointModel.startsWith('gemini-3.8') || endpointModel.startsWith('gemini-3.6') || endpointModel.startsWith('gemini-3')) {
+        body.generationConfig = {
+          thinkingConfig: {
+            thinkingLevel: lvlLower
+          }
+        };
+      } else if (endpointModel.includes('2.5-pro') || endpointModel.includes('2.5-flash')) {
+        const budgetMap = { high: 16384, medium: 8192, low: 2048 };
+        body.generationConfig = {
+          thinkingConfig: {
+            thinkingBudget: budgetMap[lvlLower] || 16384
+          }
+        };
+      }
+      return body;
     }
 
     async function callGeminiAPI(promptText, imageBase64) {
       const apiKey = (appState.apiKey || '').trim();
-      const selectedAlias = appState.selectedModel || 'gemini-3.5-flash-lite';
-      const candidateModels = getModelFallbackChain(selectedAlias);
+      if (!apiKey) throw new Error("Configura tu Clave API de Gemini en Ajustes.");
 
-      if (selectedAlias === 'gemini-3.8-live-extended-thinking') {
-        showToast("Ejecutando con Pensamiento Extendido (Solo Gemini Premium)...", "info");
-      }
+      const selectedAlias = appState.selectedModel || 'gemini-3.8-live-extended-thinking';
+      const thinkingLevel = appState.thinkingLevel || 'HIGH';
+      const candidateModels = getModelFallbackChain(selectedAlias);
 
       let parts = [{ text: promptText }];
       if (imageBase64) {
@@ -1811,57 +2267,128 @@
         parts.push({ inline_data: { mime_type: mimeType, data: base64Data } });
       }
 
-      let lastErr = "Error al conectar con la API.";
+      let lastErr = "Error al conectar con la API de Gemini.";
+
       for (const endpointModel of candidateModels) {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 25000);
-        try {
-          const apiVersion = endpointModel.includes('3.8') ? 'v1alpha' : 'v1beta';
-          const res = await fetch(`https://generativelanguage.googleapis.com/${apiVersion}/models/${endpointModel}:generateContent?key=${encodeURIComponent(apiKey)}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: parts }] }),
-            signal: controller.signal
-          });
-          clearTimeout(timeoutId);
-
-          if (!res.ok) {
-            const errData = await res.json().catch(() => ({}));
-            lastErr = errData.error?.message || `Error HTTP ${res.status}`;
-            if (res.status === 403 || lastErr.toLowerCase().includes('api key not valid')) {
-              throw new Error("Tu Clave API de Gemini no es válida.");
+        // 1. Si es un modelo Live API y no lleva imagen adjunta, intentamos primero el protocolo oficial WebSocket BidiGenerateContent
+        if (endpointModel.includes('-live') && !imageBase64) {
+          try {
+            const wsResult = await callGeminiLiveWebSocket(apiKey, endpointModel, promptText, thinkingLevel);
+            if (wsResult && (wsResult.includes('{') || wsResult.includes('['))) {
+              return wsResult;
             }
-            continue;
+          } catch (wsErr) {
+            // Si el endpoint Live está configurado solo para audio o requiere fallback REST, continuamos con generateContent con thinkingConfig
+            lastErr = wsErr.message;
           }
+        }
 
-          const data = await res.json();
-          let rawText = data.candidates[0].content.parts[0].text;
-          const jsonStart = rawText.indexOf('[');
-          const jsonObjectStart = rawText.indexOf('{');
+        // 2. Llamada REST generateContent con thinkingConfig (soporta texto e imágenes y modelos Pro/Argon/3.8)
+        const apiVersions = endpointModel.includes('3.8') || endpointModel.includes('4-argon') ? ['v1beta', 'v1alpha'] : ['v1beta'];
+        for (const apiVer of apiVersions) {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 38000);
+          try {
+            const reqBody = buildGenerateContentBody(endpointModel, parts, thinkingLevel);
+            const res = await fetch(`https://generativelanguage.googleapis.com/${apiVer}/models/${endpointModel}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(reqBody),
+              signal: controller.signal
+            });
+            clearTimeout(timeoutId);
 
-          if (jsonStart !== -1 && (jsonObjectStart === -1 || jsonStart < jsonObjectStart)) {
-            const jsonEnd = rawText.lastIndexOf(']');
-            if (jsonEnd !== -1) rawText = rawText.substring(jsonStart, jsonEnd + 1);
-          } else if (jsonObjectStart !== -1) {
-            const jsonEnd = rawText.lastIndexOf('}');
-            if (jsonEnd !== -1) rawText = rawText.substring(jsonObjectStart, jsonEnd + 1);
+            if (!res.ok) {
+              const errData = await res.json().catch(() => ({}));
+              lastErr = errData.error?.message || `Error HTTP ${res.status}`;
+              if (res.status === 400 && lastErr.toLowerCase().includes('api key not valid')) {
+                throw new Error("Tu Clave API de Gemini no es válida.");
+              }
+              if (res.status === 403 && lastErr.toLowerCase().includes('api key')) {
+                throw new Error("Clave API sin permisos o inválida.");
+              }
+              // Si falló por el parámetro thinkingConfig en algún endpoint específico, reintentar limpio en el mismo modelo
+              if (res.status === 400 && (lastErr.includes('thinking') || lastErr.includes('thinkingConfig'))) {
+                const retryRes = await fetch(`https://generativelanguage.googleapis.com/${apiVer}/models/${endpointModel}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ contents: [{ parts }] })
+                });
+                if (retryRes.ok) {
+                  const retryData = await retryRes.json();
+                  const retryParts = retryData.candidates?.[0]?.content?.parts || [];
+                  const answerPart = retryParts.find(p => p.text && !p.thought) || retryParts[retryParts.length - 1];
+                  if (answerPart && answerPart.text) {
+                    return extractCleanJsonFromText(answerPart.text);
+                  }
+                }
+              }
+              continue;
+            }
+
+            const data = await res.json();
+            const resParts = data.candidates?.[0]?.content?.parts || [];
+            // Filtrar los fragmentos de pensamiento interno (p.thought === true) para quedarnos con la respuesta final razonada
+            const textParts = resParts.filter(p => p.text && !p.thought).map(p => p.text).join('\n');
+            const finalRaw = textParts || (resParts[resParts.length - 1]?.text || '');
+            if (finalRaw) {
+              return extractCleanJsonFromText(finalRaw);
+            }
+          } catch (err) {
+            clearTimeout(timeoutId);
+            if (err.message.includes('Clave API')) throw err;
+            lastErr = err.name === 'AbortError' ? "Tiempo de pensamiento agotado." : err.message;
           }
-
-          return rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-        } catch (err) {
-          clearTimeout(timeoutId);
-          if (err.message.includes('Clave API')) throw err;
-          lastErr = err.name === 'AbortError' ? "Tiempo de espera agotado." : err.message;
         }
       }
       throw new Error(lastErr);
     }
 
-    // ==================== 1. NUTRICIÓN ====================
+    // Botón para corroborar en vivo que el token y el modelo con pensamiento extendido responden
+    async function verifyActiveModelConnection() {
+      const apiKeyInputVal = document.getElementById('apiKeyInput').value.trim();
+      if (apiKeyInputVal) appState.apiKey = apiKeyInputVal;
+      appState.selectedModel = document.getElementById('modelSelect').value;
+      appState.thinkingLevel = document.getElementById('thinkingLevelSelect').value;
+
+      if (!appState.apiKey) {
+        showToast("Primero pega tu Clave API de Gemini arriba", "warning");
+        return;
+      }
+
+      const btn = document.getElementById('verifyModelBtn');
+      const box = document.getElementById('modelVerificationResultBox');
+      const orig = btn.innerHTML;
+      btn.innerHTML = `<div class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full spinner"></div><span>Verificando...</span>`;
+      btn.disabled = true;
+
+      try {
+        const startMs = Date.now();
+        const testRes = await callGeminiAPI(
+          'Responde ÚNICAMENTE este JSON válido confirmando razonamiento activo: {"status":"OK","thinkingActive":true,"message":"Motor de pensamiento extendido verificado y funcional"}',
+          null
+        );
+        const parsed = JSON.parse(testRes);
+        const elapsed = ((Date.now() - startMs) / 1000).toFixed(2);
+        box.classList.remove('hidden');
+        box.innerHTML = `✓ CONEXIÓN EXITOSA (${elapsed}s) • Modelo: ${appState.selectedModel} • Nivel: ${appState.thinkingLevel}\nRespuesta: ${parsed.message || 'Funcional'}`;
+        saveState();
+        showToast("Modelo verificado y pensando al máximo", "success");
+      } catch (err) {
+        box.classList.remove('hidden');
+        box.innerHTML = `✕ Error al verificar: ${err.message}`;
+        showToast("Error verificando: " + err.message, "error");
+      } finally {
+        btn.innerHTML = orig;
+        btn.disabled = false;
+      }
+    }
+
+    // ==================== 1. NUTRICIÓN Y CUADRADOR DE MACROS ====================
     function getTodayTotals() {
-      const dayData = appState.days[appState.currentDay];
+      const dayData = appState.days[appState.currentDay] || { meals: [] };
       let totKcal = 0, totP = 0, totC = 0, totF = 0;
-      dayData.meals.forEach(m => {
+      (dayData.meals || []).forEach(m => {
         totKcal += Number(m.kcal) || 0;
         totP += Number(m.p) || 0;
         totC += Number(m.c) || 0;
@@ -1870,31 +2397,159 @@
       return { totKcal, totP, totC, totF };
     }
 
+    // Detecta qué comidas ya se registraron hoy (Desayuno, Comida, Cena)
+    function getLoggedMealTypesToday() {
+      const dayData = appState.days[appState.currentDay] || { meals: [] };
+      const joined = (dayData.meals || []).map(m => (m.name || '').toLowerCase()).join(' | ');
+      return {
+        hasBreakfast: joined.includes('desayuno') || joined.includes('breakfast'),
+        hasLunch: joined.includes('comida') || joined.includes('almuerzo') || joined.includes('lunch'),
+        hasDinner: joined.includes('cena') || joined.includes('dinner'),
+        count: (dayData.meals || []).length
+      };
+    }
+
+    function autoSelectRemainingMeals() {
+      const status = getLoggedMealTypesToday();
+      const bEl = document.getElementById('planBreakfast');
+      const lEl = document.getElementById('planLunch');
+      const dEl = document.getElementById('planDinner');
+
+      if (status.count === 0) {
+        bEl.checked = true; lEl.checked = true; dEl.checked = true;
+        showToast("No has registrado comidas hoy: se seleccionaron las 3 comidas para cuadrar tus macros", "info");
+      } else {
+        bEl.checked = !status.hasBreakfast;
+        lEl.checked = !status.hasLunch;
+        dEl.checked = !status.hasDinner;
+        if (!bEl.checked && !lEl.checked && !dEl.checked) {
+          dEl.checked = true;
+        }
+        showToast("Se marcaron automáticamente las comidas que te faltan hoy", "success");
+      }
+      renderChefMacroBanner();
+    }
+
+    function selectAllThreeMealsForChef() {
+      document.getElementById('planBreakfast').checked = true;
+      document.getElementById('planLunch').checked = true;
+      document.getElementById('planDinner').checked = true;
+      renderChefMacroBanner();
+      showToast("3 comidas seleccionadas: se distribuirán tus macros completas del día", "info");
+    }
+
+    function getNutritionalGoalPolicy() {
+      const goalKey = appState.profile?.goalKey || 'deficit';
+      if (goalKey === 'deficit') {
+        return {
+          key: 'deficit',
+          shortBadge: 'Meta: Déficit (Bajar Grasa)',
+          ruleSummary: 'Prioridad #1: alcanzar tus gramos de Proteína y cuidar Grasas/Carbos. Las calorías totales PUEDEN quedarse por debajo de la meta (déficit seguro) sin forzar calorías extra.',
+          aiDirective: 'El usuario está en PÉRDIDA DE GRASA CORPORAL (Déficit). Es OBLIGATORIO cumplir con la proteína faltante para proteger su masa muscular y respetar los topes de carbohidratos y grasas, pero NO importa si las calorías totales quedan por debajo de la meta calórica (es deseable mantener el déficit sin rellenar con calorías vacías).'
+        };
+      } else if (goalKey === 'recomp') {
+        return {
+          key: 'recomp',
+          shortBadge: 'Meta: Recomposición Corporal',
+          ruleSummary: 'Prioridad: clavar la Proteína al 100% y acercarse al máximo a los Carbohidratos, Grasas y Calorías establecidas (+/- 5%).',
+          aiDirective: 'El usuario está en RECOMPOSICIÓN CORPORAL. Aquí las calorías NO deben quedar muy cortas: debes cuadrar las porciones en gramos para llegar lo más cerca posible (95%-100%) tanto de las calorías como de las proteínas, carbohidratos y grasas objetivo.'
+        };
+      } else {
+        return {
+          key: goalKey,
+          shortBadge: goalKey === 'bulk' ? 'Meta: Volumen Muscular' : 'Meta: Hipertrofia Limpia',
+          ruleSummary: 'Prioridad Estricta: En hipertrofia/volumen las calorías NO pueden quedar cortas. Se debe alcanzar el 100% de Calorías, Proteínas, Carbohidratos y Grasas.',
+          aiDirective: `El usuario está en ${goalKey === 'bulk' ? 'VOLUMEN Y FUERZA' : 'HIPERTROFIA MUSCULAR'}. Para esta meta LAS CALORÍAS NO PUEDEN QUEDARSE CORTAS. Es estrictamente obligatorio diseñar las porciones en gramos exactos para alcanzar el 100% de las calorías, proteínas, carbohidratos y grasas faltantes.`
+        };
+      }
+    }
+
+    function renderChefMacroBanner() {
+      const banner = document.getElementById('chefMacroBudgetBanner');
+      if (!banner) return;
+
+      const maxKcal = Number(appState.targetKcal) || 2100;
+      const maxP = Number(appState.targetProt) || 170;
+      const maxC = Number(appState.targetCarb) || 160;
+      const maxF = Number(appState.targetFat) || 75;
+      const { totKcal, totP, totC, totF } = getTodayTotals();
+
+      const remKcal = Math.max(0, maxKcal - totKcal);
+      const remP = Math.max(0, maxP - totP);
+      const remC = Math.max(0, maxC - totC);
+      const remF = Math.max(0, maxF - totF);
+
+      const bChecked = document.getElementById('planBreakfast')?.checked;
+      const lChecked = document.getElementById('planLunch')?.checked;
+      const dChecked = document.getElementById('planDinner')?.checked;
+      const allThreeSelected = bChecked && lChecked && dChecked;
+
+      const policy = getNutritionalGoalPolicy();
+
+      if (allThreeSelected && totKcal === 0) {
+        banner.innerHTML = `
+          <div class="flex items-center justify-between font-bold text-emerald-400">
+            <span>Modo Día Completo (3 Comidas)</span>
+            <span>Meta: ${maxKcal} kcal</span>
+          </div>
+          <p class="text-slate-600 dark:text-slate-300">Las 3 comidas sumarán: <strong>${maxP}g Proteína</strong> • <strong>${maxC}g Carbos</strong> • <strong>${maxF}g Grasas</strong>.</p>
+          <p class="text-[10px] text-slate-400">${policy.ruleSummary}</p>
+        `;
+      } else if (allThreeSelected && totKcal > 0) {
+        banner.innerHTML = `
+          <div class="flex items-center justify-between font-bold text-amber-400">
+            <span>3 Comidas Seleccionadas (Ya llevas ${totKcal} kcal hoy)</span>
+            <span>Restan: ${remKcal} kcal</span>
+          </div>
+          <p class="text-slate-600 dark:text-slate-300">Te faltan hoy: <strong>${remP}g P</strong> • <strong>${remC}g C</strong> • <strong>${remF}g G</strong> (o un plan completo de ${maxP}g P / ${maxC}g C / ${maxF}g G para mañana).</p>
+          <p class="text-[10px] text-slate-400">${policy.ruleSummary}</p>
+        `;
+      } else {
+        banner.innerHTML = `
+          <div class="flex items-center justify-between font-bold text-terra-500">
+            <span>Macros que te faltan hoy para cumplir tu meta:</span>
+            <span>${remKcal} kcal disp.</span>
+          </div>
+          <p class="text-slate-600 dark:text-slate-300">Faltan: <strong class="text-terra-500">${remP}g Proteína</strong> • <strong class="text-amber-500">${remC}g Carbos</strong> • <strong class="text-emerald-500">${remF}g Grasas</strong></p>
+          <p class="text-[10px] text-slate-400">${policy.ruleSummary}</p>
+        `;
+      }
+    }
+
     function renderNutrition() {
-      document.getElementById('targetKcalInput').value = appState.targetKcal || '';
-      document.getElementById('targetWaterInput').value = appState.targetWater || '';
-      document.getElementById('targetProtInput').value = appState.targetProt || '';
-      document.getElementById('targetCarbInput').value = appState.targetCarb || '';
-      document.getElementById('targetFatInput').value = appState.targetFat || '';
+      document.getElementById('targetKcalInput').value = appState.targetKcal || 2100;
+      document.getElementById('targetWaterInput').value = appState.targetWater || 3500;
+      document.getElementById('targetProtInput').value = appState.targetProt || 170;
+      document.getElementById('targetCarbInput').value = appState.targetCarb || 160;
+      document.getElementById('targetFatInput').value = appState.targetFat || 75;
+
+      const goalModeSel = document.getElementById('nutritionGoalModeSelect');
+      if (goalModeSel) goalModeSel.value = appState.profile?.goalKey || 'deficit';
 
       const medInput = document.getElementById('fridgeMedicalCondition');
       if (medInput) medInput.value = appState.profile?.medicalCondition || '';
 
       const maxKcal = Number(appState.targetKcal) || 2100;
-      const maxWater = Number(appState.targetWater) || 4000;
+      const maxWater = Number(appState.targetWater) || 3500;
       const maxP = Number(appState.targetProt) || 170;
       const maxC = Number(appState.targetCarb) || 160;
-      const maxF = Number(appState.targetFat) || 85;
+      const maxF = Number(appState.targetFat) || 75;
 
       const { totKcal, totP, totC, totF } = getTodayTotals();
       const remKcal = Math.max(0, maxKcal - totKcal);
       const remP = Math.max(0, maxP - totP);
+      const remC = Math.max(0, maxC - totC);
+      const remF = Math.max(0, maxF - totF);
+
+      const policy = getNutritionalGoalPolicy();
+      const badgeEl = document.getElementById('goalRuleBadge');
+      if (badgeEl) badgeEl.textContent = policy.shortBadge;
 
       document.getElementById('metaKcalLabel').textContent = maxKcal;
       document.getElementById('kcalConsumedBig').textContent = totKcal;
       document.getElementById('kcalTargetSmall').textContent = `/ ${maxKcal} kcal`;
       document.getElementById('kcalRemainingBig').textContent = `${remKcal} kcal`;
-      document.getElementById('remainingMacrosSummary').textContent = `Faltan ${remP}g de proteína hoy.`;
+      document.getElementById('remainingMacrosSummary').textContent = `Te faltan: ${remP}g P • ${remC}g C • ${remF}g G`;
 
       const mainRing = document.getElementById('mainKcalRing');
       if (mainRing) {
@@ -1908,6 +2563,10 @@
       document.getElementById('carbText').textContent = `${totC} / ${maxC} g`;
       document.getElementById('fatText').textContent = `${totF} / ${maxF} g`;
 
+      document.getElementById('protRemLabel').textContent = remP > 0 ? `(faltan ${remP}g)` : '(meta lograda)';
+      document.getElementById('carbRemLabel').textContent = remC > 0 ? `(faltan ${remC}g)` : '(meta lograda)';
+      document.getElementById('fatRemLabel').textContent = remF > 0 ? `(faltan ${remF}g)` : '(meta lograda)';
+
       document.getElementById('protLinearBar').style.width = `${Math.min(100, (totP / maxP) * 100)}%`;
       document.getElementById('carbLinearBar').style.width = `${Math.min(100, (totC / maxC) * 100)}%`;
       document.getElementById('fatLinearBar').style.width = `${Math.min(100, (totF / maxF) * 100)}%`;
@@ -1918,6 +2577,16 @@
       document.getElementById('waterText').textContent = `${(waterMl / 1000).toFixed(2)} L`;
       document.getElementById('waterLiquid').style.height = `${waterPct}%`;
       document.getElementById('waterPercentText').textContent = `${waterPct}%`;
+
+      const status = getLoggedMealTypesToday();
+      const statusEl = document.getElementById('loggedMealTypesStatus');
+      if (statusEl) {
+        const doneArr = [];
+        if (status.hasBreakfast) doneArr.push('✓ Desayuno');
+        if (status.hasLunch) doneArr.push('✓ Comida');
+        if (status.hasDinner) doneArr.push('✓ Cena');
+        statusEl.textContent = doneArr.length > 0 ? doneArr.join(' • ') : `${status.count} platillo(s) registrado(s)`;
+      }
 
       const mealsEl = document.getElementById('mealsList');
       if (dayData.meals.length === 0) {
@@ -1936,6 +2605,7 @@
         `).join('');
       }
 
+      renderChefMacroBanner();
       renderFridgePlan();
     }
 
@@ -1945,11 +2615,11 @@
       const p = document.getElementById('targetProtInput').value;
       const c = document.getElementById('targetCarbInput').value;
       const f = document.getElementById('targetFatInput').value;
-      appState.targetKcal = k ? parseInt(k) : '';
-      appState.targetWater = w ? parseInt(w) : '';
-      appState.targetProt = p ? parseInt(p) : '';
-      appState.targetCarb = c ? parseInt(c) : '';
-      appState.targetFat = f ? parseInt(f) : '';
+      appState.targetKcal = k ? parseInt(k) : 2100;
+      appState.targetWater = w ? parseInt(w) : 3500;
+      appState.targetProt = p ? parseInt(p) : 170;
+      appState.targetCarb = c ? parseInt(c) : 160;
+      appState.targetFat = f ? parseInt(f) : 75;
       saveState();
       showToast("Metas actualizadas", "success");
     }
@@ -1993,25 +2663,29 @@
     async function analyzeFoodWithGemini() {
       if (!appState.apiKey) { showToast("Configura tu API Key en Ajustes", "warning"); switchTab('settings'); return; }
       const promptText = document.getElementById('aiFoodInput').value.trim();
+      const mealTypeTag = document.getElementById('mealTypeTagSelect').value || 'Comida';
       if (!promptText && !currentUploadedImageBase64) { showToast("Describe tu comida o sube una foto", "warning"); return; }
 
       const btn = document.getElementById('aiFoodBtn');
       const originalText = btn.innerHTML;
-      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner"></div><span>Analizando...</span>`;
+      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner"></div><span>Pensando...</span>`;
       btn.disabled = true;
 
       try {
-        let prompt = "Analiza este alimento o plato (imagen/texto). Devuelve ÚNICAMENTE un JSON válido sin texto extra: {\"name\": \"nombre del plato\", \"kcal\": número_entero, \"p\": gramos_proteina_entero, \"c\": gramos_carbohidratos_entero, \"f\": gramos_grasas_entero}.";
-        if (promptText) prompt += ` Descripción adicional: ${promptText}`;
+        let prompt = `Analiza con precisión nutricional este alimento o plato (${mealTypeTag}). Calcula calorías y macronutrientes reales. Devuelve ÚNICAMENTE un JSON válido sin texto extra: {"name": "${mealTypeTag}: nombre del plato y porción", "kcal": número_entero, "p": gramos_proteina_entero, "c": gramos_carbohidratos_entero, "f": gramos_grasas_entero}.`;
+        if (promptText) prompt += ` Descripción del usuario: ${promptText}`;
 
         const textResult = await callGeminiAPI(prompt, currentUploadedImageBase64);
         const parsed = JSON.parse(textResult);
+        if (parsed.name && !parsed.name.toLowerCase().includes(mealTypeTag.toLowerCase())) {
+          parsed.name = `${mealTypeTag}: ${parsed.name}`;
+        }
 
         appState.days[appState.currentDay].meals.push(parsed);
         document.getElementById('aiFoodInput').value = '';
         clearUploadedPhoto();
         saveState();
-        showToast(`Registrado: ${parsed.name} (${parsed.kcal} kcal)`, "success");
+        showToast(`Registrado: ${parsed.name} (${parsed.kcal} kcal | ${parsed.p}g P)`, "success");
       } catch (err) {
         showToast("Error IA: " + err.message, "error");
       } finally {
@@ -2020,49 +2694,97 @@
       }
     }
 
+    // CHEF IA INTELIGENTE: Cuadra las 3 comidas o completa las macros exactas que faltan hoy según lo ya comido y la meta
     async function recommendFromFridge() {
       const ingredients = document.getElementById('fridgeIngredients').value.trim();
-      if (!ingredients) { showToast("Escribe qué ingredientes tienes", "warning"); return; }
+      if (!ingredients) { showToast("Escribe qué ingredientes tienes en tu refri o alacena", "warning"); return; }
       if (!appState.apiKey) { showToast("Configura tu API Key en Ajustes", "warning"); switchTab('settings'); return; }
 
       const medInputVal = document.getElementById('fridgeMedicalCondition').value.trim();
       appState.profile.medicalCondition = medInputVal;
 
+      const bChecked = document.getElementById('planBreakfast').checked;
+      const lChecked = document.getElementById('planLunch').checked;
+      const dChecked = document.getElementById('planDinner').checked;
+
       const mealsRequested = [];
-      if (document.getElementById('planDinner').checked) mealsRequested.push("Cena de hoy");
-      if (document.getElementById('planBreakfast').checked) mealsRequested.push("Desayuno de mañana");
-      if (document.getElementById('planLunch').checked) mealsRequested.push("Comida trabajo");
+      if (bChecked) mealsRequested.push("Desayuno");
+      if (lChecked) mealsRequested.push("Comida");
+      if (dChecked) mealsRequested.push("Cena");
+
+      if (mealsRequested.length === 0) {
+        showToast("Selecciona al menos una comida (Desayuno, Comida o Cena)", "warning");
+        return;
+      }
 
       const maxKcal = Number(appState.targetKcal) || 2100;
       const maxP = Number(appState.targetProt) || 170;
-      const { totKcal, totP } = getTodayTotals();
-      const remKcal = Math.max(300, maxKcal - totKcal);
-      const remP = Math.max(20, maxP - totP);
+      const maxC = Number(appState.targetCarb) || 160;
+      const maxF = Number(appState.targetFat) || 75;
 
+      const { totKcal, totP, totC, totF } = getTodayTotals();
+      const remKcal = Math.max(0, maxKcal - totKcal);
+      const remP = Math.max(0, maxP - totP);
+      const remC = Math.max(0, maxC - totC);
+      const remF = Math.max(0, maxF - totF);
+
+      const alreadyEatenList = (appState.days[appState.currentDay].meals || [])
+        .map(m => `${m.name} (${m.kcal} kcal, ${m.p}g P, ${m.c}g C, ${m.f}g G)`)
+        .join('; ') || 'Ninguna comida registrada hoy todavía';
+
+      // Si el usuario pide las 3 comidas completas y aún no ha comido hoy (o quiere el plan completo de 3 comidas para cuadrar su meta diaria total)
+      const isFullDayThreeMeals = (mealsRequested.length === 3 && totKcal === 0);
+      const budgetKcal = isFullDayThreeMeals ? maxKcal : Math.max(250, remKcal);
+      const budgetP = isFullDayThreeMeals ? maxP : Math.max(15, remP);
+      const budgetC = isFullDayThreeMeals ? maxC : Math.max(10, remC);
+      const budgetF = isFullDayThreeMeals ? maxF : Math.max(8, remF);
+
+      const policy = getNutritionalGoalPolicy();
       const userWeight = appState.profile.weight ? `${appState.profile.weight}kg` : 'peso estándar';
-      const userGoal = appState.profile.goalText || 'Mejorar salud y composición corporal';
-      const medicalContext = medInputVal ? `Condición médica, alergia o restricción del usuario: "${medInputVal}".` : 'Sin condiciones médicas ni restricciones reportadas.';
+      const medicalContext = medInputVal ? `Condición médica, alergia o restricción: "${medInputVal}".` : 'Sin restricciones médicas.';
 
       const btn = document.getElementById('fridgeBtn');
       const originalText = btn.innerHTML;
-      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner"></div><span>Diseñando menú...</span>`;
+      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner"></div><span>Calculando gramajes y macros con IA...</span>`;
       btn.disabled = true;
 
       try {
-        const prompt = `Actúa como nutriólogo clínico y deportivo personalizado. Perfil del usuario: Peso ${userWeight}, Objetivo: "${userGoal}". ${medicalContext}
-        Restante hoy: ${remKcal} kcal, ${remP}g proteína. Ingredientes disponibles: "${ingredients}". Comidas solicitadas: ${mealsRequested.join(', ')}.
-        Devuelve ÚNICAMENTE un JSON válido:
+        const prompt = `Actúa como nutriólogo clínico y deportivo de élite con razonamiento matemático exacto de macronutrientes.
+        DATOS DEL USUARIO:
+        - Peso: ${userWeight} | Meta actual: "${appState.profile.goalText || policy.shortBadge}".
+        - ${medicalContext}
+        - Metas diarias totales establecidas: ${maxKcal} kcal | ${maxP}g Proteína | ${maxC}g Carbohidratos | ${maxF}g Grasas.
+        - Comidas ya registradas hoy: ${alreadyEatenList} (Total ya consumido hoy: ${totKcal} kcal, ${totP}g P, ${totC}g C, ${totF}g G).
+        - Macros y calorías FALTANTES para cerrar hoy en la meta: ${budgetKcal} kcal | ${budgetP}g Proteína | ${budgetC}g Carbohidratos | ${budgetF}g Grasas.
+        - Comidas que el usuario te pide diseñar ahora mismo: ${mealsRequested.join(', ')} (${mealsRequested.length} tiempo(s) de comida).
+        - Ingredientes disponibles: "${ingredients}".
+
+        REGLA DE ORO SEGÚN SU META FÍSICA:
+        ${policy.aiDirective}
+        - Si te pide las 3 comidas (Desayuno, Comida, Cena), reparte los gramajes entre las 3 comidas para que LA SUMA DE LAS 3 COMIDAS cumpla exactamente con la meta de macros (${maxP}g P, ${maxC}g C, ${maxF}g G).
+        - Si ya desayunó y/o comió y te pide la(s) siguiente(s) comida(s), ajusta los gramajes exactos (ej. cuántos gramos de pechuga/atún/claras/arroz/aguacate) de esta recomendación específicamente para COMPLETAR o acercarse lo más posible a los macros que le faltan hoy (${budgetP}g P, ${budgetC}g C, ${budgetF}g G).
+
+        Devuelve ÚNICAMENTE un objeto JSON válido con esta estructura exacta:
         {
-          "avoidWarning": "Recomendación personalizada sobre qué evitar o cómo combinar estos ingredientes según su objetivo y su situación médica (${medInputVal || 'General'})",
+          "avoidWarning": "Explicación de cómo esta(s) receta(s) cuadra(n) sus macros faltantes según su meta (${policy.shortBadge}) y qué evitar por su condición (${medInputVal || 'General'})",
+          "macroMathSummary": "Resumen numérico exacto: Suma de estas recetas = X kcal, Xg P, Xg C, Xg G vs Meta restante",
           "proposals": [
-            {"mealTime": "Cena", "title": "Nombre y gramajes exactos", "instructions": "Preparación paso a paso adaptada al usuario", "kcal": 480, "p": 45, "c": 20, "f": 22}
+            {
+              "mealTime": "Desayuno / Comida / Cena",
+              "title": "Nombre del platillo con gramajes exactos (ej. 220g Fajitas de Pollo + 130g Arroz + 40g Aguacate)",
+              "instructions": "Preparación paso a paso indicando pesos en crudo/cocido y por qué completa sus macros faltantes",
+              "kcal": 520,
+              "p": 48,
+              "c": 42,
+              "f": 16
+            }
           ]
         }`;
 
         const resText = await callGeminiAPI(prompt, null);
         appState.lastFridgePlan = JSON.parse(resText);
         saveState();
-        showToast("Menú personalizado diseñado con éxito", "success");
+        showToast("Recetas calculadas para cuadrar tus macros", "success");
       } catch (err) {
         showToast("Error Chef IA: " + err.message, "error");
       } finally {
@@ -2076,24 +2798,38 @@
       const plan = appState.lastFridgePlan;
       if (!plan) { container.innerHTML = ''; return; }
 
+      let sumKcal = 0, sumP = 0, sumC = 0, sumF = 0;
+      (plan.proposals || []).forEach(pr => {
+        sumKcal += Number(pr.kcal) || 0;
+        sumP += Number(pr.p) || 0;
+        sumC += Number(pr.c) || 0;
+        sumF += Number(pr.f) || 0;
+      });
+
       const proposalsHtml = (plan.proposals || []).map((prop, idx) => `
-        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-1.5">
+        <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-1.5">
           <div class="flex justify-between items-start gap-2">
             <div>
               <span class="text-[10px] font-extrabold uppercase text-emerald-500 block">${prop.mealTime}</span>
               <h4 class="font-bold text-xs">${prop.title}</h4>
             </div>
-            <button onclick="logFridgeProposal(${idx})" class="px-2.5 py-1 bg-terra-500 text-white text-[10px] font-bold rounded-lg shrink-0">+ Registrar</button>
+            <button onclick="logFridgeProposal(${idx})" class="px-2.5 py-1 bg-terra-500 hover:bg-terra-600 text-white text-[10px] font-bold rounded-lg shrink-0 shadow-sm">+ Registrar</button>
           </div>
-          <p class="text-[11px] text-slate-500 dark:text-slate-300">${prop.instructions}</p>
-          <p class="text-[10px] font-bold text-slate-400">${prop.kcal} kcal | ${prop.p}g P | ${prop.c}g C | ${prop.f}g G</p>
+          <p class="text-[11px] text-slate-500 dark:text-slate-300 leading-relaxed">${prop.instructions}</p>
+          <div class="flex flex-wrap gap-1.5 pt-1">
+            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-terra-500/15 text-terra-500">${prop.kcal} kcal</span>
+            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-400">${prop.p}g Proteína</span>
+            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-400">${prop.c}g Carbos</span>
+            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400">${prop.f}g Grasas</span>
+          </div>
         </div>
       `).join('');
 
       container.innerHTML = `
-        <div class="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-xs space-y-1">
-          <span class="font-extrabold text-rose-400 uppercase text-[10px] block">Recomendación y Precaución Nutricional</span>
-          <p class="text-slate-600 dark:text-slate-200 text-[11px]">${plan.avoidWarning}</p>
+        <div class="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-xs space-y-1">
+          <span class="font-extrabold text-emerald-400 uppercase text-[10px] block">Cuadre Matemático de Macros</span>
+          <p class="text-slate-700 dark:text-slate-200 text-[11px] font-bold">${plan.macroMathSummary || `Total sugerido: ${sumKcal} kcal • ${sumP}g P • ${sumC}g C • ${sumF}g G`}</p>
+          <p class="text-slate-500 dark:text-slate-300 text-[11px]">${plan.avoidWarning || ''}</p>
         </div>
         <div class="space-y-2">${proposalsHtml}</div>
       `;
@@ -2107,11 +2843,11 @@
         kcal: Number(p.kcal) || 400, p: Number(p.p) || 35, c: Number(p.c) || 25, f: Number(p.f) || 15
       });
       saveState();
-      showToast(`Registrado: ${p.title}`, "success");
+      showToast(`Registrado en tu día: ${p.title}`, "success");
     }
 
     function removeMeal(index) { appState.days[appState.currentDay].meals.splice(index, 1); saveState(); }
-    function clearTodayMeals() { appState.days[appState.currentDay].meals = []; saveState(); showToast("Comidas limpiadas", "info"); }
+    function clearTodayMeals() { appState.days[appState.currentDay].meals = []; saveState(); showToast("Comidas de hoy reiniciadas", "info"); }
     function addWater(amount) {
       const dayData = appState.days[appState.currentDay];
       dayData.water = Math.max(0, (dayData.water || 0) + amount);
@@ -2550,8 +3286,32 @@
       }).join('\n-----------------------------------\n');
     }
 
+    function copyTextSafe(text, successMsg) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => showToast(successMsg, "success")).catch(() => fallbackCopyText(text, successMsg));
+      } else {
+        fallbackCopyText(text, successMsg);
+      }
+    }
+
+    function fallbackCopyText(text, successMsg) {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast(successMsg, "success");
+      } catch (e) {
+        showToast("No se pudo copiar automáticamente", "warning");
+      }
+    }
+
     function copyWorkFormatReport() {
-      navigator.clipboard.writeText(buildWorkReportText()).then(() => showToast("Texto copiado al portapapeles", "success"));
+      copyTextSafe(buildWorkReportText(), "Texto copiado al portapapeles");
     }
 
     function downloadWorkFormatCSV() {
@@ -2607,11 +3367,11 @@
 
       const btn = document.getElementById(mode === 'lesson' ? 'tutorLessonBtn' : 'tutorReviewBtn');
       const orig = btn.innerHTML;
-      btn.innerHTML = `<span class="animate-pulse">Preparando clase...</span>`;
+      btn.innerHTML = `<span class="animate-pulse">Pensando clase...</span>`;
       btn.disabled = true;
 
       try {
-        const prompt = `Actúa como el mejor profesor particular de "${subject}" (experto en idiomas, programación y ciencias).
+        const prompt = `Actúa como el mejor profesor particular de "${subject}" (experto en idiomas, programación y ciencias) usando pensamiento profundo.
         Nivel del alumno: "${level}". Objetivo: "${goal}".
         Modo solicitado: "${mode === 'lesson' ? 'Lección estructurada desde cero paso a paso + Examen interactivo' : 'Revisión detallada de tarea/apuntes/código con correcciones y explicación'}".
         ${notes ? `Apuntes, código o duda enviada por el alumno: "${notes}"` : ''}
@@ -2619,7 +3379,7 @@
         Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta:
         {
           "lessonTitle": "Título claro de la lección o revisión",
-          "explanation": "Explicación didáctica, clara y paso a paso",
+          "explanation": "Explicación didáctica, profunda, clara y paso a paso",
           "keyTerms": ["concepto 1", "concepto 2", "concepto 3"],
           "homeworkFeedback": "Retroalimentación de sus apuntes/tarea o ejercicio práctico sugerido",
           "quizQuestion": "Pregunta de examen para comprobar lo aprendido",
@@ -2900,7 +3660,7 @@
       const goal = document.getElementById('gymGoalSelect').value;
 
       const btn = document.getElementById('gymBtn');
-      const orig = btn.innerHTML; btn.innerHTML = `<span>Generando...</span>`; btn.disabled = true;
+      const orig = btn.innerHTML; btn.innerHTML = `<span>Pensando...</span>`; btn.disabled = true;
 
       try {
         const prompt = `Para una persona de ${weight}kg y ${height}cm, objetivo: "${goal}", entrenando ${daysCount} días por semana.
@@ -3005,7 +3765,7 @@
     function deleteGymEx(i) { appState.gymStructured[appState.currentDay].exercises.splice(i, 1); saveState(); }
     function exportToCalendar() { showToast("Archivo de calendario listo", "success"); }
 
-    // ==================== 6. DESPENSA ====================
+    // ==================== 6. DESPENSA Y PLANIFICADOR DE 3 COMIDAS CON MACROS ====================
     async function generateGroceryWithGemini() {
       if (!appState.apiKey) { showToast("Configura tu API Key en Ajustes", "warning"); switchTab('settings'); return; }
       const budget = document.getElementById('groceryBudget').value.trim() || "1500";
@@ -3014,19 +3774,38 @@
       const goal = document.getElementById('groceryGoalSelect').value;
       const medCond = appState.profile?.medicalCondition ? `Condición médica o restricción del usuario: "${appState.profile.medicalCondition}".` : '';
 
+      const maxKcal = Number(appState.targetKcal) || 2100;
+      const maxP = Number(appState.targetProt) || 170;
+      const maxC = Number(appState.targetCarb) || 160;
+      const maxF = Number(appState.targetFat) || 75;
+      const policy = getNutritionalGoalPolicy();
+
       const btn = document.getElementById('groceryBtn');
-      const orig = btn.innerHTML; btn.innerHTML = "Generando..."; btn.disabled = true;
+      const orig = btn.innerHTML; btn.innerHTML = "Pensando menú y macros..."; btn.disabled = true;
 
       try {
-        const prompt = `Actúa como nutriólogo personalizado. Presupuesto $${budget} para ${days} días en ${store}. Meta: "${goal}". ${medCond}
+        const prompt = `Actúa como nutriólogo experto. Presupuesto $${budget} para ${days} días comprando en ${store}. Meta: "${goal}". ${medCond}
+        METAS DIARIAS DEL USUARIO: ${maxKcal} kcal | ${maxP}g Proteína | ${maxC}g Carbohidratos | ${maxF}g Grasas.
+        REGLA DE META: ${policy.aiDirective}
+        Cada día del mealPlan debe tener las 3 comidas (Desayuno, Comida, Cena) con gramajes y macros por comida para que al sumar las 3 comidas del día se cumplan las metas de macros (${maxP}g P, ${maxC}g C, ${maxF}g G).
         Devuelve ÚNICAMENTE un JSON válido:
-        {"groceries": [{"text": "Producto (cantidad) - $precio"}], "mealPlan": [{"day": "Día 1", "breakfast": "...", "snack1": "...", "lunch": "...", "snack2": "...", "dinner": "..."}]}`;
+        {
+          "groceries": [{"text": "Producto (cantidad exacta para cumplir macros de la semana) - $precio"}],
+          "mealPlan": [
+            {
+              "day": "Día 1 (${maxKcal} kcal | ${maxP}g P | ${maxC}g C | ${maxF}g G)",
+              "breakfast": "Platillo con gramajes (ej. 4 huevos + 60g avena -> 550 kcal | 42g P | 48g C | 18g G)",
+              "lunch": "Platillo con gramajes (ej. 220g pechuga + 150g arroz -> 720 kcal | 68g P | 65g C | 18g G)",
+              "dinner": "Platillo con gramajes (ej. 200g atún/pollo + ensalada y aguacate -> 620 kcal | 60g P | 35g C | 24g G)"
+            }
+          ]
+        }`;
         const res = await callGeminiAPI(prompt, null);
         const parsed = JSON.parse(res);
         appState.groceries = (parsed.groceries || []).map((it, idx) => ({ id: Date.now() + idx, text: it.text, checked: false }));
         appState.mealPlanStructured = parsed.mealPlan || [];
         saveState();
-        showToast("Lista y semana generadas", "success");
+        showToast("Lista y semana con macros exactas generadas", "success");
       } catch (err) { showToast("Error IA: " + err.message, "error"); }
       finally { btn.innerHTML = orig; btn.disabled = false; }
     }
@@ -3046,7 +3825,7 @@
 
       const planContainer = document.getElementById('mealPlanContainer');
       planContainer.innerHTML = (appState.mealPlanStructured || []).map(day => `
-        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs space-y-1">
+        <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs space-y-1.5">
           <h4 class="font-black text-terra-500 uppercase">${day.day}</h4>
           <p><strong>Desayuno:</strong> ${day.breakfast}</p>
           <p><strong>Comida:</strong> ${day.lunch}</p>
@@ -3079,6 +3858,11 @@
         appState.targetProt = Number(parsed.targetProt) || 170;
         appState.targetCarb = Number(parsed.targetCarb) || 160;
         appState.targetFat = Number(parsed.targetFat) || 85;
+        if (goal.toLowerCase().includes('grasa')) appState.profile.goalKey = 'deficit';
+        else if (goal.toLowerCase().includes('recompos')) appState.profile.goalKey = 'recomp';
+        else if (goal.toLowerCase().includes('volumen')) appState.profile.goalKey = 'bulk';
+        else appState.profile.goalKey = 'hypertrophy';
+        appState.profile.goalText = goal;
         saveState();
         showToast(`Metas instaladas: ${appState.targetKcal} kcal`, "success");
         switchTab('nutrition');
@@ -3088,14 +3872,19 @@
     function saveSettings() {
       appState.apiKey = document.getElementById('apiKeyInput').value.trim();
       appState.selectedModel = document.getElementById('modelSelect').value;
+      const tSel = document.getElementById('thinkingLevelSelect');
+      if (tSel) appState.thinkingLevel = tSel.value || 'HIGH';
       handleModelSelectionChange(appState.selectedModel);
       saveState();
-      showToast("Token y modelo guardados", "success");
+      showToast(`Guardado: ${appState.selectedModel} (Pensamiento ${appState.thinkingLevel})`, "success");
     }
 
     function renderSettings() {
       document.getElementById('apiKeyInput').value = appState.apiKey || '';
-      document.getElementById('modelSelect').value = appState.selectedModel || 'gemini-3.5-flash-lite';
+      document.getElementById('modelSelect').value = appState.selectedModel || 'gemini-3.8-live-extended-thinking';
+      const tSel = document.getElementById('thinkingLevelSelect');
+      if (tSel) tSel.value = appState.thinkingLevel || 'HIGH';
+
       const notice = document.getElementById('premiumModelNotice');
       if (notice) notice.classList.toggle('hidden', appState.selectedModel !== 'gemini-3.8-live-extended-thinking');
 
@@ -3103,7 +3892,7 @@
       const calcMedInput = document.getElementById('calcMedical');
       if (calcMedInput) calcMedInput.value = p.medicalCondition || '';
 
-      const modelName = appState.selectedModel || 'gemini-3.5-flash-lite';
+      const modelName = appState.selectedModel || 'gemini-3.8-live-extended-thinking';
       document.getElementById('headerTitle').textContent = p.name ? `Control TCC • ${p.name}` : 'Control TCC';
       document.getElementById('headerSubtitle').textContent = appState.apiKey ? `IA Activa (${modelName})` : `Modelo: ${modelName}`;
 
@@ -3114,16 +3903,16 @@
       if (summaryEl) {
         summaryEl.innerHTML = `
           <p><strong>Responsable:</strong> ${p.name || 'Usuario'} ${p.age ? `(${p.age} años)` : ''}</p>
-          <p><strong>Físico:</strong> ${p.weight || '---'} kg | ${p.height || '---'} cm</p>
+          <p><strong>Físico:</strong> ${p.weight || '---'} kg | ${p.height || '---'} cm | <strong>Meta:</strong> ${p.goalText || 'Déficit'}</p>
           <p><strong>Condición / Restricción:</strong> ${p.medicalCondition || 'Ninguna especificada'}</p>
-          <p><strong>Metas:</strong> ${appState.targetKcal || 2100} kcal | ${appState.targetProt || 170}g P | ${appState.targetCarb || 160}g C</p>
+          <p><strong>Metas:</strong> ${appState.targetKcal || 2100} kcal | ${appState.targetProt || 170}g P | ${appState.targetCarb || 160}g C | ${appState.targetFat || 75}g G</p>
         `;
       }
     }
 
     function toggleFactoryResetConfirm() { document.getElementById('factoryResetConfirmBox').classList.toggle('hidden'); }
     function executeFactoryReset() {
-      localStorage.removeItem(STORAGE_KEY);
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
       appState = createDefaultState();
       document.getElementById('factoryResetConfirmBox').classList.add('hidden');
       renderAll();
@@ -3144,7 +3933,14 @@
       if (!file) return;
       const reader = new FileReader();
       reader.onload = function(e) {
-        try { appState = JSON.parse(e.target.result); saveState(); showToast("Respaldo restaurado", "success"); }
+        try {
+          const imported = JSON.parse(e.target.result);
+          appState = mergeStatesNonDestructively(imported, appState);
+          appState.onboardingComplete = true;
+          saveState();
+          checkOnboarding();
+          showToast("Respaldo restaurado y fusionado", "success");
+        }
         catch (err) { showToast("Archivo inválido", "error"); }
       };
       reader.readAsText(file);
@@ -3154,7 +3950,7 @@
       const dayData = appState.days[appState.currentDay];
       const { totKcal, totP, totC, totF } = getTodayTotals();
       const report = `Reporte TCC (${appState.currentDay} - ${appState.profile.name || 'Usuario'}):\n• Kcal: ${totKcal}/${appState.targetKcal || 2100}\n• Macros: ${totP}g P | ${totC}g C | ${totF}g G\n• Agua: ${(dayData.water/1000).toFixed(2)}L`;
-      navigator.clipboard.writeText(report).then(() => showToast("Reporte diario copiado", "success"));
+      copyTextSafe(report, "Reporte diario copiado");
     }
 
     function renderAll() {
