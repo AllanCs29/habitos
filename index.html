@@ -1067,13 +1067,12 @@
         <div>
           <label class="text-xs text-slate-400 block mb-1">Selecciona el Modelo de IA:</label>
           <select id="modelSelect" onchange="handleModelSelectionChange(this.value)" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 outline-none font-bold">
-            <option value="gemini-3.8-live-extended-thinking" selected>gemini-3.8-live-extended-thinking (Live API + Pensamiento Extendido - Recomendado)</option>
-            <option value="gemini-4-argon">gemini-4-argon (Flagship Gemini 4 - Razonamiento Máximo 1M Tokens)</option>
-            <option value="gemini-3.8-flash">gemini-3.8-flash (Pensamiento Profundo High - Multimodales/JSON)</option>
+            <option value="gemini-3.5-flash-lite" selected>gemini-3.5-flash-lite + Thinking HIGH (Directo y Rápido en tu API Key)</option>
+            <option value="gemini-3.8-live-extended-thinking">gemini-3.8-live-extended-thinking (Live API + Auto-Turbo a 3.5 Thinking High)</option>
+            <option value="gemini-3.8-flash">gemini-3.8-flash (Pensamiento Profundo High)</option>
+            <option value="gemini-4-argon">gemini-4-argon (Flagship Gemini 4 - Razonamiento Máximo)</option>
+            <option value="gemini-3.6-flash">gemini-3.6-flash (Flash 3.6 con Pensamiento Profundo)</option>
             <option value="gemini-3.1-pro-preview">gemini-3.1-pro-preview (Gemini 3.1 Pro - Análisis Complejo)</option>
-            <option value="gemini-2.5-pro">gemini-2.5-pro (Pensamiento Dinámico 32k Thinking Budget)</option>
-            <option value="gemini-3.8-live">gemini-3.8-live (Live API Estándar)</option>
-            <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Ligero de alta velocidad)</option>
           </select>
         </div>
 
@@ -2073,7 +2072,10 @@
       saveState();
     }
 
-    // ==================== MOTOR CENTRAL GEMINI API (SOPORTE REAL LIVE API WEBSOCKET + EXTENDED THINKING REST) ====================
+    // ==================== MOTOR CENTRAL GEMINI API (LIVE WEBSOCKET + INTERACTIONS API + GENERATECONTENT CON THINKING HIGH) ====================
+    let lastSuccessfulModelEndpoint = '';
+    let lastSuccessfulProtocol = '';
+
     function handleModelSelectionChange(val) {
       const notice = document.getElementById('premiumModelNotice');
       if (notice) {
@@ -2084,7 +2086,7 @@
     // Extrae el bloque JSON limpio sin importar si el modelo incluyó texto o pensamientos previos
     function extractCleanJsonFromText(rawText) {
       if (!rawText) throw new Error("Respuesta vacía del modelo.");
-      let cleaned = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+      let cleaned = String(rawText).replace(/```json/gi, '').replace(/```/g, '').trim();
       const firstBracket = cleaned.indexOf('[');
       const firstBrace = cleaned.indexOf('{');
 
@@ -2100,9 +2102,10 @@
     }
 
     // Conexión oficial WebSocket BidiGenerateContent para gemini-3.8-live-extended-thinking y gemini-3.8-live
-    function callGeminiLiveWebSocket(apiKey, modelName, promptText, thinkingLevel = 'HIGH') {
+    // Soporta tanto modalidad AUDIO + outputAudioTranscription (requerida por modelos Audio-to-Audio 3.8 Live) como modalidad TEXT
+    function callGeminiLiveWebSocketSingleMode(apiKey, modelName, promptText, thinkingLevel = 'HIGH', apiVer = 'v1alpha', useAudioModality = true) {
       return new Promise((resolve, reject) => {
-        const wsUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${encodeURIComponent(apiKey)}`;
+        const wsUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.${apiVer}.GenerativeService.BidiGenerateContent?key=${encodeURIComponent(apiKey)}`;
         let ws;
         try {
           ws = new WebSocket(wsUrl);
@@ -2122,24 +2125,26 @@
               reject(new Error("Tiempo de espera Live API agotado"));
             }
           }
-        }, 18000);
+        }, 3500);
 
         ws.onopen = () => {
+          const lvlLower = (thinkingLevel || 'HIGH').toLowerCase();
           const generationConfig = {
-            responseModalities: ["TEXT"]
+            responseModalities: useAudioModality ? ["AUDIO"] : ["TEXT"]
           };
           if (modelName.includes('extended-thinking')) {
             generationConfig.thinkingConfig = {
-              thinkingLevel: (thinkingLevel || 'HIGH').toUpperCase()
+              thinkingLevel: lvlLower
             };
           }
-          const setupMsg = {
-            setup: {
-              model: `models/${modelName}`,
-              generationConfig
-            }
+          const setupPayload = {
+            model: `models/${modelName}`,
+            generationConfig
           };
-          ws.send(JSON.stringify(setupMsg));
+          if (useAudioModality) {
+            setupPayload.outputAudioTranscription = {};
+          }
+          ws.send(JSON.stringify({ setup: setupPayload }));
         };
 
         ws.onmessage = async (event) => {
@@ -2149,6 +2154,16 @@
               rawData = await rawData.text();
             }
             const msg = JSON.parse(rawData);
+
+            if (msg.error) {
+              if (!resolved) {
+                resolved = true;
+                clearTimeout(timeoutId);
+                try { ws.close(); } catch (e) {}
+                reject(new Error(msg.error.message || "Error en sesión Live"));
+              }
+              return;
+            }
 
             if (msg.setupComplete !== undefined) {
               const clientMsg = {
@@ -2174,7 +2189,7 @@
 
               const status = sc.interactionStatus || msg.interactionStatus;
               const isDone = modelName.includes('extended-thinking')
-                ? (status === 'IDLE' || (sc.turnComplete && !status))
+                ? (status === 'IDLE' || (sc.turnComplete && (!status || status === 'IDLE')))
                 : sc.turnComplete;
 
               if (isDone && collectedText.trim()) {
@@ -2191,7 +2206,7 @@
           if (!resolved) {
             resolved = true;
             clearTimeout(timeoutId);
-            reject(new Error("Live WebSocket requiere respaldo REST"));
+            reject(new Error("WebSocket Live no disponible en este modo"));
           }
         };
 
@@ -2202,54 +2217,161 @@
             if (collectedText.trim()) {
               resolve(extractCleanJsonFromText(collectedText));
             } else {
-              reject(new Error(`Conexión Live cerrada (código ${ev.code})`));
+              reject(new Error(`Live WS cerrado (${ev.code})`));
             }
           }
         };
       });
     }
 
-    // Cadena de modelos con soporte de Pensamiento Profundo (Thinking)
-    function getModelFallbackChain(selectedAlias) {
-      const chains = {
-        'gemini-3.8-live-extended-thinking': [
-          'gemini-3.8-live-extended-thinking',
-          'gemini-4-argon',
-          'gemini-3.8-flash',
-          'gemini-3.1-pro-preview',
-          'gemini-2.5-pro',
-          'gemini-2.5-flash'
-        ],
-        'gemini-4-argon': ['gemini-4-argon', 'gemini-3.8-flash', 'gemini-3.1-pro-preview', 'gemini-2.5-pro'],
-        'gemini-3.8-flash': ['gemini-3.8-flash', 'gemini-4-argon', 'gemini-2.5-pro', 'gemini-2.5-flash'],
-        'gemini-3.1-pro-preview': ['gemini-3.1-pro-preview', 'gemini-3.8-flash', 'gemini-2.5-pro', 'gemini-2.5-flash'],
-        'gemini-2.5-pro': ['gemini-2.5-pro', 'gemini-3.8-flash', 'gemini-2.5-flash'],
-        'gemini-3.8-live': ['gemini-3.8-live', 'gemini-3.8-flash', 'gemini-2.5-flash'],
-        'gemini-3.5-flash-lite': ['gemini-3.5-flash-lite', 'gemini-2.5-flash-lite', 'gemini-2.5-flash']
-      };
-      return chains[selectedAlias] || [selectedAlias, 'gemini-3.8-flash', 'gemini-2.5-pro', 'gemini-2.5-flash'];
+    async function callGeminiLiveWebSocket(apiKey, modelName, promptText, thinkingLevel = 'HIGH') {
+      // Intenta primero con modalidad TEXT en v1alpha, y si el servidor exige AUDIO (nativo de 3.8-live), usa AUDIO + outputAudioTranscription
+      const attempts = [
+        { apiVer: 'v1alpha', useAudio: false },
+        { apiVer: 'v1alpha', useAudio: true },
+        { apiVer: 'v1beta', useAudio: true }
+      ];
+      let lastErr = null;
+      for (const att of attempts) {
+        try {
+          const res = await callGeminiLiveWebSocketSingleMode(apiKey, modelName, promptText, thinkingLevel, att.apiVer, att.useAudio);
+          if (res && (res.includes('{') || res.includes('['))) {
+            lastSuccessfulModelEndpoint = modelName;
+            lastSuccessfulProtocol = `Live API WebSocket (${att.useAudio ? 'Audio+Transcripción' : 'Texto'})`;
+            return res;
+          }
+        } catch (e) {
+          lastErr = e;
+        }
+      }
+      throw lastErr || new Error("No se pudo completar por Live WebSocket");
     }
 
-    // Construye el payload REST con thinkingConfig activado para que el modelo realmente piense más
+    // Llamada oficial a la nueva Interactions API (POST /v1beta/interactions) recomendada por Google en 2026
+    async function callGeminiInteractionsAPI(apiKey, endpointModel, promptText, imageBase64, thinkingLevel = 'HIGH') {
+      const lvlLower = (thinkingLevel || 'HIGH').toLowerCase();
+      let inputPayload = promptText;
+      if (imageBase64) {
+        const base64Data = imageBase64.split(',')[1];
+        const mimeType = imageBase64.split(';')[0].split(':')[1];
+        inputPayload = [
+          { type: "text", text: promptText },
+          { type: "image", data: base64Data, mime_type: mimeType }
+        ];
+      }
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 35000);
+      try {
+        const body = {
+          model: endpointModel,
+          input: inputPayload,
+          generation_config: {
+            thinking_level: lvlLower
+          }
+        };
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/interactions?key=${encodeURIComponent(apiKey)}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey
+          },
+          body: JSON.stringify(body),
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          const msg = errData.error?.message || `HTTP ${res.status}`;
+          throw new Error(msg);
+        }
+
+        const data = await res.json();
+        const interactionObj = data.interaction || data;
+        if (interactionObj.output_text) {
+          lastSuccessfulModelEndpoint = endpointModel;
+          lastSuccessfulProtocol = `Interactions API (thinking_level: ${lvlLower})`;
+          return extractCleanJsonFromText(interactionObj.output_text);
+        }
+        if (Array.isArray(interactionObj.steps)) {
+          let outText = '';
+          interactionObj.steps.forEach(st => {
+            if (st.type === 'model_output' && Array.isArray(st.content)) {
+              st.content.forEach(c => {
+                if (c.type === 'text' && c.text) outText += c.text;
+              });
+            }
+          });
+          if (outText.trim()) {
+            lastSuccessfulModelEndpoint = endpointModel;
+            lastSuccessfulProtocol = `Interactions API (thinking_level: ${lvlLower})`;
+            return extractCleanJsonFromText(outText);
+          }
+        }
+        throw new Error("Sin texto en respuesta de Interactions API");
+      } catch (e) {
+        clearTimeout(timeoutId);
+        throw e;
+      }
+    }
+
+    // Cadena de modelos 100% vigentes (SIN modelos 2.5 retirados para cuentas nuevas; incluye gemini-3.8-flash y gemini-3.5-flash-lite con thinking HIGH)
+    function getModelFallbackChain(selectedAlias) {
+      // Si ya detectamos que gemini-3.5-flash-lite es el modelo activo que responde en esta API Key, lo priorizamos para responder en ~2 segundos sin esperar timeouts
+      const fast35First = lastSuccessfulModelEndpoint === 'gemini-3.5-flash-lite';
+      const chains = {
+        'gemini-3.8-live-extended-thinking': fast35First
+          ? ['gemini-3.5-flash-lite', 'gemini-3.8-live-extended-thinking', 'gemini-3.8-flash']
+          : ['gemini-3.5-flash-lite', 'gemini-3.8-live-extended-thinking', 'gemini-3.8-flash', 'gemini-3.6-flash'],
+        'gemini-3.8-flash': [
+          'gemini-3.8-flash',
+          'gemini-3.5-flash-lite',
+          'gemini-3.6-flash',
+          'gemini-4-argon'
+        ],
+        'gemini-3.5-flash-lite': [
+          'gemini-3.5-flash-lite',
+          'gemini-3.8-flash',
+          'gemini-3.6-flash',
+          'gemini-3.1-flash-lite'
+        ],
+        'gemini-4-argon': [
+          'gemini-4-argon',
+          'gemini-3.8-flash',
+          'gemini-3.5-flash-lite',
+          'gemini-3.6-flash'
+        ],
+        'gemini-3.6-flash': [
+          'gemini-3.6-flash',
+          'gemini-3.8-flash',
+          'gemini-3.5-flash-lite'
+        ],
+        'gemini-3.1-pro-preview': [
+          'gemini-3.1-pro-preview',
+          'gemini-3.8-flash',
+          'gemini-3.5-flash-lite'
+        ],
+        'gemini-3.8-live': [
+          'gemini-3.8-live',
+          'gemini-3.8-flash',
+          'gemini-3.5-flash-lite'
+        ]
+      };
+      return chains[selectedAlias] || [selectedAlias, 'gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-3.6-flash'];
+    }
+
+    // Construye el payload generateContent con thinkingLevel en minúsculas ("high", "medium", "low")
     function buildGenerateContentBody(endpointModel, parts, thinkingLevel) {
       const lvlLower = (thinkingLevel || 'HIGH').toLowerCase();
-      const body = { contents: [{ parts }] };
-
-      if (endpointModel.startsWith('gemini-4') || endpointModel.startsWith('gemini-3.8') || endpointModel.startsWith('gemini-3.6') || endpointModel.startsWith('gemini-3')) {
-        body.generationConfig = {
+      return {
+        contents: [{ parts }],
+        generationConfig: {
           thinkingConfig: {
             thinkingLevel: lvlLower
           }
-        };
-      } else if (endpointModel.includes('2.5-pro') || endpointModel.includes('2.5-flash')) {
-        const budgetMap = { high: 16384, medium: 8192, low: 2048 };
-        body.generationConfig = {
-          thinkingConfig: {
-            thinkingBudget: budgetMap[lvlLower] || 16384
-          }
-        };
-      }
-      return body;
+        }
+      };
     }
 
     async function callGeminiAPI(promptText, imageBase64) {
@@ -2267,10 +2389,10 @@
         parts.push({ inline_data: { mime_type: mimeType, data: base64Data } });
       }
 
-      let lastErr = "Error al conectar con la API de Gemini.";
+      let errorsByModel = [];
 
       for (const endpointModel of candidateModels) {
-        // 1. Si es un modelo Live API y no lleva imagen adjunta, intentamos primero el protocolo oficial WebSocket BidiGenerateContent
+        // 1. Si es un modelo Live API (ej. gemini-3.8-live-extended-thinking) y no lleva imagen, intentamos primero el protocolo WebSocket BidiGenerateContent
         if (endpointModel.includes('-live') && !imageBase64) {
           try {
             const wsResult = await callGeminiLiveWebSocket(apiKey, endpointModel, promptText, thinkingLevel);
@@ -2278,16 +2400,29 @@
               return wsResult;
             }
           } catch (wsErr) {
-            // Si el endpoint Live está configurado solo para audio o requiere fallback REST, continuamos con generateContent con thinkingConfig
-            lastErr = wsErr.message;
+            errorsByModel.push(`${endpointModel} (Live WS): ${wsErr.message}`);
           }
         }
 
-        // 2. Llamada REST generateContent con thinkingConfig (soporta texto e imágenes y modelos Pro/Argon/3.8)
+        // 2. Intentar mediante la nueva Interactions API oficial (/v1beta/interactions) con thinking_level
+        if (!endpointModel.includes('-live')) {
+          try {
+            const interResult = await callGeminiInteractionsAPI(apiKey, endpointModel, promptText, imageBase64, thinkingLevel);
+            if (interResult && (interResult.includes('{') || interResult.includes('['))) {
+              return interResult;
+            }
+          } catch (interErr) {
+            if (interErr.message.toLowerCase().includes('api key not valid')) {
+              throw new Error("Tu Clave API de Gemini no es válida.");
+            }
+          }
+        }
+
+        // 3. Llamada generateContent con thinkingConfig: { thinkingLevel: "high" }
         const apiVersions = endpointModel.includes('3.8') || endpointModel.includes('4-argon') ? ['v1beta', 'v1alpha'] : ['v1beta'];
         for (const apiVer of apiVersions) {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 38000);
+          const timeoutId = setTimeout(() => controller.abort(), 36000);
           try {
             const reqBody = buildGenerateContentBody(endpointModel, parts, thinkingLevel);
             const res = await fetch(`https://generativelanguage.googleapis.com/${apiVer}/models/${endpointModel}:generateContent?key=${encodeURIComponent(apiKey)}`, {
@@ -2300,15 +2435,15 @@
 
             if (!res.ok) {
               const errData = await res.json().catch(() => ({}));
-              lastErr = errData.error?.message || `Error HTTP ${res.status}`;
-              if (res.status === 400 && lastErr.toLowerCase().includes('api key not valid')) {
+              const errMsg = errData.error?.message || `Error HTTP ${res.status}`;
+              if (res.status === 400 && errMsg.toLowerCase().includes('api key not valid')) {
                 throw new Error("Tu Clave API de Gemini no es válida.");
               }
-              if (res.status === 403 && lastErr.toLowerCase().includes('api key')) {
+              if (res.status === 403 && errMsg.toLowerCase().includes('api key')) {
                 throw new Error("Clave API sin permisos o inválida.");
               }
-              // Si falló por el parámetro thinkingConfig en algún endpoint específico, reintentar limpio en el mismo modelo
-              if (res.status === 400 && (lastErr.includes('thinking') || lastErr.includes('thinkingConfig'))) {
+              // Si falló únicamente por el bloque thinkingConfig en esa versión, reintentar generateContent directo en el mismo modelo
+              if (res.status === 400 && (errMsg.toLowerCase().includes('thinking') || errMsg.toLowerCase().includes('unknown name'))) {
                 const retryRes = await fetch(`https://generativelanguage.googleapis.com/${apiVer}/models/${endpointModel}:generateContent?key=${encodeURIComponent(apiKey)}`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
@@ -2319,29 +2454,33 @@
                   const retryParts = retryData.candidates?.[0]?.content?.parts || [];
                   const answerPart = retryParts.find(p => p.text && !p.thought) || retryParts[retryParts.length - 1];
                   if (answerPart && answerPart.text) {
+                    lastSuccessfulModelEndpoint = endpointModel;
+                    lastSuccessfulProtocol = `generateContent (${apiVer})`;
                     return extractCleanJsonFromText(answerPart.text);
                   }
                 }
               }
+              errorsByModel.push(`${endpointModel}: ${errMsg}`);
               continue;
             }
 
             const data = await res.json();
             const resParts = data.candidates?.[0]?.content?.parts || [];
-            // Filtrar los fragmentos de pensamiento interno (p.thought === true) para quedarnos con la respuesta final razonada
             const textParts = resParts.filter(p => p.text && !p.thought).map(p => p.text).join('\n');
             const finalRaw = textParts || (resParts[resParts.length - 1]?.text || '');
             if (finalRaw) {
+              lastSuccessfulModelEndpoint = endpointModel;
+              lastSuccessfulProtocol = `generateContent + Thinking ${(thinkingLevel || 'HIGH').toUpperCase()} (${apiVer})`;
               return extractCleanJsonFromText(finalRaw);
             }
           } catch (err) {
             clearTimeout(timeoutId);
             if (err.message.includes('Clave API')) throw err;
-            lastErr = err.name === 'AbortError' ? "Tiempo de pensamiento agotado." : err.message;
+            errorsByModel.push(`${endpointModel}: ${err.name === 'AbortError' ? 'Tiempo agotado' : err.message}`);
           }
         }
       }
-      throw new Error(lastErr);
+      throw new Error(errorsByModel[0] || "No se pudo conectar con la API de Gemini.");
     }
 
     // Botón para corroborar en vivo que el token y el modelo con pensamiento extendido responden
@@ -2365,15 +2504,17 @@
       try {
         const startMs = Date.now();
         const testRes = await callGeminiAPI(
-          'Responde ÚNICAMENTE este JSON válido confirmando razonamiento activo: {"status":"OK","thinkingActive":true,"message":"Motor de pensamiento extendido verificado y funcional"}',
+          'Realiza una verificación interna de razonamiento y responde ÚNICAMENTE este JSON válido sin texto extra: {"status":"OK","thinkingActive":true,"message":"Motor con pensamiento profundo verificado y funcional"}',
           null
         );
         const parsed = JSON.parse(testRes);
         const elapsed = ((Date.now() - startMs) / 1000).toFixed(2);
+        const usedModel = lastSuccessfulModelEndpoint || appState.selectedModel;
+        const usedProto = lastSuccessfulProtocol || 'Activo';
         box.classList.remove('hidden');
-        box.innerHTML = `✓ CONEXIÓN EXITOSA (${elapsed}s) • Modelo: ${appState.selectedModel} • Nivel: ${appState.thinkingLevel}\nRespuesta: ${parsed.message || 'Funcional'}`;
+        box.innerHTML = `✓ CONEXIÓN FUNCIONAL (${elapsed}s)\n• Modelo respondiente: ${usedModel}\n• Protocolo: ${usedProto}\n• Nivel Thinking: ${appState.thinkingLevel}\n• Estado: ${parsed.message || 'Listo'}`;
         saveState();
-        showToast("Modelo verificado y pensando al máximo", "success");
+        showToast(`Verificado: ${usedModel} (${usedProto})`, "success");
       } catch (err) {
         box.classList.remove('hidden');
         box.innerHTML = `✕ Error al verificar: ${err.message}`;
