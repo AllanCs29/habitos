@@ -61,6 +61,13 @@
     .anim-curl { transform-origin: 50px 45px; animation: curlMove 2s ease-in-out infinite; }
     .muscle-active { animation: pulseGlow 1.5s ease-in-out infinite; }
     .breathe-active { animation: breatheCircle 12s ease-in-out infinite; }
+    @keyframes floatNode { 0%, 100% { transform: translateY(0px) scale(1); } 50% { transform: translateY(-5px) scale(1.06); } }
+    .candy-node-active { animation: floatNode 2.2s ease-in-out infinite; }
+    .candy-map-bg {
+      background-image: radial-gradient(rgba(224, 90, 51, 0.14) 1.5px, transparent 1.5px), radial-gradient(rgba(59, 130, 246, 0.12) 1.5px, transparent 1.5px);
+      background-size: 28px 28px;
+      background-position: 0 0, 14px 14px;
+    }
   </style>
 </head>
 <body class="bg-[#f6f4f0] dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen pb-12 transition-colors duration-200">
@@ -732,33 +739,63 @@
       </div>
     </section>
 
-    <!-- ==================== PESTAÑA 3: TU PROFE IA ==================== -->
+    <!-- ==================== PESTAÑA 3: TU PROFE IA (MULTIMATERIA + MAPA CANDY CRUSH + IDE CÓDIGO + FÓRMULAS) ==================== -->
     <section id="tab-tutor" class="space-y-4 hidden">
       <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-4">
-        <div class="flex justify-between items-start">
+        <div class="flex justify-between items-start gap-2">
           <div>
-            <span class="text-[10px] font-extrabold uppercase tracking-wider text-terra-500 block">Academia Interactiva IA</span>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-terra-500 block">Academia Gamificada Multi-Materia</span>
             <h2 class="text-lg font-black tracking-tight flex items-center gap-2">
               <i class="fi fi-rr-graduation-cap text-terra-500"></i>
               <span>Tu Profe Personal IA</span>
             </h2>
-            <p class="text-[11px] text-slate-400">Clases desde 0, idiomas, programación, revisión de apuntes y exámenes.</p>
+            <p class="text-[11px] text-slate-400">Cada materia guarda sus propias lecciones desde la #1 en su mapa de niveles.</p>
           </div>
-          <div class="text-right">
-            <span id="tutorStreakBadge" class="text-xs font-black bg-terra-500/15 text-terra-500 px-2.5 py-1 rounded-xl inline-flex items-center gap-1">
-              <i class="fi fi-sr-flame"></i> <span>1d</span>
-            </span>
-            <span id="tutorProgressBadge" class="text-[10px] text-slate-400 font-bold mt-1 block">0 lecciones</span>
+          <div class="text-right shrink-0">
+            <div class="flex items-center justify-end gap-1.5">
+              <span id="tutorStreakBadge" class="text-xs font-black bg-terra-500/15 text-terra-500 px-2.5 py-1 rounded-xl inline-flex items-center gap-1" title="Racha por día calendario estudiado">
+                <i class="fi fi-sr-flame"></i> <span>0d racha</span>
+              </span>
+              <span id="tutorXpBadge" class="text-xs font-black bg-amber-500/15 text-amber-400 px-2.5 py-1 rounded-xl inline-flex items-center gap-1">
+                <i class="fi fi-sr-star"></i> <span>0 XP</span>
+              </span>
+            </div>
+            <span id="tutorProgressBadge" class="text-[10px] text-slate-400 font-bold mt-1 block">0 lecciones en esta materia</span>
           </div>
         </div>
 
+        <!-- SELECTOR DE MATERIAS GUARDADAS (CADA UNA CON SU PROPIO HISTORIAL DESDE LECCIÓN 1) -->
+        <div class="space-y-2 pt-1 border-t border-slate-100 dark:border-slate-800">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold uppercase text-slate-400">Tus Materias Activas (Toca para cambiar)</span>
+            <button onclick="toggleNewSubjectBox()" class="text-[10px] font-extrabold text-terra-500 bg-terra-500/10 px-2.5 py-1 rounded-lg flex items-center gap-1">
+              <i class="fi fi-rr-plus-small"></i> <span>Nueva Materia</span>
+            </button>
+          </div>
+
+          <div id="tutorSubjectPills" class="flex gap-2 overflow-x-auto no-scrollbar py-1"></div>
+
+          <!-- CAJA PARA CREAR UNA MATERIA NUEVA DESDE LECCIÓN 1 -->
+          <div id="newSubjectCreatorBox" class="hidden p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-terra-500/40 space-y-2">
+            <span class="text-[10px] font-extrabold uppercase text-terra-500 block">Agregar Nueva Materia (Inicia en Nivel / Lección 1)</span>
+            <div class="grid grid-cols-1 gap-2">
+              <input id="newSubjectNameInput" type="text" placeholder="Ej. Cálculo Diferencial / Python / Inglés / Finanzas..." class="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-slate-900 font-bold outline-none">
+              <div class="flex gap-2">
+                <button onclick="createNewTutorSubject()" class="flex-1 py-2 bg-terra-500 text-white font-extrabold text-xs rounded-xl">Crear e Ir a Lección 1</button>
+                <button onclick="toggleNewSubjectBox()" class="px-3 py-2 bg-slate-300 dark:bg-slate-700 text-xs font-bold rounded-xl">Cancelar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONFIGURACIÓN DE LA MATERIA ACTUAL -->
         <div class="grid grid-cols-2 gap-2 text-xs">
           <div>
-            <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Materia / Tema</label>
-            <input id="tutorSubjectInput" type="text" placeholder="Ej. Inglés / Python / Finanzas" onchange="saveTutorConfig()" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold outline-none">
+            <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Materia Activa</label>
+            <input id="tutorSubjectInput" type="text" placeholder="Ej. Inglés / Python / Matemáticas" onchange="saveTutorConfig()" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold outline-none">
           </div>
           <div>
-            <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Tu Nivel Actual</label>
+            <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Tu Nivel en esta Materia</label>
             <select id="tutorLevelSelect" onchange="saveTutorConfig()" class="w-full px-2.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold outline-none">
               <option value="Desde Cero (Principiante Absoluto)">Desde 0 (Principiante)</option>
               <option value="Básico (A1/A2 - Fundamentos)">Básico (Fundamentos)</option>
@@ -769,8 +806,8 @@
         </div>
 
         <div>
-          <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">¿Cuál es tu objetivo en esta materia?</label>
-          <input id="tutorGoalInput" type="text" placeholder="Ej. Aprender a programar desde 0 / Hablar inglés en el trabajo..." onchange="saveTutorConfig()" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 outline-none">
+          <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Objetivo o Tema Específico para la siguiente clase</label>
+          <input id="tutorGoalInput" type="text" placeholder="Ej. Dominar funciones desde 0 / Derivadas / Verbos en pasado..." onchange="saveTutorConfig()" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 outline-none">
         </div>
 
         <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2.5">
@@ -785,7 +822,7 @@
               <input type="file" accept="image/*" id="tutorImageInput" onchange="handleTutorImageUpload(event)" class="hidden">
             </label>
           </div>
-          <textarea id="tutorNotesInput" rows="2" placeholder="Pega aquí tu código, ejercicio a revisar, o duda específica de tus apuntes..." class="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-slate-900 outline-none resize-none font-mono"></textarea>
+          <textarea id="tutorNotesInput" rows="2" placeholder="Pega aquí tu código, problema matemático, ejercicio a revisar o duda..." class="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-slate-900 outline-none resize-none font-mono"></textarea>
 
           <div id="tutorPhotoPreviewBox" class="hidden flex items-center justify-between bg-slate-900 p-2 rounded-xl border border-blue-500/40">
             <div class="flex items-center gap-2">
@@ -796,18 +833,39 @@
           </div>
         </div>
 
+        <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-terra-500/10 border border-terra-500/30 text-[11px]">
+          <span class="font-bold text-slate-600 dark:text-slate-300">Siguiente nivel en esta materia:</span>
+          <span id="tutorNextLessonBtnLabel" class="font-black text-terra-500">Generar Lección #1</span>
+        </div>
+
         <div class="grid grid-cols-2 gap-2">
-          <button id="tutorLessonBtn" onclick="startTutorSession('lesson')" class="py-3 bg-terra-500 hover:bg-terra-600 text-white font-black text-xs rounded-2xl shadow transition flex items-center justify-center gap-1.5">
-            <i class="fi fi-rr-book-alt"></i>
+          <button id="tutorLessonBtn" onclick="startTutorSession('lesson')" class="py-3 bg-gradient-to-r from-terra-500 to-amber-500 hover:from-terra-600 hover:to-amber-600 text-white font-black text-xs rounded-2xl shadow-md transition flex items-center justify-center gap-1.5">
+            <i class="fi fi-rr-play-alt"></i>
             <span>Darme Clase + Examen</span>
           </button>
-          <button id="tutorReviewBtn" onclick="startTutorSession('review')" class="py-3 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs rounded-2xl shadow transition flex items-center justify-center gap-1.5">
+          <button id="tutorReviewBtn" onclick="startTutorSession('review')" class="py-3 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs rounded-2xl shadow-md transition flex items-center justify-center gap-1.5">
             <i class="fi fi-rr-check-circle"></i>
             <span>Revisar Tarea/Código</span>
           </button>
         </div>
       </div>
 
+      <!-- MAPA DE NIVELES ESTILO CANDY CRUSH (CAMINO INTERACTIVO DE LECCIONES POR MATERIA) -->
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border-2 border-amber-500/30 space-y-3 candy-map-bg">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i class="fi fi-sr-map-marker-home text-amber-400 text-base"></i>
+            <div>
+              <h3 class="font-extrabold text-sm" id="candyMapSubjectTitle">Mapa de Niveles</h3>
+              <p class="text-[10px] text-slate-400">Toca cualquier nivel completado para repasar esa lección completa.</p>
+            </div>
+          </div>
+          <span id="candyMapStarsCount" class="text-xs font-black text-amber-400 bg-amber-500/15 px-2.5 py-1 rounded-xl">★ 0</span>
+        </div>
+        <div id="tutorCandyMapContainer" class="py-2"></div>
+      </div>
+
+      <!-- VISOR INTERACTIVO DE LA LECCIÓN SELECCIONADA (ESQUEMA VISUAL, FÓRMULAS, IDE CÓDIGO, FLASHCARDS Y RETOS) -->
       <div id="tutorLessonContainer" class="space-y-4"></div>
     </section>
 
@@ -1353,6 +1411,24 @@
       if ((incomingSt.groceries || []).length > (merged.groceries || []).length) merged.groceries = incomingSt.groceries;
       if ((incomingSt.mealPlanStructured || []).length > (merged.mealPlanStructured || []).length) merged.mealPlanStructured = incomingSt.mealPlanStructured;
       if (!merged.lastFridgePlan && incomingSt.lastFridgePlan) merged.lastFridgePlan = incomingSt.lastFridgePlan;
+      if (incomingSt.tutorData) {
+        if (!merged.tutorData) merged.tutorData = JSON.parse(JSON.stringify(incomingSt.tutorData));
+        else {
+          if (incomingSt.tutorData.subjectsMap) {
+            if (!merged.tutorData.subjectsMap) merged.tutorData.subjectsMap = {};
+            Object.keys(incomingSt.tutorData.subjectsMap).forEach(sk => {
+              const incSub = incomingSt.tutorData.subjectsMap[sk];
+              const curSub = merged.tutorData.subjectsMap[sk];
+              if (!curSub || (incSub.lessons || []).length > (curSub.lessons || []).length) {
+                merged.tutorData.subjectsMap[sk] = JSON.parse(JSON.stringify(incSub));
+              }
+            });
+          }
+          const combinedDays = new Set([...(merged.tutorData.studyDaysHistory || []), ...(incomingSt.tutorData.studyDaysHistory || [])]);
+          merged.tutorData.studyDaysHistory = Array.from(combinedDays);
+          merged.tutorData.totalXp = Math.max(merged.tutorData.totalXp || 0, incomingSt.tutorData.totalXp || 0);
+        }
+      }
       if (getStateRichnessScore(merged) > 0) merged.onboardingComplete = true;
 
       return merged;
@@ -3474,11 +3550,191 @@
       link.click();
     }
 
-    // ==================== 3. TU PROFE IA ====================
+    // ==================== 3. TU PROFE IA (MULTI-MATERIA, MAPA CANDY CRUSH, FÓRMULAS, IDE CÓDIGO Y RACHA DIARIA) ====================
+    function normalizeSubjectKey(name) {
+      return (name || 'General').trim().toLowerCase().replace(/\s+/g, '_');
+    }
+
+    function ensureTutorMultiSubjectStructure() {
+      if (!appState.tutorData) {
+        appState.tutorData = createDefaultState().tutorData;
+      }
+      const td = appState.tutorData;
+      if (!td.subjectsMap || typeof td.subjectsMap !== 'object') {
+        td.subjectsMap = {};
+      }
+      if (!Array.isArray(td.studyDaysHistory)) {
+        td.studyDaysHistory = [];
+      }
+      if (typeof td.totalXp !== 'number') {
+        td.totalXp = 0;
+      }
+
+      // Migrar lección anterior si existía en el formato viejo para nunca perderla
+      const initialSubjName = (td.subject || 'Inglés').trim();
+      const initKey = normalizeSubjectKey(initialSubjName);
+      if (Object.keys(td.subjectsMap).length === 0) {
+        const migratedLessons = [];
+        if (td.lastLesson) {
+          migratedLessons.push({
+            ...td.lastLesson,
+            lessonNumber: 1,
+            createdAt: appState.currentDay || '2026-10-22',
+            stars: 3,
+            completedQuiz: true
+          });
+        }
+        td.subjectsMap[initKey] = {
+          key: initKey,
+          name: initialSubjName,
+          level: td.level || 'Desde Cero (Principiante Absoluto)',
+          goal: td.goal || 'Dominar los fundamentos paso a paso',
+          lessons: migratedLessons,
+          selectedLessonIndex: migratedLessons.length > 0 ? 0 : -1
+        };
+        td.activeSubjectKey = initKey;
+      }
+
+      if (!td.activeSubjectKey || !td.subjectsMap[td.activeSubjectKey]) {
+        td.activeSubjectKey = Object.keys(td.subjectsMap)[0];
+      }
+      return td;
+    }
+
+    function getActiveSubjectObj() {
+      const td = ensureTutorMultiSubjectStructure();
+      return td.subjectsMap[td.activeSubjectKey];
+    }
+
+    // Calcula la racha real POR DÍA calendario estudiado (no por botón presionado el mismo día)
+    function registerTutorStudyDayToday() {
+      const td = ensureTutorMultiSubjectStructure();
+      const todayId = appState.currentDay || '2026-10-22';
+      if (!td.studyDaysHistory.includes(todayId)) {
+        td.studyDaysHistory.push(todayId);
+      }
+      td.streak = calculateTutorDailyStreak();
+    }
+
+    function calculateTutorDailyStreak() {
+      const td = ensureTutorMultiSubjectStructure();
+      const historySet = new Set(td.studyDaysHistory || []);
+      if (historySet.size === 0) return 0;
+
+      const currentIdx = DAYS_CONFIG.findIndex(d => d.id === appState.currentDay);
+      if (currentIdx === -1) return historySet.size;
+
+      let streak = 0;
+      for (let i = currentIdx; i >= 0; i--) {
+        const dId = DAYS_CONFIG[i].id;
+        if (historySet.has(dId)) {
+          streak++;
+        } else if (i !== currentIdx) {
+          break;
+        }
+      }
+      return Math.max(streak, historySet.has(appState.currentDay) ? 1 : 0);
+    }
+
+    function toggleNewSubjectBox() {
+      const box = document.getElementById('newSubjectCreatorBox');
+      if (!box) return;
+      box.classList.toggle('hidden');
+      if (!box.classList.contains('hidden')) {
+        document.getElementById('newSubjectNameInput').focus();
+      }
+    }
+
+    function createNewTutorSubject() {
+      const input = document.getElementById('newSubjectNameInput');
+      const rawName = (input.value || '').trim();
+      if (!rawName) {
+        showToast("Escribe el nombre de la nueva materia", "warning");
+        return;
+      }
+      const td = ensureTutorMultiSubjectStructure();
+      const key = normalizeSubjectKey(rawName);
+
+      if (!td.subjectsMap[key]) {
+        td.subjectsMap[key] = {
+          key,
+          name: rawName,
+          level: 'Desde Cero (Principiante Absoluto)',
+          goal: `Dominar ${rawName} paso a paso desde la Lección 1`,
+          lessons: [],
+          selectedLessonIndex: -1
+        };
+        showToast(`Materia "${rawName}" creada. Lista para iniciar en la Lección #1`, "success");
+      } else {
+        showToast(`Cambiado a tu materia "${td.subjectsMap[key].name}"`, "info");
+      }
+
+      td.activeSubjectKey = key;
+      td.subject = td.subjectsMap[key].name;
+      td.level = td.subjectsMap[key].level;
+      td.goal = td.subjectsMap[key].goal;
+      input.value = '';
+      document.getElementById('newSubjectCreatorBox').classList.add('hidden');
+      saveState();
+    }
+
+    function selectTutorSubject(subjKey) {
+      const td = ensureTutorMultiSubjectStructure();
+      if (!td.subjectsMap[subjKey]) return;
+      td.activeSubjectKey = subjKey;
+      const subj = td.subjectsMap[subjKey];
+      td.subject = subj.name;
+      td.level = subj.level;
+      td.goal = subj.goal;
+      saveState();
+      showToast(`Materia activa: ${subj.name} (${subj.lessons.length} lecciones guardadas)`, "info");
+    }
+
+    function deleteTutorSubject(subjKey, ev) {
+      if (ev) ev.stopPropagation();
+      const td = ensureTutorMultiSubjectStructure();
+      const keys = Object.keys(td.subjectsMap);
+      if (keys.length <= 1) {
+        td.subjectsMap[subjKey].lessons = [];
+        td.subjectsMap[subjKey].selectedLessonIndex = -1;
+        saveState();
+        showToast("Se reiniciaron las lecciones de esta materia a 0", "info");
+        return;
+      }
+      const deletedName = td.subjectsMap[subjKey]?.name || 'Materia';
+      delete td.subjectsMap[subjKey];
+      td.activeSubjectKey = Object.keys(td.subjectsMap)[0];
+      saveState();
+      showToast(`Materia "${deletedName}" eliminada`, "info");
+    }
+
     function saveTutorConfig() {
-      appState.tutorData.subject = document.getElementById('tutorSubjectInput').value.trim() || 'Inglés y Programación';
-      appState.tutorData.level = document.getElementById('tutorLevelSelect').value;
-      appState.tutorData.goal = document.getElementById('tutorGoalInput').value.trim();
+      const td = ensureTutorMultiSubjectStructure();
+      const typedName = (document.getElementById('tutorSubjectInput').value || '').trim() || 'Inglés';
+      const levelVal = document.getElementById('tutorLevelSelect').value;
+      const goalVal = (document.getElementById('tutorGoalInput').value || '').trim();
+
+      const newKey = normalizeSubjectKey(typedName);
+      // Si el usuario escribió un nombre de materia distinto en el campo, cambiamos o creamos esa materia automáticamente con su propio contador desde Lección 1
+      if (!td.subjectsMap[newKey]) {
+        td.subjectsMap[newKey] = {
+          key: newKey,
+          name: typedName,
+          level: levelVal,
+          goal: goalVal || `Aprender ${typedName} desde Lección 1`,
+          lessons: [],
+          selectedLessonIndex: -1
+        };
+      } else {
+        td.subjectsMap[newKey].name = typedName;
+        td.subjectsMap[newKey].level = levelVal;
+        td.subjectsMap[newKey].goal = goalVal;
+      }
+
+      td.activeSubjectKey = newKey;
+      td.subject = typedName;
+      td.level = levelVal;
+      td.goal = goalVal;
       saveState();
     }
 
@@ -3497,44 +3753,110 @@
       document.getElementById('tutorPhotoPreviewBox').classList.add('hidden');
     }
 
+    function openSavedLessonByIndex(idx) {
+      const subj = getActiveSubjectObj();
+      if (!subj || !subj.lessons[idx]) return;
+      subj.selectedLessonIndex = idx;
+      saveState();
+      const container = document.getElementById('tutorLessonContainer');
+      if (container) container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      showToast(`Viendo Lección #${subj.lessons[idx].lessonNumber || (idx + 1)}: ${subj.lessons[idx].lessonTitle}`, "info");
+    }
+
     async function startTutorSession(mode) {
       if (!appState.apiKey) { showToast("Configura tu API Key en Ajustes", "warning"); switchTab('settings'); return; }
       saveTutorConfig();
 
-      const subject = appState.tutorData.subject;
-      const level = appState.tutorData.level;
-      const goal = appState.tutorData.goal;
+      const td = ensureTutorMultiSubjectStructure();
+      const subj = getActiveSubjectObj();
+      const nextLessonNum = (subj.lessons || []).length + 1;
+      const previousTitles = (subj.lessons || []).map(l => `Lección ${l.lessonNumber}: ${l.lessonTitle}`).join('; ') || 'Ninguna (Esta es la Lección #1 inicial)';
       const notes = document.getElementById('tutorNotesInput').value.trim();
 
       const btn = document.getElementById(mode === 'lesson' ? 'tutorLessonBtn' : 'tutorReviewBtn');
       const orig = btn.innerHTML;
-      btn.innerHTML = `<span class="animate-pulse">Pensando clase...</span>`;
+      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner"></div><span>Creando Lección #${nextLessonNum}...</span>`;
       btn.disabled = true;
 
       try {
-        const prompt = `Actúa como el mejor profesor particular de "${subject}" (experto en idiomas, programación y ciencias) usando pensamiento profundo.
-        Nivel del alumno: "${level}". Objetivo: "${goal}".
-        Modo solicitado: "${mode === 'lesson' ? 'Lección estructurada desde cero paso a paso + Examen interactivo' : 'Revisión detallada de tarea/apuntes/código con correcciones y explicación'}".
-        ${notes ? `Apuntes, código o duda enviada por el alumno: "${notes}"` : ''}
+        const prompt = `Actúa como el mejor profesor interactivo de "${subj.name}".
+        - Nivel del alumno en esta materia: "${subj.level}".
+        - Objetivo actual: "${subj.goal}".
+        - Número de lección que toca generar en "${subj.name}": LECCIÓN #${nextLessonNum}.
+        - Lecciones que ya tomó antes en esta materia (NO las repitas, avanza al siguiente escalón lógico): ${previousTitles}.
+        - Modo solicitado: "${mode === 'lesson' ? `Lección #${nextLessonNum} progresiva, visual e interactiva + Reto gamificado` : 'Revisión detallada de tarea/apuntes/código con correcciones y explicación'}".
+        ${notes ? `- Apuntes, código o duda enviada por el alumno: "${notes}"` : ''}
 
-        Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta:
+        REGLAS DE FORMATO PEDAGÓGICO INTERACTIVO:
+        1. Detecta la categoría de la materia: "math" (matemáticas, física, química, finanzas, estadística, cálculo), "code" (programación, Python, JavaScript, HTML, SQL, algoritmos), "language" (inglés, francés, idiomas) o "general".
+        2. Si la materia involucra matemáticas/física/finanzas (o aplica alguna ecuación), llena "formulas" con las fórmulas clave resaltadas, qué significa cada variable y un ejemplo numérico paso a paso.
+        3. Si la materia involucra programación/código (o lo pide el alumno), llena "codeBlock" con un código limpio, bien indentado, lenguaje y la salida de consola en "codeOutput".
+        4. Llena SIEMPRE "visualDiagram" con 4 pasos o bloques visuales cortos ("steps") que representen gráficamente el tema para dibujarlos en un esquema visual ilustrado.
+        5. Llena "flashcards" con 3 tarjetas interactivas (frente y reverso) para que el alumno memorice jugando.
+
+        Devuelve ÚNICAMENTE un objeto JSON válido con esta estructura exacta:
         {
-          "lessonTitle": "Título claro de la lección o revisión",
-          "explanation": "Explicación didáctica, profunda, clara y paso a paso",
-          "keyTerms": ["concepto 1", "concepto 2", "concepto 3"],
-          "homeworkFeedback": "Retroalimentación de sus apuntes/tarea o ejercicio práctico sugerido",
-          "quizQuestion": "Pregunta de examen para comprobar lo aprendido",
+          "category": "math | code | language | general",
+          "lessonTitle": "Título atractivo de la Lección #${nextLessonNum}",
+          "summaryBanner": "Frase motivadora o resumen ejecutivo de 1 línea de lo que dominará hoy",
+          "explanation": "Explicación didáctica, amena, dividida en párrafos claros y ejemplos de la vida real",
+          "visualDiagram": {
+            "diagramTitle": "Esquema Visual de Referencia",
+            "steps": [
+              {"badge": "Paso 1", "title": "Concepto base", "detail": "Descripción corta visual"},
+              {"badge": "Paso 2", "title": "Proceso / Regla", "detail": "Cómo se transforma"},
+              {"badge": "Paso 3", "title": "Aplicación", "detail": "Ejemplo directo"},
+              {"badge": "Paso 4", "title": "Resultado", "detail": "Meta lograda"}
+            ]
+          },
+          "formulas": [
+            {"name": "Nombre de la Fórmula o Regla", "expression": "Ej. f'(x) = lim (h->0) [f(x+h) - f(x)] / h", "variables": "Donde x es la variable independiente y h el incremento", "example": "Si f(x) = x², entonces f'(x) = 2x"}
+          ],
+          "codeLanguage": "python / javascript / sql / none",
+          "codeBlock": "# Si es clase de programación, pon aquí el código real bien comentado\n",
+          "codeOutput": "Salida esperada en terminal al ejecutar el código",
+          "keyTerms": ["Término 1", "Término 2", "Término 3"],
+          "flashcards": [
+            {"front": "Pregunta rápida o concepto 1", "back": "Respuesta clara al voltear la tarjeta"},
+            {"front": "Pregunta rápida o concepto 2", "back": "Respuesta clara al voltear la tarjeta"},
+            {"front": "Pregunta rápida o concepto 3", "back": "Respuesta clara al voltear la tarjeta"}
+          ],
+          "interactiveChallenge": {
+            "prompt": "Mini reto práctico de aplicación inmediata",
+            "hint": "Pista rápida por si se atora",
+            "solution": "Solución explicada paso a paso"
+          },
+          "homeworkFeedback": "Retroalimentación a sus apuntes/código o tip pro del profesor",
+          "quizQuestion": "Pregunta de examen del Nivel #${nextLessonNum} para ganar las 3 estrellas",
           "quizOptions": ["Opción A", "Opción B", "Opción C", "Opción D"],
           "correctOptionIndex": 0,
-          "quizExplanation": "Por qué esa respuesta es la correcta"
+          "quizExplanation": "Explicación de por qué es la respuesta correcta"
         }`;
 
         const resText = await callGeminiAPI(prompt, currentTutorImageBase64);
         const parsed = JSON.parse(resText);
-        appState.tutorData.lastLesson = parsed;
-        appState.tutorData.lessonsCompleted = (appState.tutorData.lessonsCompleted || 0) + 1;
+
+        const newLessonObj = {
+          ...parsed,
+          lessonNumber: nextLessonNum,
+          createdAt: appState.currentDay || '2026-10-22',
+          referenceImage: currentTutorImageBase64 || null,
+          stars: 2,
+          completedQuiz: false
+        };
+
+        subj.lessons.push(newLessonObj);
+        subj.selectedLessonIndex = subj.lessons.length - 1;
+
+        // Actualizar racha diaria real (1 por fecha calendario) y puntos XP
+        registerTutorStudyDayToday();
+        td.totalXp = (td.totalXp || 0) + 50;
+        td.lessonsCompleted = Object.values(td.subjectsMap).reduce((acc, sObj) => acc + (sObj.lessons?.length || 0), 0);
+        td.lastLesson = newLessonObj;
+
+        if (currentTutorImageBase64) clearTutorPhoto();
         saveState();
-        showToast("Clase lista", "success");
+        showToast(`¡Lección #${nextLessonNum} de ${subj.name} desbloqueada! (+50 XP)`, "success");
       } catch (err) {
         showToast("Error Profe IA: " + err.message, "error");
       } finally {
@@ -3543,62 +3865,453 @@
       }
     }
 
+    function escapeHtmlSafe(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function copyLessonCodeBlock() {
+      const subj = getActiveSubjectObj();
+      const lesson = subj?.lessons?.[subj.selectedLessonIndex];
+      if (!lesson || !lesson.codeBlock) return;
+      copyTextSafe(lesson.codeBlock, "Código copiado al portapapeles");
+    }
+
+    function toggleFlashcardFlip(cardIdx) {
+      const frontEl = document.getElementById(`fc-front-${cardIdx}`);
+      const backEl = document.getElementById(`fc-back-${cardIdx}`);
+      if (!frontEl || !backEl) return;
+      frontEl.classList.toggle('hidden');
+      backEl.classList.toggle('hidden');
+    }
+
+    function toggleChallengeSolution(type) {
+      const el = document.getElementById(`tutor-challenge-${type}`);
+      if (el) el.classList.toggle('hidden');
+    }
+
     function answerTutorQuiz(selectedIdx) {
-      const lesson = appState.tutorData.lastLesson;
+      const td = ensureTutorMultiSubjectStructure();
+      const subj = getActiveSubjectObj();
+      const lesson = subj?.lessons?.[subj.selectedLessonIndex];
       if (!lesson) return;
+
       const fbBox = document.getElementById('tutorQuizFeedback');
       if (!fbBox) return;
       fbBox.classList.remove('hidden');
+
       if (selectedIdx === Number(lesson.correctOptionIndex)) {
-        fbBox.className = "p-3.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-xs text-emerald-300 mt-3";
-        fbBox.innerHTML = `<strong>Respuesta Correcta:</strong> ${lesson.quizExplanation}`;
+        const firstTime = !lesson.completedQuiz;
+        lesson.completedQuiz = true;
+        lesson.stars = 3;
+        if (firstTime) {
+          td.totalXp = (td.totalXp || 0) + 100;
+        }
         playBeep();
+        saveState();
+        const updatedFb = document.getElementById('tutorQuizFeedback');
+        if (updatedFb) {
+          updatedFb.classList.remove('hidden');
+          updatedFb.className = "p-4 rounded-2xl bg-emerald-500/15 border-2 border-emerald-500/50 text-xs text-emerald-300 mt-3 space-y-1";
+          updatedFb.innerHTML = `<div class="font-black text-sm text-emerald-400">★★★ ¡Nivel #${lesson.lessonNumber} Superado con 3 Estrellas! ${firstTime ? '(+100 XP)' : ''}</div><p>${lesson.quizExplanation}</p>`;
+        }
       } else {
         fbBox.className = "p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/40 text-xs text-rose-300 mt-3";
-        fbBox.innerHTML = `<strong>Respuesta Incorrecta:</strong> La opción correcta era <em>${lesson.quizOptions[lesson.correctOptionIndex]}</em>. ${lesson.quizExplanation}`;
+        fbBox.innerHTML = `<strong>Respuesta Incorrecta:</strong> Inténtalo de nuevo o revisa el esquema arriba. Pista: <em>${lesson.quizExplanation}</em>`;
       }
     }
 
+    // Construye el esquema visual / infografía SVG referencial de la lección
+    function buildVisualReferenceCardHtml(lesson, subjName) {
+      const vd = lesson.visualDiagram || {};
+      const steps = Array.isArray(vd.steps) && vd.steps.length > 0 ? vd.steps : [
+        { badge: "1", title: "Entrada", detail: subjName },
+        { badge: "2", title: "Estructura", detail: lesson.lessonTitle || "Concepto" },
+        { badge: "3", title: "Práctica", detail: "Aplicación" },
+        { badge: "4", title: "Dominio", detail: "Nivel completado" }
+      ];
+
+      const cat = (lesson.category || 'general').toLowerCase();
+      let themeGrad = "from-indigo-950 via-slate-900 to-blue-950 border-blue-500/30";
+      let iconClass = "fi-rr-bulb text-amber-400";
+      if (cat === 'math') {
+        themeGrad = "from-amber-950/90 via-slate-900 to-rose-950/90 border-amber-500/40";
+        iconClass = "fi-rr-calculator text-amber-400";
+      } else if (cat === 'code') {
+        themeGrad = "from-slate-950 via-emerald-950/60 to-slate-900 border-emerald-500/40";
+        iconClass = "fi-rr-laptop-code text-emerald-400";
+      } else if (cat === 'language') {
+        themeGrad = "from-purple-950/90 via-slate-900 to-indigo-950 border-purple-500/40";
+        iconClass = "fi-rr-comment-alt text-purple-400";
+      }
+
+      const nodesHtml = steps.slice(0, 4).map((st, idx) => `
+        <div class="relative p-3 rounded-2xl bg-slate-900/90 border border-white/10 flex flex-col justify-between shadow-md">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-terra-500/20 text-terra-400">${escapeHtmlSafe(st.badge || `Paso ${idx + 1}`)}</span>
+            <span class="text-[10px] text-slate-500 font-black">0${idx + 1}</span>
+          </div>
+          <p class="text-xs font-extrabold text-white leading-snug">${escapeHtmlSafe(st.title)}</p>
+          <p class="text-[10px] text-slate-300 mt-1 leading-relaxed">${escapeHtmlSafe(st.detail)}</p>
+        </div>
+      `).join('');
+
+      const userRefImgHtml = lesson.referenceImage ? `
+        <div class="mt-3 pt-3 border-t border-white/10">
+          <span class="text-[10px] font-extrabold uppercase text-sky-400 block mb-1.5">Tu Imagen / Apunte de Referencia en esta Lección:</span>
+          <img src="${lesson.referenceImage}" class="w-full max-h-56 object-contain rounded-2xl border border-white/15 bg-black/40 p-1">
+        </div>
+      ` : '';
+
+      return `
+        <div class="rounded-3xl p-4 bg-gradient-to-br ${themeGrad} border text-white space-y-3 shadow-lg">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fi ${iconClass} text-base"></i>
+              <div>
+                <span class="text-[9px] font-extrabold uppercase tracking-wider text-slate-300 block">Infografía & Esquema Referencial</span>
+                <h4 class="text-xs font-black">${escapeHtmlSafe(vd.diagramTitle || `Mapa Conceptual: ${lesson.lessonTitle}`)}</h4>
+              </div>
+            </div>
+            <span class="text-[9px] px-2 py-0.5 rounded-full bg-white/10 text-slate-200 font-bold">Visual IA</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2.5">
+            ${nodesHtml}
+          </div>
+          ${userRefImgHtml}
+        </div>
+      `;
+    }
+
+    // Construye el mapa sinuoso estilo Candy Crush para la materia activa
+    function renderCandyCrushMap(subj) {
+      const mapEl = document.getElementById('tutorCandyMapContainer');
+      const titleEl = document.getElementById('candyMapSubjectTitle');
+      const starsEl = document.getElementById('candyMapStarsCount');
+      if (!mapEl) return;
+
+      const lessons = subj.lessons || [];
+      const totalStars = lessons.reduce((acc, l) => acc + (Number(l.stars) || 2), 0);
+      if (titleEl) titleEl.textContent = `Mapa de Saga: ${subj.name}`;
+      if (starsEl) starsEl.textContent = `★ ${totalStars} estrellas`;
+
+      const totalNodesToShow = Math.max(5, lessons.length + 2);
+      const offsets = ['translate-x-0', 'translate-x-10', 'translate-x-16', 'translate-x-6', '-translate-x-8', '-translate-x-14', '-translate-x-4'];
+
+      let nodesMarkup = '';
+      for (let i = 0; i < totalNodesToShow; i++) {
+        const lessonNum = i + 1;
+        const offsetClass = offsets[i % offsets.length];
+        const isCompleted = i < lessons.length;
+        const isCurrentSelected = i === subj.selectedLessonIndex;
+        const isNextUnlockable = i === lessons.length;
+
+        const connectorLine = i < totalNodesToShow - 1 ? `
+          <div class="w-1 h-6 ${i < lessons.length ? 'bg-gradient-to-b from-emerald-400 to-terra-500' : 'bg-slate-300 dark:bg-slate-800'} rounded-full my-0.5"></div>
+        ` : '';
+
+        if (isCompleted) {
+          const lObj = lessons[i];
+          const starsCount = Number(lObj.stars) || 2;
+          const starsStr = '★'.repeat(starsCount) + '☆'.repeat(Math.max(0, 3 - starsCount));
+          nodesMarkup += `
+            <div class="flex flex-col items-center">
+              <button onclick="openSavedLessonByIndex(${i})" class="transform ${offsetClass} group relative flex items-center gap-3 px-4 py-2.5 rounded-3xl transition shadow-md ${
+                isCurrentSelected
+                  ? 'bg-gradient-to-r from-terra-500 to-amber-500 text-white ring-4 ring-terra-500/30 scale-105'
+                  : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+              }">
+                <div class="w-9 h-9 rounded-2xl bg-black/20 flex items-center justify-center font-black text-sm shrink-0">
+                  ${lessonNum}
+                </div>
+                <div class="text-left max-w-[170px]">
+                  <div class="text-[10px] font-black text-amber-200 tracking-widest">${starsStr} • LECCIÓN #${lessonNum}</div>
+                  <div class="text-xs font-extrabold truncate">${escapeHtmlSafe(lObj.lessonTitle)}</div>
+                </div>
+              </button>
+              ${connectorLine}
+            </div>
+          `;
+        } else if (isNextUnlockable) {
+          nodesMarkup += `
+            <div class="flex flex-col items-center">
+              <button onclick="startTutorSession('lesson')" class="transform ${offsetClass} candy-node-active flex items-center gap-3 px-4 py-2.5 rounded-3xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black shadow-lg ring-4 ring-amber-400/30 transition">
+                <div class="w-9 h-9 rounded-2xl bg-slate-950 text-amber-400 flex items-center justify-center font-black text-sm">
+                  ${lessonNum}
+                </div>
+                <div class="text-left">
+                  <div class="text-[9px] uppercase font-black tracking-wider">¡Siguiente Nivel Disponible!</div>
+                  <div class="text-xs font-black">Desbloquear Lección #${lessonNum}</div>
+                </div>
+              </button>
+              ${connectorLine}
+            </div>
+          `;
+        } else {
+          nodesMarkup += `
+            <div class="flex flex-col items-center">
+              <div class="transform ${offsetClass} flex items-center gap-2.5 px-4 py-2 rounded-3xl bg-slate-200/70 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700 text-slate-400 opacity-65">
+                <div class="w-8 h-8 rounded-2xl bg-slate-300 dark:bg-slate-900 flex items-center justify-center text-xs font-bold">
+                  <i class="fi fi-rr-lock"></i>
+                </div>
+                <span class="text-xs font-bold">Nivel #${lessonNum} Bloqueado</span>
+              </div>
+              ${connectorLine}
+            </div>
+          `;
+        }
+      }
+
+      mapEl.innerHTML = `<div class="flex flex-col items-center py-2">${nodesMarkup}</div>`;
+    }
+
     function renderTutor() {
-      const td = appState.tutorData || createDefaultState().tutorData;
-      document.getElementById('tutorSubjectInput').value = td.subject || '';
-      document.getElementById('tutorLevelSelect').value = td.level || 'Desde Cero (Principiante Absoluto)';
-      document.getElementById('tutorGoalInput').value = td.goal || '';
-      document.getElementById('tutorProgressBadge').textContent = `${td.lessonsCompleted || 0} lecciones`;
-      document.getElementById('tutorStreakBadge').innerHTML = `<i class="fi fi-sr-flame"></i> <span>${Math.max(1, td.streak || 1)}d racha</span>`;
+      const td = ensureTutorMultiSubjectStructure();
+      const subj = getActiveSubjectObj();
+
+      // Renderizar píldoras de materias para cambiar con 1 toque
+      const pillsEl = document.getElementById('tutorSubjectPills');
+      if (pillsEl) {
+        pillsEl.innerHTML = Object.values(td.subjectsMap).map(sItem => {
+          const isAct = sItem.key === td.activeSubjectKey;
+          const countL = (sItem.lessons || []).length;
+          return `
+            <div onclick="selectTutorSubject('${sItem.key}')" class="px-3 py-1.5 rounded-2xl text-xs font-extrabold whitespace-nowrap cursor-pointer transition flex items-center gap-2 border ${
+              isAct
+                ? 'bg-terra-500 text-white border-terra-500 shadow-sm'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+            }">
+              <span>${escapeHtmlSafe(sItem.name)}</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded-full ${isAct ? 'bg-black/25 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-400'}">Niv. ${countL}</span>
+              <button onclick="deleteTutorSubject('${sItem.key}', event)" class="opacity-70 hover:opacity-100" title="Borrar o reiniciar materia">
+                <i class="fi fi-rr-cross-small"></i>
+              </button>
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('tutorSubjectInput').value = subj.name || '';
+      document.getElementById('tutorLevelSelect').value = subj.level || 'Desde Cero (Principiante Absoluto)';
+      document.getElementById('tutorGoalInput').value = subj.goal || '';
+
+      const lessonsCount = (subj.lessons || []).length;
+      const nextNum = lessonsCount + 1;
+      const nextBtnLabel = document.getElementById('tutorNextLessonBtnLabel');
+      if (nextBtnLabel) nextBtnLabel.textContent = `Generar Lección #${nextNum}`;
+
+      const dailyStreak = calculateTutorDailyStreak();
+      document.getElementById('tutorProgressBadge').textContent = `${lessonsCount} lección(es) en ${subj.name}`;
+      document.getElementById('tutorStreakBadge').innerHTML = `<i class="fi fi-sr-flame"></i> <span>${dailyStreak}d racha</span>`;
+      const xpEl = document.getElementById('tutorXpBadge');
+      if (xpEl) xpEl.innerHTML = `<i class="fi fi-sr-star"></i> <span>${td.totalXp || 0} XP</span>`;
+
+      // Renderizar Mapa estilo Candy Crush
+      renderCandyCrushMap(subj);
 
       const container = document.getElementById('tutorLessonContainer');
-      const lesson = td.lastLesson;
-      if (!lesson) {
-        container.innerHTML = '';
+      if (lessonsCount === 0) {
+        container.innerHTML = `
+          <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 text-center space-y-2">
+            <p class="text-xs font-extrabold text-terra-500 uppercase">Materia lista: ${escapeHtmlSafe(subj.name)}</p>
+            <p class="text-xs text-slate-400">Aún no tienes lecciones en <strong>${escapeHtmlSafe(subj.name)}</strong>. Presiona <strong>"Generar Lección #1"</strong> arriba o el botón dorado del mapa para comenzar desde la Lección 1.</p>
+          </div>
+        `;
         return;
       }
 
-      const termsHtml = (lesson.keyTerms || []).map(k => `<span class="px-2.5 py-1 rounded-full bg-terra-500/15 text-terra-500 font-bold text-[11px]">+ ${k}</span>`).join('');
+      if (subj.selectedLessonIndex < 0 || subj.selectedLessonIndex >= lessonsCount) {
+        subj.selectedLessonIndex = lessonsCount - 1;
+      }
+
+      const lesson = subj.lessons[subj.selectedLessonIndex];
+      const currentNum = lesson.lessonNumber || (subj.selectedLessonIndex + 1);
+
+      // Barra rápida para navegar entre Lección Anterior / Siguiente de esta materia
+      const prevDisabled = subj.selectedLessonIndex <= 0;
+      const nextDisabled = subj.selectedLessonIndex >= lessonsCount - 1;
+      const navHeaderHtml = `
+        <div class="flex items-center justify-between bg-slate-900 text-white px-4 py-2.5 rounded-2xl border border-slate-800 text-xs">
+          <button onclick="${!prevDisabled ? `openSavedLessonByIndex(${subj.selectedLessonIndex - 1})` : ''}" ${prevDisabled ? 'disabled' : ''} class="px-2.5 py-1 rounded-xl font-bold flex items-center gap-1 ${prevDisabled ? 'opacity-30 cursor-not-allowed' : 'bg-white/10 hover:bg-white/20'}">
+            <i class="fi fi-rr-angle-left"></i> <span>Lección Anterior</span>
+          </button>
+          <span class="font-black text-amber-400">Lección #${currentNum} de ${lessonsCount}</span>
+          <button onclick="${!nextDisabled ? `openSavedLessonByIndex(${subj.selectedLessonIndex + 1})` : ''}" ${nextDisabled ? 'disabled' : ''} class="px-2.5 py-1 rounded-xl font-bold flex items-center gap-1 ${nextDisabled ? 'opacity-30 cursor-not-allowed' : 'bg-white/10 hover:bg-white/20'}">
+            <span>Siguiente</span> <i class="fi fi-rr-angle-right"></i>
+          </button>
+        </div>
+      `;
+
+      // 1. Pizarrón de Fórmulas Matemáticas resaltadas (si aplica)
+      const formulasList = Array.isArray(lesson.formulas) ? lesson.formulas.filter(f => f && f.expression) : [];
+      const formulasHtml = formulasList.length > 0 ? `
+        <div class="p-4 rounded-3xl bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-rose-500/15 border-2 border-amber-500/40 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+              <i class="fi fi-rr-square-root"></i>
+              <span>Pizarrón de Fórmulas y Ecuaciones Destacadas</span>
+            </span>
+            <span class="text-[10px] px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-bold">Matemáticas / Ciencias</span>
+          </div>
+          <div class="space-y-2.5">
+            ${formulasList.map(fm => `
+              <div class="p-3.5 rounded-2xl bg-slate-950/90 border border-amber-400/40 space-y-1.5 shadow-inner">
+                <span class="text-[10px] font-extrabold text-amber-300 uppercase block">${escapeHtmlSafe(fm.name || 'Fórmula Clave')}</span>
+                <div class="py-2 px-3 rounded-xl bg-amber-500/10 border border-amber-400/30 font-mono text-sm font-black text-amber-200 text-center tracking-wide overflow-x-auto">
+                  ${escapeHtmlSafe(fm.expression)}
+                </div>
+                ${fm.variables ? `<p class="text-[11px] text-slate-300"><strong>Variables:</strong> ${escapeHtmlSafe(fm.variables)}</p>` : ''}
+                ${fm.example ? `<p class="text-[11px] text-emerald-300 font-mono"><strong>Ejemplo paso a paso:</strong> ${escapeHtmlSafe(fm.example)}</p>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : '';
+
+      // 2. Bloque de Código estilo IDE oscuro con sintaxis resaltada y salida de terminal (si aplica)
+      const hasRealCode = lesson.codeBlock && String(lesson.codeBlock).trim().length > 5 && (!lesson.codeLanguage || lesson.codeLanguage.toLowerCase() !== 'none');
+      const codeIdeHtml = hasRealCode ? `
+        <div class="rounded-3xl overflow-hidden border-2 border-emerald-500/40 bg-[#0b1120] text-slate-100 shadow-xl">
+          <div class="flex items-center justify-between px-4 py-2.5 bg-slate-900 border-b border-slate-800">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <span class="text-[10px] font-mono font-extrabold uppercase text-emerald-400 ml-1">${escapeHtmlSafe(lesson.codeLanguage || 'código')} • IDE Profe IA</span>
+            </div>
+            <button onclick="copyLessonCodeBlock()" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-[10px] font-bold flex items-center gap-1">
+              <i class="fi fi-rr-copy-alt"></i> <span>Copiar Código</span>
+            </button>
+          </div>
+          <pre class="p-4 text-xs font-mono leading-relaxed text-emerald-300 overflow-x-auto whitespace-pre"><code>${escapeHtmlSafe(lesson.codeBlock)}</code></pre>
+          ${lesson.codeOutput ? `
+            <div class="px-4 py-2.5 bg-black/60 border-t border-slate-800 font-mono text-[11px] text-sky-300">
+              <span class="text-[9px] uppercase font-bold text-slate-400 block mb-0.5">▶ Salida en Consola / Terminal:</span>
+              ${escapeHtmlSafe(lesson.codeOutput)}
+            </div>
+          ` : ''}
+        </div>
+      ` : '';
+
+      // 3. Flashcards Interactivas (Toca para voltear)
+      const flashcards = Array.isArray(lesson.flashcards) ? lesson.flashcards : [];
+      const flashcardsHtml = flashcards.length > 0 ? `
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold uppercase text-terra-500 flex items-center gap-1">
+              <i class="fi fi-rr-playing-cards"></i>
+              <span>Tarjetas Memorama Interactivas (Toca una tarjeta para voltearla)</span>
+            </span>
+          </div>
+          <div class="grid grid-cols-1 gap-2">
+            ${flashcards.map((fc, idx) => `
+              <div onclick="toggleFlashcardFlip(${idx})" class="p-3.5 rounded-2xl cursor-pointer transition border-2 border-terra-500/30 hover:border-terra-500 bg-slate-50 dark:bg-slate-800/80">
+                <div id="fc-front-${idx}" class="flex items-center justify-between gap-2">
+                  <div>
+                    <span class="text-[9px] font-black uppercase text-terra-500 block">Tarjeta #${idx + 1} • Pregunta (Toca para ver respuesta)</span>
+                    <p class="text-xs font-bold mt-0.5">${escapeHtmlSafe(fc.front)}</p>
+                  </div>
+                  <i class="fi fi-rr-refresh text-terra-500"></i>
+                </div>
+                <div id="fc-back-${idx}" class="hidden flex items-center justify-between gap-2 text-emerald-400">
+                  <div>
+                    <span class="text-[9px] font-black uppercase text-emerald-400 block">✓ Respuesta / Concepto</span>
+                    <p class="text-xs font-extrabold mt-0.5">${escapeHtmlSafe(fc.back)}</p>
+                  </div>
+                  <i class="fi fi-sr-check-circle text-emerald-400"></i>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : '';
+
+      // 4. Reto práctico con Pista y Solución desplegable
+      const ch = lesson.interactiveChallenge;
+      const challengeHtml = ch && ch.prompt ? `
+        <div class="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 space-y-2.5 text-xs">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-black uppercase text-indigo-400 flex items-center gap-1">
+              <i class="fi fi-rr-rocket-lunch"></i> <span>Mini-Reto Interactivo de Práctica</span>
+            </span>
+            <div class="flex gap-1.5">
+              <button onclick="toggleChallengeSolution('hint')" class="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 text-[10px] font-bold">Ver Pista</button>
+              <button onclick="toggleChallengeSolution('sol')" class="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">Ver Solución</button>
+            </div>
+          </div>
+          <p class="font-bold text-slate-700 dark:text-slate-200">${escapeHtmlSafe(ch.prompt)}</p>
+          <div id="tutor-challenge-hint" class="hidden p-2.5 rounded-xl bg-amber-500/15 text-amber-300 text-[11px]">
+            <strong>💡 Pista:</strong> ${escapeHtmlSafe(ch.hint)}
+          </div>
+          <div id="tutor-challenge-sol" class="hidden p-2.5 rounded-xl bg-emerald-500/15 text-emerald-300 text-[11px] font-mono">
+            <strong>✓ Solución paso a paso:</strong> ${escapeHtmlSafe(ch.solution)}
+          </div>
+        </div>
+      ` : '';
+
+      const termsHtml = (lesson.keyTerms || []).map(k => `<span class="px-2.5 py-1 rounded-full bg-terra-500/15 text-terra-500 font-bold text-[11px]">+ ${escapeHtmlSafe(k)}</span>`).join('');
       const optionsHtml = (lesson.quizOptions || []).map((opt, idx) => `
         <button onclick="answerTutorQuiz(${idx})" class="p-3 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-terra-500 text-left text-xs font-bold flex items-center gap-2 transition bg-slate-50 dark:bg-slate-800/60">
           <span class="w-6 h-6 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px]">${['A','B','C','D'][idx] || idx+1}</span>
-          <span>${opt}</span>
+          <span>${escapeHtmlSafe(opt)}</span>
         </button>
       `).join('');
 
       container.innerHTML = `
-        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200 dark:border-slate-800 space-y-3">
-          <span class="text-[10px] font-extrabold uppercase bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-2.5 py-1 rounded-full">Lección #${td.lessonsCompleted || 1}</span>
-          <h3 class="text-base font-black">${lesson.lessonTitle}</h3>
-          <div class="text-xs leading-relaxed whitespace-pre-wrap text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-2xl border border-slate-200/60 dark:border-slate-800">${lesson.explanation}</div>
-          ${lesson.homeworkFeedback ? `<div class="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-xs"><strong class="text-blue-400 block mb-0.5">Práctica / Revisión:</strong> ${lesson.homeworkFeedback}</div>` : ''}
+        ${navHeaderHtml}
+
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold uppercase bg-terra-500 text-white px-3 py-1 rounded-full">
+              ${escapeHtmlSafe(subj.name)} • Lección #${currentNum}
+            </span>
+            <span class="text-xs font-black text-amber-400">${'★'.repeat(Number(lesson.stars) || 2)}</span>
+          </div>
+
           <div>
-            <span class="text-[10px] font-bold uppercase text-slate-400 block mb-1.5">Conceptos / Vocabulario de hoy</span>
+            <h3 class="text-base font-black">${escapeHtmlSafe(lesson.lessonTitle)}</h3>
+            ${lesson.summaryBanner ? `<p class="text-[11px] text-terra-500 font-bold mt-0.5">${escapeHtmlSafe(lesson.summaryBanner)}</p>` : ''}
+          </div>
+
+          <!-- ESQUEMA E INFOGRAFÍA VISUAL REFERENCIAL -->
+          ${buildVisualReferenceCardHtml(lesson, subj.name)}
+
+          <!-- EXPLICACIÓN DEL PROFESOR -->
+          <div class="text-xs leading-relaxed whitespace-pre-wrap text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800">${escapeHtmlSafe(lesson.explanation)}</div>
+
+          <!-- PIZARRÓN DE FÓRMULAS MATEMÁTICAS RESALTADAS -->
+          ${formulasHtml}
+
+          <!-- CONSOLA / IDE DE CÓDIGO FORMATEADO -->
+          ${codeIdeHtml}
+
+          <!-- RETO PRÁCTICO INTERACTIVO -->
+          ${challengeHtml}
+
+          <!-- FLASHCARDS INTERACTIVAS -->
+          ${flashcardsHtml}
+
+          ${lesson.homeworkFeedback ? `<div class="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-xs"><strong class="text-blue-400 block mb-0.5">Nota del Profesor / Revisión:</strong> ${escapeHtmlSafe(lesson.homeworkFeedback)}</div>` : ''}
+
+          <div>
+            <span class="text-[10px] font-bold uppercase text-slate-400 block mb-1.5">Conceptos Clave Dominados en la Lección #${currentNum}</span>
             <div class="flex flex-wrap gap-1.5">${termsHtml}</div>
           </div>
         </div>
 
-        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border-2 border-terra-500/30 space-y-3">
-          <span class="text-[10px] font-extrabold uppercase text-terra-500 block">Examen Rápido de Comprobación</span>
-          <h4 class="text-sm font-black">${lesson.quizQuestion}</h4>
+        <!-- EXAMEN GAMIFICADO DE LA LECCIÓN PARA GANAR LAS 3 ESTRELLAS -->
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border-2 border-terra-500/40 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold uppercase text-terra-500 block">Jefe de Nivel #${currentNum} • Gana las 3 Estrellas (★★★)</span>
+            <span class="text-[10px] font-bold text-amber-400">+100 XP</span>
+          </div>
+          <h4 class="text-sm font-black">${escapeHtmlSafe(lesson.quizQuestion)}</h4>
           <div class="grid grid-cols-1 gap-2">${optionsHtml}</div>
-          <div id="tutorQuizFeedback" class="hidden"></div>
+          <div id="tutorQuizFeedback" class="${lesson.completedQuiz ? 'p-3.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-xs text-emerald-300 mt-3' : 'hidden'}">
+            ${lesson.completedQuiz ? `<strong>★★★ Nivel Superado:</strong> ${escapeHtmlSafe(lesson.quizExplanation)}` : ''}
+          </div>
         </div>
       `;
     }
