@@ -250,7 +250,7 @@
     </div>
   </div>
 
-  <!-- ==================== MODAL ONBOARDING (DATOS PERSONALES + CREAR CUENTA O INVITADO) ==================== -->
+  <!-- ==================== MODAL ONBOARDING (DATOS PERSONALES + CONDICIÓN MÉDICA + CLOUD/INVITADO) ==================== -->
   <div id="onboardingModal" class="fixed inset-0 z-[90] bg-slate-950/95 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto">
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-md rounded-3xl p-6 space-y-4 shadow-2xl my-auto">
       <div class="flex items-center gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
@@ -259,24 +259,24 @@
         </div>
         <div>
           <h2 class="text-base font-extrabold tracking-tight">Configuración Inicial TCC</h2>
-          <p class="text-[11px] text-slate-500 dark:text-slate-400">Ingresa tus datos o inicia sesión para recuperar tu nube.</p>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400">Personaliza tu perfil o inicia sesión para recuperar tu nube.</p>
         </div>
       </div>
 
       <div class="space-y-2.5 text-xs">
         <div>
           <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">1. Tu Nombre o Alias (Para tus reportes)</label>
-          <input id="obName" type="text" placeholder="Ej. Allan" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 outline-none font-bold">
+          <input id="obName" type="text" placeholder="Ej. Allan / Usuario" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 outline-none font-bold">
         </div>
 
         <div class="grid grid-cols-3 gap-2">
           <div>
             <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Peso (kg)</label>
-            <input id="obWeight" type="number" placeholder="Ej. 120" class="w-full px-2 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-center font-bold outline-none">
+            <input id="obWeight" type="number" placeholder="Ej. 80" class="w-full px-2 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-center font-bold outline-none">
           </div>
           <div>
             <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Altura (cm)</label>
-            <input id="obHeight" type="number" placeholder="Ej. 182" class="w-full px-2 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-center font-bold outline-none">
+            <input id="obHeight" type="number" placeholder="Ej. 175" class="w-full px-2 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-center font-bold outline-none">
           </div>
           <div>
             <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Edad</label>
@@ -308,6 +308,11 @@
             <option value="hypertrophy">Hipertrofia y ganancia muscular limpia</option>
             <option value="bulk">Volumen y aumento de fuerza máxima</option>
           </select>
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold uppercase text-emerald-400 block mb-1">¿Cuentas con alguna condición médica, alergia o restricción? (Opcional)</label>
+          <input id="obMedical" type="text" placeholder="Ej. Ninguna / Resistencia a la insulina / Hipertensión / Sin lactosa..." class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 outline-none text-xs">
         </div>
 
         <div>
@@ -559,16 +564,26 @@
         </div>
       </div>
 
-      <!-- CHEF IA -->
+      <!-- CHEF IA PERSONALIZADO PARA CADA USUARIO -->
       <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3">
         <div class="flex items-center gap-2">
           <i class="fi fi-rr-hat-chef text-emerald-500"></i>
           <div>
             <h2 class="font-extrabold text-sm">Chef IA: ¿Qué tienes en tu refri?</h2>
-            <p class="text-[11px] text-slate-400">Dile tus ingredientes y te arma tus comidas cuidando tus macros.</p>
+            <p class="text-[11px] text-slate-400">Dile tus ingredientes y tu situación médica o alimentaria para armar tus comidas.</p>
           </div>
         </div>
-        <textarea id="fridgeIngredients" rows="2" placeholder="Ej. Pan de linaza, huevo, jamón, fajitas de pollo, queso panela, yogurt griego, frutos rojos..." class="w-full px-3.5 py-2 text-xs rounded-2xl bg-slate-100 dark:bg-slate-800 outline-none resize-none"></textarea>
+
+        <div>
+          <label class="text-[10px] font-bold uppercase text-emerald-500 block mb-1">¿Cuentas con alguna condición médica, alergia o restricción? (Personalizado)</label>
+          <input id="fridgeMedicalCondition" type="text" onchange="updateMedicalCondition(this.value)" placeholder="Ej. Ninguna / Resistencia a la insulina / Hipertensión / Diabetes / Sin lactosa..." class="w-full px-3.5 py-2 text-xs rounded-2xl bg-slate-100 dark:bg-slate-800 outline-none">
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Ingredientes disponibles en tu refri o alacena</label>
+          <textarea id="fridgeIngredients" rows="2" placeholder="Ej. Pan de linaza, huevo, jamón, fajitas de pollo, queso panela, yogurt griego, frutos rojos..." class="w-full px-3.5 py-2 text-xs rounded-2xl bg-slate-100 dark:bg-slate-800 outline-none resize-none"></textarea>
+        </div>
+
         <div class="flex flex-wrap gap-2 text-[11px]">
           <label class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-xl cursor-pointer">
             <input type="checkbox" id="planDinner" checked class="accent-emerald-500"> <span>Cena hoy</span>
@@ -905,8 +920,9 @@
           <input id="groceryStore" type="text" placeholder="Tienda (3B)" class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 text-center font-bold outline-none">
         </div>
         <select id="groceryGoalSelect" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 outline-none font-semibold">
-          <option value="Pérdida de grasa, alta proteína, control de glucosa">Pérdida de grasa, alta proteína, control de glucosa</option>
+          <option value="Pérdida de grasa, alta proteína y alimentos saciantes">Pérdida de grasa, alta proteína y alimentos saciantes</option>
           <option value="Hipertrofia muscular y ganancia de fuerza limpia">Hipertrofia muscular y ganancia de fuerza limpia</option>
+          <option value="Recomposición corporal equilibrada">Recomposición corporal equilibrada</option>
           <option value="Volumen económico">Volumen económico</option>
         </select>
         <button id="groceryBtn" onclick="generateGroceryWithGemini()" class="w-full py-2.5 bg-terra-500 hover:bg-terra-600 text-white font-extrabold text-xs rounded-2xl transition">
@@ -1031,6 +1047,7 @@
           <option value="Recomposición corporal" class="text-slate-900">Recomposición corporal</option>
           <option value="Hipertrofia y ganancia muscular limpia" class="text-slate-900">Hipertrofia y masa muscular limpia</option>
         </select>
+        <input id="calcMedical" type="text" onchange="updateMedicalCondition(this.value)" placeholder="Condición médica o restricción (opcional)..." class="w-full px-3 py-2 text-xs rounded-xl bg-white/10 text-white placeholder-indigo-200 outline-none">
         <button id="calcBtn" onclick="calculateMacrosWithGemini()" class="w-full py-2.5 bg-white text-indigo-700 font-extrabold text-xs rounded-xl">
           Calcular e Instalar Metas
         </button>
@@ -1124,7 +1141,7 @@
         selectedModel: 'gemini-3.5-flash-lite',
         onboardingComplete: false,
         profile: {
-          name: '', weight: '', height: '', age: '', activity: 1.55, gymDays: '', goalKey: 'deficit', goalText: GOAL_LABELS.deficit
+          name: '', weight: '', height: '', age: '', activity: 1.55, gymDays: '', goalKey: 'deficit', goalText: GOAL_LABELS.deficit, medicalCondition: ''
         },
         targetKcal: '', targetWater: '', targetProt: '', targetCarb: '', targetFat: '',
         days: {},
@@ -1198,6 +1215,7 @@
 
     let appState = loadInitialState();
     if (!appState.profile) appState.profile = createDefaultState().profile;
+    if (appState.profile.medicalCondition === undefined) appState.profile.medicalCondition = '';
     if (!appState.selectedModel) appState.selectedModel = 'gemini-3.5-flash-lite';
     if (!appState.tutorData) appState.tutorData = createDefaultState().tutorData;
     DAYS_CONFIG.forEach(d => {
@@ -1210,6 +1228,13 @@
     let currentModalEvidenceImages = [];
     let activeFormatTaskIndex = null;
     let alarmAudioInterval = null;
+
+    function updateMedicalCondition(val) {
+      if (!appState.profile) appState.profile = createDefaultState().profile;
+      appState.profile.medicalCondition = (val || '').trim();
+      saveState();
+      showToast("Condición / restricción actualizada en tu perfil", "success");
+    }
 
     // ==================== SIDEBAR Y SUBVISTAS ====================
     function toggleSidebar() {
@@ -1344,6 +1369,7 @@
               appState = remoteState;
               appState.onboardingComplete = true;
               if (!appState.tutorData) appState.tutorData = createDefaultState().tutorData;
+              if (appState.profile && appState.profile.medicalCondition === undefined) appState.profile.medicalCondition = '';
               localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
               renderAll();
               checkOnboarding();
@@ -1372,6 +1398,7 @@
               appState = remoteState;
               appState.onboardingComplete = true;
               if (!appState.tutorData) appState.tutorData = createDefaultState().tutorData;
+              if (appState.profile && appState.profile.medicalCondition === undefined) appState.profile.medicalCondition = '';
               localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
               renderAll();
               checkOnboarding();
@@ -1564,6 +1591,7 @@
         document.getElementById('obActivity').value = appState.profile.activity || '1.55';
         document.getElementById('obGymDays').value = appState.profile.gymDays || '';
         document.getElementById('obGoal').value = appState.profile.goalKey || 'deficit';
+        document.getElementById('obMedical').value = appState.profile.medicalCondition || '';
         document.getElementById('obApiKey').value = appState.apiKey || '';
         modal.classList.remove('hidden');
       } else {
@@ -1582,6 +1610,7 @@
       const heightVal = parseFloat(document.getElementById('obHeight').value);
       const ageVal = parseInt(document.getElementById('obAge').value);
       const gymDaysVal = parseInt(document.getElementById('obGymDays').value);
+      const medicalVal = document.getElementById('obMedical').value.trim();
 
       if (!weightVal || !heightVal || !ageVal) {
         showToast("Primero ingresa tu peso, altura y edad arriba", "warning");
@@ -1593,14 +1622,15 @@
       const apiKey = document.getElementById('obApiKey').value.trim();
 
       appState.profile = {
-        name: name || 'Allan',
+        name: name || 'Usuario',
         weight: weightVal,
         height: heightVal,
         age: ageVal,
         activity,
         gymDays: gymDaysVal || 4,
         goalKey,
-        goalText: GOAL_LABELS[goalKey] || GOAL_LABELS.deficit
+        goalText: GOAL_LABELS[goalKey] || GOAL_LABELS.deficit,
+        medicalCondition: medicalVal
       };
       if (apiKey) appState.apiKey = apiKey;
 
@@ -1760,7 +1790,7 @@
         'gemini-3.1-flash-live-preview': ['gemini-2.5-flash', 'gemini-2.0-flash'],
         'gemini-3.8-live': ['gemini-2.5-flash', 'gemini-2.0-flash'],
         'gemini-3.8-flash': ['gemini-2.5-flash', 'gemini-2.0-flash'],
-        'gemini-3.8-live-extended-thinking': ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash']
+        'gemini-3.8-live-extended-thinking': ['gemini-3.8-live-extended-thinking', 'gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash']
       };
       return aliasMap[selectedAlias] || [selectedAlias, 'gemini-2.5-flash-lite', 'gemini-2.5-flash'];
     }
@@ -1786,7 +1816,8 @@
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 25000);
         try {
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${endpointModel}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+          const apiVersion = endpointModel.includes('3.8') ? 'v1alpha' : 'v1beta';
+          const res = await fetch(`https://generativelanguage.googleapis.com/${apiVersion}/models/${endpointModel}:generateContent?key=${encodeURIComponent(apiKey)}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ contents: [{ parts: parts }] }),
@@ -1845,6 +1876,9 @@
       document.getElementById('targetProtInput').value = appState.targetProt || '';
       document.getElementById('targetCarbInput').value = appState.targetCarb || '';
       document.getElementById('targetFatInput').value = appState.targetFat || '';
+
+      const medInput = document.getElementById('fridgeMedicalCondition');
+      if (medInput) medInput.value = appState.profile?.medicalCondition || '';
 
       const maxKcal = Number(appState.targetKcal) || 2100;
       const maxWater = Number(appState.targetWater) || 4000;
@@ -1991,6 +2025,9 @@
       if (!ingredients) { showToast("Escribe qué ingredientes tienes", "warning"); return; }
       if (!appState.apiKey) { showToast("Configura tu API Key en Ajustes", "warning"); switchTab('settings'); return; }
 
+      const medInputVal = document.getElementById('fridgeMedicalCondition').value.trim();
+      appState.profile.medicalCondition = medInputVal;
+
       const mealsRequested = [];
       if (document.getElementById('planDinner').checked) mealsRequested.push("Cena de hoy");
       if (document.getElementById('planBreakfast').checked) mealsRequested.push("Desayuno de mañana");
@@ -2002,26 +2039,30 @@
       const remKcal = Math.max(300, maxKcal - totKcal);
       const remP = Math.max(20, maxP - totP);
 
+      const userWeight = appState.profile.weight ? `${appState.profile.weight}kg` : 'peso estándar';
+      const userGoal = appState.profile.goalText || 'Mejorar salud y composición corporal';
+      const medicalContext = medInputVal ? `Condición médica, alergia o restricción del usuario: "${medInputVal}".` : 'Sin condiciones médicas ni restricciones reportadas.';
+
       const btn = document.getElementById('fridgeBtn');
       const originalText = btn.innerHTML;
       btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner"></div><span>Diseñando menú...</span>`;
       btn.disabled = true;
 
       try {
-        const prompt = `Actúa como nutriólogo clínico. , peso ${appState.profile.weight || 120}kg.
-        Restante hoy: ${remKcal} kcal, ${remP}g proteína. Ingredientes: "${ingredients}". Comidas: ${mealsRequested.join(', ')}.
+        const prompt = `Actúa como nutriólogo clínico y deportivo personalizado. Perfil del usuario: Peso ${userWeight}, Objetivo: "${userGoal}". ${medicalContext}
+        Restante hoy: ${remKcal} kcal, ${remP}g proteína. Ingredientes disponibles: "${ingredients}". Comidas solicitadas: ${mealsRequested.join(', ')}.
         Devuelve ÚNICAMENTE un JSON válido:
         {
-          "avoidWarning": "Qué evitar o combinar para no elevar glucosa",
+          "avoidWarning": "Recomendación personalizada sobre qué evitar o cómo combinar estos ingredientes según su objetivo y su situación médica (${medInputVal || 'General'})",
           "proposals": [
-            {"mealTime": "Cena", "title": "Nombre y gramajes exactos", "instructions": "Preparación paso a paso", "kcal": 480, "p": 45, "c": 20, "f": 22}
+            {"mealTime": "Cena", "title": "Nombre y gramajes exactos", "instructions": "Preparación paso a paso adaptada al usuario", "kcal": 480, "p": 45, "c": 20, "f": 22}
           ]
         }`;
 
         const resText = await callGeminiAPI(prompt, null);
         appState.lastFridgePlan = JSON.parse(resText);
         saveState();
-        showToast("Menú diseñado con éxito", "success");
+        showToast("Menú personalizado diseñado con éxito", "success");
       } catch (err) {
         showToast("Error Chef IA: " + err.message, "error");
       } finally {
@@ -2051,7 +2092,7 @@
 
       container.innerHTML = `
         <div class="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-xs space-y-1">
-          <span class="font-extrabold text-rose-400 uppercase text-[10px] block">Precaución Glucémica</span>
+          <span class="font-extrabold text-rose-400 uppercase text-[10px] block">Recomendación y Precaución Nutricional</span>
           <p class="text-slate-600 dark:text-slate-200 text-[11px]">${plan.avoidWarning}</p>
         </div>
         <div class="space-y-2">${proposalsHtml}</div>
@@ -2296,7 +2337,7 @@
       }
 
       showToast("Generando PDF Oficial con tus evidencias...", "info");
-      const responsibleName = appState.profile.name || 'Allan';
+      const responsibleName = appState.profile.name || 'Usuario';
       const wrapper = document.getElementById('pdfPrintWrapper');
 
       wrapper.innerHTML = tasksToExport.map((t, index) => {
@@ -2502,7 +2543,7 @@
     function deleteTask(i) { appState.tasks.splice(i, 1); saveState(); }
 
     function buildWorkReportText() {
-      const user = appState.profile.name || 'Allan';
+      const user = appState.profile.name || 'Usuario';
       return appState.tasks.map((t, idx) => {
         const wf = t.workFormat || {};
         return `TAREA #${wf.taskNumber || idx + 1} | Fecha: ${appState.currentDay}\nResponsable: ${user} | Solicita: ${wf.solicita || t.solicita || 'Lucia'}\nActividad: ${wf.activityDesc || t.text}\nObservaciones: ${wf.notes || '---'}\nEvidencia: ${wf.deliverable || '---'}\n`;
@@ -2519,7 +2560,7 @@
       const rows = appState.tasks.map((t, idx) => {
         const wf = t.workFormat || {};
         const cols = [
-          wf.taskNumber || idx + 1, wf.assignDate || appState.currentDay, appState.profile.name || 'Allan',
+          wf.taskNumber || idx + 1, wf.assignDate || appState.currentDay, appState.profile.name || 'Usuario',
           wf.solicita || t.solicita || 'Lucia', wf.dueDate || appState.currentDay, wf.activityDesc || t.text,
           wf.notes || '', wf.deliverable || ''
         ];
@@ -2853,8 +2894,8 @@
 
     async function generateGymRoutineWithGemini() {
       if (!appState.apiKey) { showToast("Configura tu API Key en Ajustes", "warning"); switchTab('settings'); return; }
-      const weight = document.getElementById('gymWeight').value || appState.profile.weight || 120;
-      const height = document.getElementById('gymHeight').value || appState.profile.height || 182;
+      const weight = document.getElementById('gymWeight').value || appState.profile.weight || 75;
+      const height = document.getElementById('gymHeight').value || appState.profile.height || 175;
       const daysCount = parseInt(document.getElementById('gymDays').value) || appState.profile.gymDays || 4;
       const goal = document.getElementById('gymGoalSelect').value;
 
@@ -2971,12 +3012,13 @@
       const days = document.getElementById('groceryDays').value.trim() || "7";
       const store = document.getElementById('groceryStore').value.trim() || "Tiendas 3B";
       const goal = document.getElementById('groceryGoalSelect').value;
+      const medCond = appState.profile?.medicalCondition ? `Condición médica o restricción del usuario: "${appState.profile.medicalCondition}".` : '';
 
       const btn = document.getElementById('groceryBtn');
       const orig = btn.innerHTML; btn.innerHTML = "Generando..."; btn.disabled = true;
 
       try {
-        const prompt = `Actúa como nutriólogo. Presupuesto $${budget} para ${days} días en ${store}. Meta: "${goal}".
+        const prompt = `Actúa como nutriólogo personalizado. Presupuesto $${budget} para ${days} días en ${store}. Meta: "${goal}". ${medCond}
         Devuelve ÚNICAMENTE un JSON válido:
         {"groceries": [{"text": "Producto (cantidad) - $precio"}], "mealPlan": [{"day": "Día 1", "breakfast": "...", "snack1": "...", "lunch": "...", "snack2": "...", "dinner": "..."}]}`;
         const res = await callGeminiAPI(prompt, null);
@@ -3024,11 +3066,12 @@
       const age = document.getElementById('calcAge').value || appState.profile.age;
       const activity = document.getElementById('calcActivity').value;
       const goal = document.getElementById('calcGoalSelect').value;
+      const medCond = document.getElementById('calcMedical').value.trim() || appState.profile.medicalCondition || 'Ninguna';
 
       if (!weight || !height || !age) { showToast("Ingresa peso, altura y edad", "warning"); return; }
 
       try {
-        const prompt = `Calcula calorías, agua (ml) y macros para ${weight}kg, ${height}cm, ${age} años, "${activity}", "${goal}". Devuelve ÚNICAMENTE un JSON: {"targetKcal": 2100, "targetWater": 4000, "targetProt": 170, "targetCarb": 160, "targetFat": 85}`;
+        const prompt = `Calcula calorías, agua (ml) y macros para ${weight}kg, ${height}cm, ${age} años, "${activity}", objetivo: "${goal}", condición médica o restricción: "${medCond}". Devuelve ÚNICAMENTE un JSON: {"targetKcal": 2100, "targetWater": 4000, "targetProt": 170, "targetCarb": 160, "targetFat": 85}`;
         const textResult = await callGeminiAPI(prompt, null);
         const parsed = JSON.parse(textResult);
         appState.targetKcal = Number(parsed.targetKcal) || 2100;
@@ -3057,6 +3100,9 @@
       if (notice) notice.classList.toggle('hidden', appState.selectedModel !== 'gemini-3.8-live-extended-thinking');
 
       const p = appState.profile || {};
+      const calcMedInput = document.getElementById('calcMedical');
+      if (calcMedInput) calcMedInput.value = p.medicalCondition || '';
+
       const modelName = appState.selectedModel || 'gemini-3.5-flash-lite';
       document.getElementById('headerTitle').textContent = p.name ? `Control TCC • ${p.name}` : 'Control TCC';
       document.getElementById('headerSubtitle').textContent = appState.apiKey ? `IA Activa (${modelName})` : `Modelo: ${modelName}`;
@@ -3067,8 +3113,9 @@
       const summaryEl = document.getElementById('profileSummaryCard');
       if (summaryEl) {
         summaryEl.innerHTML = `
-          <p><strong>Responsable:</strong> ${p.name || 'Allan'} ${p.age ? `(${p.age} años)` : ''}</p>
+          <p><strong>Responsable:</strong> ${p.name || 'Usuario'} ${p.age ? `(${p.age} años)` : ''}</p>
           <p><strong>Físico:</strong> ${p.weight || '---'} kg | ${p.height || '---'} cm</p>
+          <p><strong>Condición / Restricción:</strong> ${p.medicalCondition || 'Ninguna especificada'}</p>
           <p><strong>Metas:</strong> ${appState.targetKcal || 2100} kcal | ${appState.targetProt || 170}g P | ${appState.targetCarb || 160}g C</p>
         `;
       }
@@ -3106,7 +3153,7 @@
     function copyDailyReport() {
       const dayData = appState.days[appState.currentDay];
       const { totKcal, totP, totC, totF } = getTodayTotals();
-      const report = `Reporte TCC (${appState.currentDay} - ${appState.profile.name || 'Allan'}):\n• Kcal: ${totKcal}/${appState.targetKcal || 2100}\n• Macros: ${totP}g P | ${totC}g C | ${totF}g G\n• Agua: ${(dayData.water/1000).toFixed(2)}L`;
+      const report = `Reporte TCC (${appState.currentDay} - ${appState.profile.name || 'Usuario'}):\n• Kcal: ${totKcal}/${appState.targetKcal || 2100}\n• Macros: ${totP}g P | ${totC}g C | ${totF}g G\n• Agua: ${(dayData.water/1000).toFixed(2)}L`;
       navigator.clipboard.writeText(report).then(() => showToast("Reporte diario copiado", "success"));
     }
 
