@@ -68,12 +68,80 @@
       background-size: 28px 28px;
       background-position: 0 0, 14px 14px;
     }
+
+    /* Animaciones minimalistas globales para todas las secciones y transiciones */
+    @keyframes viewSlideUpFade {
+      0% { opacity: 0; transform: translateY(14px) scale(0.992); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes subtleSlideRight {
+      0% { opacity: 0; transform: translateX(-12px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes streakPopGlow {
+      0% { transform: scale(0.82) translateY(16px); opacity: 0; }
+      45% { transform: scale(1.06) translateY(-2px); opacity: 1; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    @keyframes lockShake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    @keyframes cursorBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    @keyframes emberRise {
+      0% { transform: translateY(0) scale(0.8); opacity: 0.9; }
+      100% { transform: translateY(-42px) scale(1.25); opacity: 0; }
+    }
+    .section-anim-enter {
+      animation: viewSlideUpFade 0.34s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    .subview-anim-enter {
+      animation: subtleSlideRight 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    .streak-celebration-anim {
+      animation: streakPopGlow 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    .anim-lock-shake {
+      animation: lockShake 0.42s ease-in-out;
+    }
+    .ide-cursor {
+      display: inline-block;
+      width: 7px;
+      height: 13px;
+      background-color: #34d399;
+      vertical-align: middle;
+      animation: cursorBlink 1.1s step-end infinite;
+    }
+    button {
+      transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    button:active:not(:disabled) {
+      transform: scale(0.96);
+    }
+    .card-minimal-anim {
+      transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.24s ease, border-color 0.24s ease;
+    }
+    .card-minimal-anim:hover {
+      transform: translateY(-1.5px);
+    }
+    .flashcard-flip-anim {
+      transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease;
+    }
+    .flashcard-flip-anim:active {
+      transform: scale(0.97) rotateX(6deg);
+    }
   </style>
 </head>
 <body class="bg-[#f6f4f0] dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen pb-12 transition-colors duration-200">
 
   <!-- CONTENEDOR DE NOTIFICACIONES CENTRADO -->
   <div id="toastContainer" class="fixed top-4 inset-x-0 mx-auto z-[120] pointer-events-none w-11/12 max-w-sm flex flex-col items-center space-y-2"></div>
+  <!-- OVERLAY MINIMALISTA DE CELEBRACIÓN DE RACHA Y NIVEL -->
+  <div id="streakCelebrationOverlay" class="fixed inset-x-0 top-16 mx-auto z-[115] pointer-events-none w-11/12 max-w-xs hidden"></div>
 
   <!-- ==================== SLIDE LATERAL (ÚNICO MENÚ DE NAVEGACIÓN CON ICONOS FLATICON) ==================== -->
   <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[70] hidden"></div>
@@ -739,9 +807,11 @@
       </div>
     </section>
 
-    <!-- ==================== PESTAÑA 3: TU PROFE IA (MULTIMATERIA + MAPA CANDY CRUSH + IDE CÓDIGO + FÓRMULAS) ==================== -->
-    <section id="tab-tutor" class="space-y-4 hidden">
-      <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-4">
+    <!-- ==================== PESTAÑA 3: TU PROFE IA (MULTIMATERIA + MULTITAREA INFERIOR + MAPA CANDY CRUSH + IDE VISUAL + FÓRMULAS) ==================== -->
+    <section id="tab-tutor" class="space-y-4 pb-24 hidden">
+
+      <!-- CABECERA COMPACTA SIEMPRE VISIBLE EN PROFE IA CON RACHA DIARIA Y SELECTOR RÁPIDO DE MATERIA -->
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3 card-minimal-anim">
         <div class="flex justify-between items-start gap-2">
           <div>
             <span class="text-[10px] font-extrabold uppercase tracking-wider text-terra-500 block">Academia Gamificada Multi-Materia</span>
@@ -749,11 +819,11 @@
               <i class="fi fi-rr-graduation-cap text-terra-500"></i>
               <span>Tu Profe Personal IA</span>
             </h2>
-            <p class="text-[11px] text-slate-400">Cada materia guarda sus propias lecciones desde la #1 en su mapa de niveles.</p>
+            <p class="text-[11px] text-slate-400">Cada materia inicia en Lección #1 y exige aprobar el examen para subir de nivel.</p>
           </div>
           <div class="text-right shrink-0">
             <div class="flex items-center justify-end gap-1.5">
-              <span id="tutorStreakBadge" class="text-xs font-black bg-terra-500/15 text-terra-500 px-2.5 py-1 rounded-xl inline-flex items-center gap-1" title="Racha por día calendario estudiado">
+              <span id="tutorStreakBadge" onclick="triggerStreakCelebration('🔥 Racha de Estudio Activa', 'Se incrementa 1 vez por cada día calendario estudiado')" class="cursor-pointer text-xs font-black bg-terra-500/15 text-terra-500 px-2.5 py-1 rounded-xl inline-flex items-center gap-1" title="Racha por día calendario estudiado">
                 <i class="fi fi-sr-flame"></i> <span>0d racha</span>
               </span>
               <span id="tutorXpBadge" class="text-xs font-black bg-amber-500/15 text-amber-400 px-2.5 py-1 rounded-xl inline-flex items-center gap-1">
@@ -764,8 +834,8 @@
           </div>
         </div>
 
-        <!-- SELECTOR DE MATERIAS GUARDADAS (CADA UNA CON SU PROPIO HISTORIAL DESDE LECCIÓN 1) -->
-        <div class="space-y-2 pt-1 border-t border-slate-100 dark:border-slate-800">
+        <!-- PÍLDORAS DE MATERIAS GUARDADAS (SIEMPRE ACCESIBLES PARA CAMBIAR AL INSTANTE) -->
+        <div class="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
           <div class="flex items-center justify-between">
             <span class="text-[10px] font-extrabold uppercase text-slate-400">Tus Materias Activas (Toca para cambiar)</span>
             <button onclick="toggleNewSubjectBox()" class="text-[10px] font-extrabold text-terra-500 bg-terra-500/10 px-2.5 py-1 rounded-lg flex items-center gap-1">
@@ -776,8 +846,8 @@
           <div id="tutorSubjectPills" class="flex gap-2 overflow-x-auto no-scrollbar py-1"></div>
 
           <!-- CAJA PARA CREAR UNA MATERIA NUEVA DESDE LECCIÓN 1 -->
-          <div id="newSubjectCreatorBox" class="hidden p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-terra-500/40 space-y-2">
-            <span class="text-[10px] font-extrabold uppercase text-terra-500 block">Agregar Nueva Materia (Inicia en Nivel / Lección 1)</span>
+          <div id="newSubjectCreatorBox" class="hidden p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-terra-500/40 space-y-2 subview-anim-enter">
+            <span class="text-[10px] font-extrabold uppercase text-terra-500 block">Agregar Nueva Materia (Inicia garantizado en Lección #1)</span>
             <div class="grid grid-cols-1 gap-2">
               <input id="newSubjectNameInput" type="text" placeholder="Ej. Cálculo Diferencial / Python / Inglés / Finanzas..." class="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-slate-900 font-bold outline-none">
               <div class="flex gap-2">
@@ -788,53 +858,9 @@
           </div>
         </div>
 
-        <!-- CONFIGURACIÓN DE LA MATERIA ACTUAL -->
-        <div class="grid grid-cols-2 gap-2 text-xs">
-          <div>
-            <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Materia Activa</label>
-            <input id="tutorSubjectInput" type="text" placeholder="Ej. Inglés / Python / Matemáticas" onchange="saveTutorConfig()" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold outline-none">
-          </div>
-          <div>
-            <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Tu Nivel en esta Materia</label>
-            <select id="tutorLevelSelect" onchange="saveTutorConfig()" class="w-full px-2.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold outline-none">
-              <option value="Desde Cero (Principiante Absoluto)">Desde 0 (Principiante)</option>
-              <option value="Básico (A1/A2 - Fundamentos)">Básico (Fundamentos)</option>
-              <option value="Intermedio (B1/B2 - Práctico)">Intermedio (Práctico)</option>
-              <option value="Avanzado (C1/Senior)">Avanzado</option>
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Objetivo o Tema Específico para la siguiente clase</label>
-          <input id="tutorGoalInput" type="text" placeholder="Ej. Dominar funciones desde 0 / Derivadas / Verbos en pasado..." onchange="saveTutorConfig()" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 outline-none">
-        </div>
-
-        <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2.5">
-          <div class="flex justify-between items-center">
-            <span class="text-[10px] font-extrabold uppercase text-blue-400 flex items-center gap-1.5">
-              <i class="fi fi-rr-clip"></i>
-              <span>Tus Apuntes, Tarea o Código (Opcional)</span>
-            </span>
-            <label class="px-2.5 py-1 bg-blue-500/15 text-blue-400 border border-blue-500/30 rounded-lg text-[10px] font-bold cursor-pointer flex items-center gap-1">
-              <i class="fi fi-rr-camera"></i>
-              <span>Foto de Apuntes</span>
-              <input type="file" accept="image/*" id="tutorImageInput" onchange="handleTutorImageUpload(event)" class="hidden">
-            </label>
-          </div>
-          <textarea id="tutorNotesInput" rows="2" placeholder="Pega aquí tu código, problema matemático, ejercicio a revisar o duda..." class="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-slate-900 outline-none resize-none font-mono"></textarea>
-
-          <div id="tutorPhotoPreviewBox" class="hidden flex items-center justify-between bg-slate-900 p-2 rounded-xl border border-blue-500/40">
-            <div class="flex items-center gap-2">
-              <img id="tutorPhotoThumb" src="" class="w-10 h-10 object-cover rounded-lg">
-              <span class="text-[11px] text-blue-300 font-bold">Foto de apunte cargada</span>
-            </div>
-            <button onclick="clearTutorPhoto()" class="text-[10px] bg-rose-600 text-white px-2 py-1 rounded font-bold">Quitar</button>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-terra-500/10 border border-terra-500/30 text-[11px]">
-          <span class="font-bold text-slate-600 dark:text-slate-300">Siguiente nivel en esta materia:</span>
+        <!-- ESTADO DE BLOQUEO O AVANCE DE NIVEL Y BOTONES DE GENERACIÓN -->
+        <div id="tutorLevelGateBanner" class="flex items-center justify-between px-3 py-2 rounded-xl bg-terra-500/10 border border-terra-500/30 text-[11px]">
+          <span id="tutorGateStatusLabel" class="font-bold text-slate-600 dark:text-slate-300">Siguiente nivel en esta materia:</span>
           <span id="tutorNextLessonBtnLabel" class="font-black text-terra-500">Generar Lección #1</span>
         </div>
 
@@ -850,23 +876,138 @@
         </div>
       </div>
 
-      <!-- MAPA DE NIVELES ESTILO CANDY CRUSH (CAMINO INTERACTIVO DE LECCIONES POR MATERIA) -->
-      <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border-2 border-amber-500/30 space-y-3 candy-map-bg">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <i class="fi fi-sr-map-marker-home text-amber-400 text-base"></i>
+      <!-- SUB-SECCIÓN 1: MAPA DE SAGA CANDY CRUSH + CONFIGURACIÓN DE MATERIA + ALERTA DE RACHA -->
+      <div id="tutorSubView-map" class="space-y-4 subview-anim-enter">
+        <!-- MAPA DE NIVELES ESTILO CANDY CRUSH -->
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border-2 border-amber-500/30 space-y-3 candy-map-bg card-minimal-anim">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fi fi-sr-map-marker-home text-amber-400 text-base"></i>
+              <div>
+                <h3 class="font-extrabold text-sm" id="candyMapSubjectTitle">Mapa de Niveles</h3>
+                <p class="text-[10px] text-slate-400">Debes aprobar el examen de cada lección para desbloquear el siguiente nivel.</p>
+              </div>
+            </div>
+            <span id="candyMapStarsCount" class="text-xs font-black text-amber-400 bg-amber-500/15 px-2.5 py-1 rounded-xl">★ 0</span>
+          </div>
+          <div id="tutorCandyMapContainer" class="py-2"></div>
+        </div>
+
+        <!-- AJUSTES DE LA MATERIA ACTIVA Y APUNTES -->
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3 card-minimal-anim">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold uppercase text-slate-400">Configuración de la Materia Activa</span>
+            <span class="text-[10px] text-terra-500 font-bold">Personaliza tu clase</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-xs">
             <div>
-              <h3 class="font-extrabold text-sm" id="candyMapSubjectTitle">Mapa de Niveles</h3>
-              <p class="text-[10px] text-slate-400">Toca cualquier nivel completado para repasar esa lección completa.</p>
+              <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Nombre de Materia Activa</label>
+              <input id="tutorSubjectInput" type="text" placeholder="Ej. Inglés / Python / Matemáticas" onchange="saveTutorConfig()" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold outline-none">
+            </div>
+            <div>
+              <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Tu Nivel en esta Materia</label>
+              <select id="tutorLevelSelect" onchange="saveTutorConfig()" class="w-full px-2.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold outline-none">
+                <option value="Desde Cero (Principiante Absoluto)">Desde 0 (Principiante)</option>
+                <option value="Básico (A1/A2 - Fundamentos)">Básico (Fundamentos)</option>
+                <option value="Intermedio (B1/B2 - Práctico)">Intermedio (Práctico)</option>
+                <option value="Avanzado (C1/Senior)">Avanzado</option>
+              </select>
             </div>
           </div>
-          <span id="candyMapStarsCount" class="text-xs font-black text-amber-400 bg-amber-500/15 px-2.5 py-1 rounded-xl">★ 0</span>
+
+          <div>
+            <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Objetivo o Tema Específico para la clase</label>
+            <input id="tutorGoalInput" type="text" placeholder="Ej. Dominar funciones desde 0 / Derivadas / Verbos en pasado..." onchange="saveTutorConfig()" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 outline-none">
+          </div>
+
+          <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2.5">
+            <div class="flex justify-between items-center">
+              <span class="text-[10px] font-extrabold uppercase text-blue-400 flex items-center gap-1.5">
+                <i class="fi fi-rr-clip"></i>
+                <span>Tus Apuntes, Tarea o Código (Opcional)</span>
+              </span>
+              <label class="px-2.5 py-1 bg-blue-500/15 text-blue-400 border border-blue-500/30 rounded-lg text-[10px] font-bold cursor-pointer flex items-center gap-1">
+                <i class="fi fi-rr-camera"></i>
+                <span>Foto de Apuntes</span>
+                <input type="file" accept="image/*" id="tutorImageInput" onchange="handleTutorImageUpload(event)" class="hidden">
+              </label>
+            </div>
+            <textarea id="tutorNotesInput" rows="2" placeholder="Pega aquí tu código, problema matemático, ejercicio a revisar o duda..." class="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-slate-900 outline-none resize-none font-mono"></textarea>
+
+            <div id="tutorPhotoPreviewBox" class="hidden flex items-center justify-between bg-slate-900 p-2 rounded-xl border border-blue-500/40">
+              <div class="flex items-center gap-2">
+                <img id="tutorPhotoThumb" src="" class="w-10 h-10 object-cover rounded-lg">
+                <span class="text-[11px] text-blue-300 font-bold">Foto de apunte cargada</span>
+              </div>
+              <button onclick="clearTutorPhoto()" class="text-[10px] bg-rose-600 text-white px-2 py-1 rounded font-bold">Quitar</button>
+            </div>
+          </div>
         </div>
-        <div id="tutorCandyMapContainer" class="py-2"></div>
+
+        <!-- PROTECTOR DE RACHA DIARIA Y NOTIFICACIONES EN CELULAR (INCLUSO CON NAVEGADOR CERRADO) -->
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border-2 border-terra-500/35 space-y-3 card-minimal-anim">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fi fi-sr-bell-ring text-terra-500 text-base"></i>
+              <div>
+                <h3 class="font-extrabold text-xs uppercase text-terra-500">Protector de Racha & Alertas en Celular</h3>
+                <p id="tutorStreakRiskStatusText" class="text-[11px] text-slate-400">Verifica tu estado de estudio hoy</p>
+              </div>
+            </div>
+            <button onclick="testMobileNotificationNow()" class="px-2.5 py-1 rounded-xl bg-terra-500/15 text-terra-500 text-[10px] font-extrabold">
+              Probar Alerta
+            </button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 items-center text-xs bg-slate-50 dark:bg-slate-800/70 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
+            <div>
+              <span class="text-[10px] font-bold uppercase text-slate-400 block">Hora Aviso Anti-Corte de Racha</span>
+              <span class="text-[10px] text-slate-400">Te avisa si aún no estudias hoy</span>
+            </div>
+            <input id="streakReminderTimeInput" type="time" value="20:00" onchange="saveStreakReminderTime(this.value)" class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 font-black text-center text-terra-500 outline-none border border-terra-500/30">
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="enableBrowserNotifications()" class="py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] rounded-xl flex items-center justify-center gap-1.5 shadow-sm">
+              <i class="fi fi-rr-bell"></i>
+              <span>Permiso Push Web</span>
+            </button>
+            <button onclick="downloadStreakNativePhoneAlarm()" class="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] rounded-xl flex items-center justify-center gap-1.5 shadow-sm">
+              <i class="fi fi-rr-calendar-clock"></i>
+              <span>Alarma Nativa (App Cerrada)</span>
+            </button>
+          </div>
+          <p class="text-[10px] text-slate-400 leading-relaxed">
+            💡 <strong>¿Por qué a veces no suenan con el navegador cerrado?</strong> Android y iOS congelan las pestañas web al apagar la pantalla. Activando el <strong>Permiso Push Service Worker</strong> + la <strong>Alarma Nativa Diaria</strong>, tu teléfono sonará puntualmente aunque el navegador esté cerrado.
+          </p>
+        </div>
       </div>
 
-      <!-- VISOR INTERACTIVO DE LA LECCIÓN SELECCIONADA (ESQUEMA VISUAL, FÓRMULAS, IDE CÓDIGO, FLASHCARDS Y RETOS) -->
+      <!-- CONTENEDOR DINÁMICO DE LA LECCIÓN (SE ORGANIZA SEGÚN LA PESTAÑA DE LA BARRA MULTITAREA INFERIOR) -->
       <div id="tutorLessonContainer" class="space-y-4"></div>
+
+      <!-- BARRA MULTITAREA INFERIOR EXCLUSIVA DE PROFE IA (BOTTOM DOCK NAVEGABLE) -->
+      <div id="tutorBottomMultitaskDock" class="fixed bottom-3 inset-x-0 mx-auto max-w-md px-3 z-50">
+        <div class="bg-slate-900/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-3xl p-1.5 shadow-2xl grid grid-cols-4 gap-1 text-[10px] font-extrabold text-slate-300">
+          <button onclick="switchTutorSubTab('map')" id="tbottom-map" class="py-2 px-1 rounded-2xl flex flex-col items-center justify-center gap-1 bg-terra-500 text-white shadow">
+            <i class="fi fi-sr-map-marker-home text-sm"></i>
+            <span>Mapa/Materias</span>
+          </button>
+          <button onclick="switchTutorSubTab('lesson')" id="tbottom-lesson" class="py-2 px-1 rounded-2xl flex flex-col items-center justify-center gap-1 hover:bg-slate-800 text-slate-400">
+            <i class="fi fi-rr-book-open-cover text-sm"></i>
+            <span>Clase & Visual</span>
+          </button>
+          <button onclick="switchTutorSubTab('practice')" id="tbottom-practice" class="py-2 px-1 rounded-2xl flex flex-col items-center justify-center gap-1 hover:bg-slate-800 text-slate-400">
+            <i class="fi fi-rr-laptop-code text-sm"></i>
+            <span id="tbottomPracticeLabel">Práctica/Lab</span>
+          </button>
+          <button onclick="switchTutorSubTab('exam')" id="tbottom-exam" class="py-2 px-1 rounded-2xl flex flex-col items-center justify-center gap-1 hover:bg-slate-800 text-slate-400 relative">
+            <i class="fi fi-rr-trophy text-sm"></i>
+            <span>Examen Nivel</span>
+            <span id="tbottomExamDot" class="hidden absolute top-1.5 right-3 w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+          </button>
+        </div>
+      </div>
     </section>
 
     <!-- ==================== PESTAÑA 4: HÁBITOS, RACHAS & ESTADÍSTICAS ==================== -->
@@ -1237,8 +1378,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
   <script>
-    // ==================== ICONO PWA ====================
+    // ==================== ICONO PWA Y SERVICE WORKER PARA NOTIFICACIONES MÓVILES ====================
     let globalAppIconPng = '';
+    let globalSwRegistration = null;
     (function setupAppIconsAndPWA() {
       try {
         const canvas = document.createElement('canvas');
@@ -1256,6 +1398,30 @@
         document.getElementById('appleTouchIconLink').href = globalAppIconPng;
         document.getElementById('faviconLink').href = globalAppIconPng;
         document.getElementById('faviconLink').type = 'image/png';
+
+        // Registrar Service Worker dinámico si el entorno lo permite para que showNotification funcione en Android/iOS
+        if ('serviceWorker' in navigator) {
+          const swCode = `
+            self.addEventListener('install', e => self.skipWaiting());
+            self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+            self.addEventListener('notificationclick', e => {
+              e.notification.close();
+              e.waitUntil(
+                self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+                  if (clientList.length > 0) return clientList[0].focus();
+                  return self.clients.openWindow('/');
+                })
+              );
+            });
+          `;
+          const swBlob = new Blob([swCode], { type: 'application/javascript' });
+          const swUrl = URL.createObjectURL(swBlob);
+          navigator.serviceWorker.register(swUrl).then(reg => {
+            globalSwRegistration = reg;
+          }).catch(() => {
+            navigator.serviceWorker.ready.then(reg => { globalSwRegistration = reg; }).catch(() => {});
+          });
+        }
       } catch (e) {}
     })();
 
@@ -1585,14 +1751,49 @@
       }
     }
 
+    function triggerElementSlideAnim(el, animClass = 'section-anim-enter') {
+      if (!el) return;
+      el.classList.remove(animClass);
+      void el.offsetWidth;
+      el.classList.add(animClass);
+    }
+
+    let celebrationTimeoutId = null;
+    function triggerStreakCelebration(titleText, subText) {
+      const box = document.getElementById('streakCelebrationOverlay');
+      if (!box) return;
+      if (celebrationTimeoutId) clearTimeout(celebrationTimeoutId);
+      box.classList.remove('hidden');
+      box.innerHTML = `
+        <div class="streak-celebration-anim bg-gradient-to-r from-terra-500 via-amber-500 to-orange-500 text-white p-3.5 rounded-3xl shadow-2xl border-2 border-amber-200/70 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-black/20 flex items-center justify-center text-lg shrink-0">
+            <i class="fi fi-sr-flame"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-black tracking-tight truncate">${titleText}</p>
+            <p class="text-[10px] text-amber-100 font-bold leading-snug">${subText || ''}</p>
+          </div>
+        </div>
+      `;
+      celebrationTimeoutId = setTimeout(() => {
+        box.classList.add('hidden');
+      }, 3400);
+    }
+
     function switchHabitSubView(sub) {
       ['today', 'stats', 'sos'].forEach(s => {
-        document.getElementById(`habitView${s.charAt(0).toUpperCase() + s.slice(1)}`).classList.add('hidden');
+        const vEl = document.getElementById(`habitView${s.charAt(0).toUpperCase() + s.slice(1)}`);
+        if (vEl) vEl.classList.add('hidden');
         const btn = document.getElementById(`hsub-${s}`);
-        btn.className = 'py-2 rounded-xl text-slate-400';
+        if (btn) btn.className = 'py-2 rounded-xl text-slate-400 transition';
       });
-      document.getElementById(`habitView${sub.charAt(0).toUpperCase() + sub.slice(1)}`).classList.remove('hidden');
-      document.getElementById(`hsub-${sub}`).className = 'py-2 rounded-xl bg-terra-500 text-white';
+      const activeView = document.getElementById(`habitView${sub.charAt(0).toUpperCase() + sub.slice(1)}`);
+      if (activeView) {
+        activeView.classList.remove('hidden');
+        triggerElementSlideAnim(activeView, 'subview-anim-enter');
+      }
+      const activeBtn = document.getElementById(`hsub-${sub}`);
+      if (activeBtn) activeBtn.className = 'py-2 rounded-xl bg-terra-500 text-white shadow-sm transition';
     }
 
     // ==================== SONIDO Y TOASTS CENTRADOS ====================
@@ -2116,7 +2317,10 @@
         }
       });
       const targetSec = document.getElementById(`tab-${tabName}`);
-      if (targetSec) targetSec.classList.remove('hidden');
+      if (targetSec) {
+        targetSec.classList.remove('hidden');
+        triggerElementSlideAnim(targetSec, 'section-anim-enter');
+      }
       const activeSideBtn = document.getElementById(`side-${tabName}`);
       if (activeSideBtn) {
         activeSideBtn.className = "w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl bg-terra-500 text-white transition text-left shadow-sm";
@@ -2146,6 +2350,10 @@
     function selectDay(dayId) {
       appState.currentDay = dayId;
       saveState();
+      const visibleSec = ['nutrition', 'focus', 'tutor', 'habits', 'gym', 'grocery', 'settings']
+        .map(t => document.getElementById(`tab-${t}`))
+        .find(el => el && !el.classList.contains('hidden'));
+      if (visibleSec) triggerElementSlideAnim(visibleSec, 'subview-anim-enter');
     }
 
     // ==================== MOTOR CENTRAL GEMINI API (LIVE WEBSOCKET + INTERACTIONS API + GENERATECONTENT CON THINKING HIGH) ====================
@@ -3108,38 +3316,159 @@
     }
 
     async function enableBrowserNotifications() {
-      if (!("Notification" in window)) { showToast("Usa el botón de Calendario en cada tarea", "warning"); return; }
+      if (!("Notification" in window)) {
+        showToast("Tu navegador bloquea Push web; usa el botón Alarma Nativa (App Cerrada)", "warning");
+        return;
+      }
       const perm = await Notification.requestPermission();
       if (perm === "granted") {
-        document.getElementById('notifPermBtn').innerHTML = `<i class="fi fi-sr-check"></i> <span>Activas</span>`;
-        showToast("Alertas activadas", "success");
+        const btn = document.getElementById('notifPermBtn');
+        if (btn) btn.innerHTML = `<i class="fi fi-sr-check"></i> <span>Activas</span>`;
+        sendPhoneNotification("Alertas Control TCC Activas", "Recibirás avisos de tareas y protección de racha de estudio.", "tcc-perm-ok");
+        showToast("Notificaciones del sistema activadas", "success");
+      } else {
+        showToast("Permiso denegado en el navegador. Usa Alarma Nativa para que suene siempre.", "warning");
       }
     }
 
-    function sendPhoneNotification(title, bodyText) {
-      if ("Notification" in window && Notification.permission === "granted") {
-        try {
-          const n = new Notification(title, { body: bodyText, icon: globalAppIconPng || undefined, requireInteraction: true });
-          n.onclick = function() { window.focus(); this.close(); };
-        } catch (e) {}
+    function sendPhoneNotification(title, bodyText, tagId = 'tcc-alert', scheduledTimestampMs = null) {
+      if (!("Notification" in window) || Notification.permission !== "granted") return false;
+      const options = {
+        body: bodyText,
+        icon: globalAppIconPng || undefined,
+        badge: globalAppIconPng || undefined,
+        tag: tagId,
+        renotify: true,
+        requireInteraction: true,
+        vibrate: [300, 120, 300, 120, 450]
+      };
+      if (scheduledTimestampMs && 'TimestampTrigger' in window) {
+        try { options.showTrigger = new window.TimestampTrigger(scheduledTimestampMs); } catch (e) {}
+      }
+      try {
+        if (globalSwRegistration && typeof globalSwRegistration.showNotification === 'function') {
+          globalSwRegistration.showNotification(title, options);
+          return true;
+        }
+        if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+          navigator.serviceWorker.ready.then(reg => {
+            if (reg && typeof reg.showNotification === 'function') reg.showNotification(title, options);
+          }).catch(() => {});
+        }
+      } catch (e) {}
+      try {
+        const n = new Notification(title, options);
+        n.onclick = function() { window.focus(); this.close(); };
+        return true;
+      } catch (e) {
+        return false;
       }
     }
 
-    setInterval(() => {
+    async function testMobileNotificationNow() {
+      playBeep();
+      if (navigator.vibrate) navigator.vibrate([250, 100, 250]);
+      if ("Notification" in window && Notification.permission !== "granted") {
+        await Notification.requestPermission();
+      }
+      const sent = sendPhoneNotification(
+        "🔥 Prueba Control TCC: Protector de Racha",
+        "Tu sonido, vibración y alertas están funcionando correctamente.",
+        "tcc-test-" + Date.now()
+      );
+      triggerStreakCelebration("🔔 Alerta Móvil Probada", sent ? "Notificación enviada a la barra de tu teléfono" : "Sonido activo (Usa Alarma Nativa para app cerrada)");
+      showToast(sent ? "Notificación enviada a tu celular" : "Sonido probado. Activa Permiso Push o Alarma Nativa", "success");
+    }
+
+    function saveStreakReminderTime(val) {
+      const td = ensureTutorMultiSubjectStructure();
+      td.streakReminderTime = val || '20:00';
+      td.lastStreakRiskAlertDay = '';
+      saveState();
+      showToast(`Aviso anti-corte de racha programado a las ${td.streakReminderTime}`, "success");
+    }
+
+    function downloadStreakNativePhoneAlarm() {
+      const td = ensureTutorMultiSubjectStructure();
+      const timeVal = td.streakReminderTime || document.getElementById('streakReminderTimeInput')?.value || '20:00';
+      const [hh, min] = timeVal.split(':');
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const startStr = `${yyyy}${mm}${dd}T${hh || '20'}${min || '00'}00`;
+      const endStr = `${yyyy}${mm}${dd}T${hh || '20'}${String(Math.min(59, (parseInt(min || '0', 10) + 15))).padStart(2, '0')}00`;
+      const ics = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Control TCC//Streak Protector//ES",
+        "BEGIN:VEVENT",
+        "SUMMARY:🔥 ¡No pierdas tu Racha de Estudio en Tu Profe IA!",
+        "DESCRIPTION:Abre Control TCC y completa 1 lección hoy para mantener viva tu racha diaria.",
+        `DTSTART:${startStr}`,
+        `DTEND:${endStr}`,
+        "RRULE:FREQ=DAILY",
+        "BEGIN:VALARM",
+        "TRIGGER:-PT0M",
+        "ACTION:DISPLAY",
+        "DESCRIPTION:🔥 ¡Tu racha de estudio está por cortarse! Toma tu clase de hoy.",
+        "END:VALARM",
+        "END:VEVENT",
+        "END:VCALENDAR"
+      ].join("\n");
+      const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `protector_racha_diaria_${hh || '20'}h.ics`;
+      link.click();
+      showToast("Alarma diaria nativa descargada: ábrela para que tu celular te avise aunque cierres el navegador", "success");
+    }
+
+    function checkAlarmsAndStreakRisk() {
       const now = new Date();
       const currentHHMM = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
       let changed = false;
-      appState.tasks.forEach((t, idx) => {
-        if (!t.done && t.time && t.time === currentHHMM && !t.notified) {
-          t.notified = true; changed = true;
-          startAlarmSound();
-          sendPhoneNotification(`Actividad: ${t.text}`, "Es hora de llenar tu formato y subir evidencia.");
-          showToast(`Alarma de actividad: ${t.text}`, "warning");
-          openTaskFormatModal(idx, true);
+
+      // 1. Verificar tareas laborales con hora programada (incluyendo si la hora pasó hace pocos minutos mientras estaba en segundo plano)
+      (appState.tasks || []).forEach((t, idx) => {
+        if (!t.done && t.time && !t.notified) {
+          if (t.time === currentHHMM) {
+            t.notified = true; changed = true;
+            startAlarmSound();
+            sendPhoneNotification(`⏰ Actividad: ${t.text}`, "Es hora de llenar tu formato y subir evidencia.", `task-${t.id || idx}`);
+            showToast(`Alarma de actividad: ${t.text}`, "warning");
+            openTaskFormatModal(idx, true);
+          }
         }
       });
+
+      // 2. Verificar si la racha de estudio de Tu Profe IA está en riesgo de cortarse hoy
+      const td = ensureTutorMultiSubjectStructure();
+      const studiedToday = (td.studyDaysHistory || []).includes(appState.currentDay);
+      const reminderHHMM = td.streakReminderTime || '20:00';
+      if (!studiedToday && td.lastStreakRiskAlertDay !== appState.currentDay) {
+        if (currentHHMM >= reminderHHMM) {
+          td.lastStreakRiskAlertDay = appState.currentDay;
+          changed = true;
+          const currentStreak = calculateTutorDailyStreak();
+          const msg = currentStreak > 0
+            ? `Llevas ${currentStreak} día(s) de racha. Toma 1 clase hoy en Tu Profe IA para que no se corte.`
+            : `Aún no estudias hoy. Toma 1 lección en Tu Profe IA para encender tu racha diaria.`;
+          playBeep();
+          sendPhoneNotification("🔥 ¡Tu racha de estudio está por cortarse!", msg, "streak-risk-" + appState.currentDay);
+          triggerStreakCelebration("🔥 ¡Racha de Estudio en Riesgo!", msg);
+          showToast("¡Cuidado! Aún no tomas tu clase de hoy y tu racha puede cortarse.", "warning");
+        }
+      }
+
       if (changed) saveState();
-    }, 5000);
+    }
+
+    setInterval(checkAlarmsAndStreakRisk, 5000);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') checkAlarmsAndStreakRisk();
+    });
+    window.addEventListener('focus', checkAlarmsAndStreakRisk);
 
     function downloadTaskPhoneAlarm(idx) {
       const t = appState.tasks[idx];
@@ -3550,7 +3879,9 @@
       link.click();
     }
 
-    // ==================== 3. TU PROFE IA (MULTI-MATERIA, MAPA CANDY CRUSH, FÓRMULAS, IDE CÓDIGO Y RACHA DIARIA) ====================
+    // ==================== 3. TU PROFE IA (MULTI-MATERIA, BLOQUEO DE NIVEL, MULTITAREA INFERIOR, IDE VISUAL Y FÓRMULAS) ====================
+    let activeTutorSubTab = 'map';
+
     function normalizeSubjectKey(name) {
       return (name || 'General').trim().toLowerCase().replace(/\s+/g, '_');
     }
@@ -3569,13 +3900,15 @@
       if (typeof td.totalXp !== 'number') {
         td.totalXp = 0;
       }
+      if (!td.streakReminderTime) {
+        td.streakReminderTime = '20:00';
+      }
 
-      // Migrar lección anterior si existía en el formato viejo para nunca perderla
       const initialSubjName = (td.subject || 'Inglés').trim();
       const initKey = normalizeSubjectKey(initialSubjName);
       if (Object.keys(td.subjectsMap).length === 0) {
         const migratedLessons = [];
-        if (td.lastLesson) {
+        if (td.lastLesson && td.lastLesson.lessonTitle) {
           migratedLessons.push({
             ...td.lastLesson,
             lessonNumber: 1,
@@ -3595,6 +3928,23 @@
         td.activeSubjectKey = initKey;
       }
 
+      // Garantizar que CADA materia tenga su propia numeración limpia desde Lección #1 (1, 2, 3...) sin saltos ni contadores globales mezclados
+      Object.values(td.subjectsMap).forEach(sObj => {
+        if (!Array.isArray(sObj.lessons)) sObj.lessons = [];
+        sObj.lessons.forEach((les, idx) => {
+          les.lessonNumber = idx + 1;
+          if (typeof les.completedQuiz !== 'boolean') {
+            les.completedQuiz = (idx < sObj.lessons.length - 1);
+          }
+          if (!les.stars) les.stars = les.completedQuiz ? 3 : 1;
+        });
+        if (sObj.lessons.length === 0) {
+          sObj.selectedLessonIndex = -1;
+        } else if (typeof sObj.selectedLessonIndex !== 'number' || sObj.selectedLessonIndex < 0 || sObj.selectedLessonIndex >= sObj.lessons.length) {
+          sObj.selectedLessonIndex = sObj.lessons.length - 1;
+        }
+      });
+
       if (!td.activeSubjectKey || !td.subjectsMap[td.activeSubjectKey]) {
         td.activeSubjectKey = Object.keys(td.subjectsMap)[0];
       }
@@ -3606,14 +3956,48 @@
       return td.subjectsMap[td.activeSubjectKey];
     }
 
-    // Calcula la racha real POR DÍA calendario estudiado (no por botón presionado el mismo día)
+    function switchTutorSubTab(subTab) {
+      activeTutorSubTab = subTab;
+      ['map', 'lesson', 'practice', 'exam'].forEach(st => {
+        const btn = document.getElementById(`tbottom-${st}`);
+        if (btn) {
+          btn.className = st === subTab
+            ? 'py-2 px-1 rounded-2xl flex flex-col items-center justify-center gap-1 bg-terra-500 text-white shadow transition relative'
+            : 'py-2 px-1 rounded-2xl flex flex-col items-center justify-center gap-1 hover:bg-slate-800 text-slate-400 transition relative';
+        }
+      });
+
+      const mapBox = document.getElementById('tutorSubView-map');
+      const lessonContainer = document.getElementById('tutorLessonContainer');
+
+      if (subTab === 'map') {
+        if (mapBox) {
+          mapBox.classList.remove('hidden');
+          triggerElementSlideAnim(mapBox, 'subview-anim-enter');
+        }
+        if (lessonContainer) lessonContainer.classList.add('hidden');
+      } else {
+        if (mapBox) mapBox.classList.add('hidden');
+        if (lessonContainer) {
+          lessonContainer.classList.remove('hidden');
+          renderTutor();
+          triggerElementSlideAnim(lessonContainer, 'subview-anim-enter');
+        }
+      }
+    }
+
+    // Racha real por DÍA calendario estudiado
     function registerTutorStudyDayToday() {
       const td = ensureTutorMultiSubjectStructure();
       const todayId = appState.currentDay || '2026-10-22';
-      if (!td.studyDaysHistory.includes(todayId)) {
+      const wasAlreadyStudiedToday = td.studyDaysHistory.includes(todayId);
+      if (!wasAlreadyStudiedToday) {
         td.studyDaysHistory.push(todayId);
       }
       td.streak = calculateTutorDailyStreak();
+      if (!wasAlreadyStudiedToday) {
+        triggerStreakCelebration(`🔥 ¡Racha de Estudio: ${td.streak} Día(s)!`, `Has asegurado tu racha del día (${todayId})`);
+      }
     }
 
     function calculateTutorDailyStreak() {
@@ -3664,9 +4048,9 @@
           lessons: [],
           selectedLessonIndex: -1
         };
-        showToast(`Materia "${rawName}" creada. Lista para iniciar en la Lección #1`, "success");
+        showToast(`Materia "${rawName}" creada en Nivel 0. Tu primera clase será la Lección #1`, "success");
       } else {
-        showToast(`Cambiado a tu materia "${td.subjectsMap[key].name}"`, "info");
+        showToast(`Cambiado a "${td.subjectsMap[key].name}"`, "info");
       }
 
       td.activeSubjectKey = key;
@@ -3675,6 +4059,7 @@
       td.goal = td.subjectsMap[key].goal;
       input.value = '';
       document.getElementById('newSubjectCreatorBox').classList.add('hidden');
+      switchTutorSubTab('map');
       saveState();
     }
 
@@ -3687,7 +4072,9 @@
       td.level = subj.level;
       td.goal = subj.goal;
       saveState();
-      showToast(`Materia activa: ${subj.name} (${subj.lessons.length} lecciones guardadas)`, "info");
+      const mainTutorSec = document.getElementById('tab-tutor');
+      if (mainTutorSec) triggerElementSlideAnim(mainTutorSec, 'subview-anim-enter');
+      showToast(`Materia activa: ${subj.name} (${subj.lessons.length === 0 ? 'Inicia en Lección #1' : subj.lessons.length + ' lecciones guardadas'})`, "info");
     }
 
     function deleteTutorSubject(subjKey, ev) {
@@ -3698,7 +4085,7 @@
         td.subjectsMap[subjKey].lessons = [];
         td.subjectsMap[subjKey].selectedLessonIndex = -1;
         saveState();
-        showToast("Se reiniciaron las lecciones de esta materia a 0", "info");
+        showToast("Se reiniciaron las lecciones de esta materia a 0 (Lista para Lección #1)", "info");
         return;
       }
       const deletedName = td.subjectsMap[subjKey]?.name || 'Materia';
@@ -3708,20 +4095,20 @@
       showToast(`Materia "${deletedName}" eliminada`, "info");
     }
 
+    // Guarda el nombre/nivel/objetivo de la materia activa o crea una nueva limpia en Lección 1 si escribió una nueva
     function saveTutorConfig() {
       const td = ensureTutorMultiSubjectStructure();
-      const typedName = (document.getElementById('tutorSubjectInput').value || '').trim() || 'Inglés';
-      const levelVal = document.getElementById('tutorLevelSelect').value;
-      const goalVal = (document.getElementById('tutorGoalInput').value || '').trim();
+      const typedName = (document.getElementById('tutorSubjectInput')?.value || '').trim() || 'Inglés';
+      const levelVal = document.getElementById('tutorLevelSelect')?.value || 'Desde Cero (Principiante Absoluto)';
+      const goalVal = (document.getElementById('tutorGoalInput')?.value || '').trim();
 
       const newKey = normalizeSubjectKey(typedName);
-      // Si el usuario escribió un nombre de materia distinto en el campo, cambiamos o creamos esa materia automáticamente con su propio contador desde Lección 1
       if (!td.subjectsMap[newKey]) {
         td.subjectsMap[newKey] = {
           key: newKey,
           name: typedName,
           level: levelVal,
-          goal: goalVal || `Aprender ${typedName} desde Lección 1`,
+          goal: goalVal || `Aprender ${typedName} desde la Lección 1`,
           lessons: [],
           selectedLessonIndex: -1
         };
@@ -3753,84 +4140,127 @@
       document.getElementById('tutorPhotoPreviewBox').classList.add('hidden');
     }
 
-    function openSavedLessonByIndex(idx) {
+    function openSavedLessonByIndex(idx, targetSubTab = 'lesson') {
       const subj = getActiveSubjectObj();
       if (!subj || !subj.lessons[idx]) return;
       subj.selectedLessonIndex = idx;
       saveState();
-      const container = document.getElementById('tutorLessonContainer');
-      if (container) container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      showToast(`Viendo Lección #${subj.lessons[idx].lessonNumber || (idx + 1)}: ${subj.lessons[idx].lessonTitle}`, "info");
+      switchTutorSubTab(targetSubTab);
+      showToast(`Abriendo Lección #${idx + 1}: ${subj.lessons[idx].lessonTitle}`, "info");
     }
 
-    async function startTutorSession(mode) {
+    // Verifica si la última lección generada en esta materia aún NO ha sido aprobada
+    function getUnpassedCurrentLesson(subj) {
+      if (!subj || !Array.isArray(subj.lessons) || subj.lessons.length === 0) return null;
+      const lastIdx = subj.lessons.length - 1;
+      const lastLesson = subj.lessons[lastIdx];
+      if (!lastLesson.completedQuiz) {
+        return { lesson: lastLesson, index: lastIdx, number: lastIdx + 1 };
+      }
+      return null;
+    }
+
+    // Regenera la explicación de la lección actual sin subir de número de lección
+    async function regenerateCurrentTutorLesson() {
+      await startTutorSession('lesson', true);
+    }
+
+    async function startTutorSession(mode, forceRegenerateSameLevel = false) {
       if (!appState.apiKey) { showToast("Configura tu API Key en Ajustes", "warning"); switchTab('settings'); return; }
       saveTutorConfig();
 
       const td = ensureTutorMultiSubjectStructure();
       const subj = getActiveSubjectObj();
-      const nextLessonNum = (subj.lessons || []).length + 1;
-      const previousTitles = (subj.lessons || []).map(l => `Lección ${l.lessonNumber}: ${l.lessonTitle}`).join('; ') || 'Ninguna (Esta es la Lección #1 inicial)';
-      const notes = document.getElementById('tutorNotesInput').value.trim();
+
+      // REGLA DE BLOQUEO DE NIVEL: Si quiere una nueva lección ('lesson'), pero la lección actual NO ha sido aprobada en su examen, no puede saltar al siguiente nivel
+      const unpassed = getUnpassedCurrentLesson(subj);
+      if (mode === 'lesson' && unpassed && !forceRegenerateSameLevel) {
+        subj.selectedLessonIndex = unpassed.index;
+        saveState();
+        const gateBanner = document.getElementById('tutorLevelGateBanner');
+        if (gateBanner) {
+          gateBanner.classList.remove('anim-lock-shake');
+          void gateBanner.offsetWidth;
+          gateBanner.classList.add('anim-lock-shake');
+        }
+        switchTutorSubTab('exam');
+        showToast(`🔒 Primero debes aprobar el Examen Jefe de la Lección #${unpassed.number} para pasar al Nivel #${unpassed.number + 1}`, "warning");
+        return;
+      }
+
+      const targetLessonNum = (forceRegenerateSameLevel && unpassed)
+        ? unpassed.number
+        : (subj.lessons.length + 1);
+
+      const previousTitles = subj.lessons
+        .slice(0, targetLessonNum - 1)
+        .map((l, i) => `Lección ${i + 1}: ${l.lessonTitle}`)
+        .join('; ') || 'Ninguna (Esta es la Lección #1 inicial de esta materia)';
+
+      const notes = (document.getElementById('tutorNotesInput')?.value || '').trim();
 
       const btn = document.getElementById(mode === 'lesson' ? 'tutorLessonBtn' : 'tutorReviewBtn');
       const orig = btn.innerHTML;
-      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner"></div><span>Creando Lección #${nextLessonNum}...</span>`;
+      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner"></div><span>Creando Lección #${targetLessonNum}...</span>`;
       btn.disabled = true;
 
       try {
         const prompt = `Actúa como el mejor profesor interactivo de "${subj.name}".
         - Nivel del alumno en esta materia: "${subj.level}".
         - Objetivo actual: "${subj.goal}".
-        - Número de lección que toca generar en "${subj.name}": LECCIÓN #${nextLessonNum}.
-        - Lecciones que ya tomó antes en esta materia (NO las repitas, avanza al siguiente escalón lógico): ${previousTitles}.
-        - Modo solicitado: "${mode === 'lesson' ? `Lección #${nextLessonNum} progresiva, visual e interactiva + Reto gamificado` : 'Revisión detallada de tarea/apuntes/código con correcciones y explicación'}".
-        ${notes ? `- Apuntes, código o duda enviada por el alumno: "${notes}"` : ''}
+        - Número exacto de lección en "${subj.name}": LECCIÓN #${targetLessonNum}.
+        - Lecciones previas en esta materia (NO las repitas, continúa el camino): ${previousTitles}.
+        - Modo solicitado: "${mode === 'lesson' ? `Lección #${targetLessonNum} progresiva, visual e interactiva + Examen Jefe de Nivel` : 'Revisión detallada de tarea/apuntes/código con correcciones'}".
+        ${notes ? `- Apuntes, tarea o código del alumno: "${notes}"` : ''}
 
-        REGLAS DE FORMATO PEDAGÓGICO INTERACTIVO:
-        1. Detecta la categoría de la materia: "math" (matemáticas, física, química, finanzas, estadística, cálculo), "code" (programación, Python, JavaScript, HTML, SQL, algoritmos), "language" (inglés, francés, idiomas) o "general".
-        2. Si la materia involucra matemáticas/física/finanzas (o aplica alguna ecuación), llena "formulas" con las fórmulas clave resaltadas, qué significa cada variable y un ejemplo numérico paso a paso.
-        3. Si la materia involucra programación/código (o lo pide el alumno), llena "codeBlock" con un código limpio, bien indentado, lenguaje y la salida de consola en "codeOutput".
-        4. Llena SIEMPRE "visualDiagram" con 4 pasos o bloques visuales cortos ("steps") que representen gráficamente el tema para dibujarlos en un esquema visual ilustrado.
-        5. Llena "flashcards" con 3 tarjetas interactivas (frente y reverso) para que el alumno memorice jugando.
+        REGLAS ESTRICTAS DE CONTENIDO VISUAL, MATEMÁTICAS Y CÓDIGO:
+        1. Clasifica "category" estrictamente en UNO de estos 4 valores:
+           - "code": ÚNICAMENTE si la materia o tema trata sobre programación, desarrollo de software, Python, JavaScript, HTML, CSS, SQL, C++, algoritmos o terminal.
+           - "math": Si trata sobre matemáticas, cálculo, álgebra, física, química, estadística, contabilidad o finanzas con ecuaciones.
+           - "language": Si trata sobre idiomas (inglés, francés, gramática, vocabulario).
+           - "general": Cualquier otra materia teórica o práctica.
+        2. Si "category" NO es "code", DEBES poner obligatoriamente "codeLanguage": "none", "codeBlock": "" y "codeOutput": "". ¡Nunca pongas código ni comentarios de relleno cuando la clase no sea de programación!
+        3. Si "category" ES "code", llena "codeLanguage" (ej. "python", "javascript", "html", "sql"), pon un programa completo, didáctico y bien indentado en "codeBlock", y pon su resultado en consola en "codeOutput".
+        4. Si "category" ES "math" (o el tema usa fórmulas), llena "formulas" con al menos 2 fórmulas resaltadas, detallando sus variables y un ejemplo paso a paso. Si no lleva fórmulas, pon "formulas": [].
+        5. Llena SIEMPRE "visualDiagram" con 4 pasos visuales claros y llena "flashcards" con 3 tarjetas interactivas.
 
         Devuelve ÚNICAMENTE un objeto JSON válido con esta estructura exacta:
         {
-          "category": "math | code | language | general",
-          "lessonTitle": "Título atractivo de la Lección #${nextLessonNum}",
-          "summaryBanner": "Frase motivadora o resumen ejecutivo de 1 línea de lo que dominará hoy",
-          "explanation": "Explicación didáctica, amena, dividida en párrafos claros y ejemplos de la vida real",
+          "category": "code | math | language | general",
+          "lessonTitle": "Título de la Lección #${targetLessonNum}",
+          "summaryBanner": "Resumen motivador de 1 línea de lo que aprenderá en este nivel",
+          "explanation": "Explicación didáctica completa dividida en párrafos claros con ejemplos prácticos",
           "visualDiagram": {
-            "diagramTitle": "Esquema Visual de Referencia",
+            "diagramTitle": "Esquema Visual de Referencia: Lección #${targetLessonNum}",
             "steps": [
-              {"badge": "Paso 1", "title": "Concepto base", "detail": "Descripción corta visual"},
-              {"badge": "Paso 2", "title": "Proceso / Regla", "detail": "Cómo se transforma"},
-              {"badge": "Paso 3", "title": "Aplicación", "detail": "Ejemplo directo"},
-              {"badge": "Paso 4", "title": "Resultado", "detail": "Meta lograda"}
+              {"badge": "1. Base", "title": "Concepto central", "detail": "Explicación visual breve"},
+              {"badge": "2. Estructura", "title": "Cómo funciona", "detail": "Mecanismo o regla clave"},
+              {"badge": "3. Ejemplo", "title": "Caso real", "detail": "Aplicación directa"},
+              {"badge": "4. Dominio", "title": "Resultado", "detail": "Lo que debes recordar"}
             ]
           },
           "formulas": [
-            {"name": "Nombre de la Fórmula o Regla", "expression": "Ej. f'(x) = lim (h->0) [f(x+h) - f(x)] / h", "variables": "Donde x es la variable independiente y h el incremento", "example": "Si f(x) = x², entonces f'(x) = 2x"}
+            {"name": "Nombre de Fórmula", "expression": "Ecuación matemática clara", "variables": "Significado de cada variable", "example": "Sustitución paso a paso con números"}
           ],
-          "codeLanguage": "python / javascript / sql / none",
-          "codeBlock": "# Si es clase de programación, pon aquí el código real bien comentado\n",
-          "codeOutput": "Salida esperada en terminal al ejecutar el código",
-          "keyTerms": ["Término 1", "Término 2", "Término 3"],
+          "codeLanguage": "none",
+          "codeBlock": "",
+          "codeOutput": "",
+          "keyTerms": ["Concepto 1", "Concepto 2", "Concepto 3"],
           "flashcards": [
-            {"front": "Pregunta rápida o concepto 1", "back": "Respuesta clara al voltear la tarjeta"},
-            {"front": "Pregunta rápida o concepto 2", "back": "Respuesta clara al voltear la tarjeta"},
-            {"front": "Pregunta rápida o concepto 3", "back": "Respuesta clara al voltear la tarjeta"}
+            {"front": "Pregunta 1 para memorizar", "back": "Respuesta clara al voltear"},
+            {"front": "Pregunta 2 para memorizar", "back": "Respuesta clara al voltear"},
+            {"front": "Pregunta 3 para memorizar", "back": "Respuesta clara al voltear"}
           ],
           "interactiveChallenge": {
-            "prompt": "Mini reto práctico de aplicación inmediata",
-            "hint": "Pista rápida por si se atora",
+            "prompt": "Ejercicio o mini-reto rápido para resolver ahora mismo",
+            "hint": "Pista clave",
             "solution": "Solución explicada paso a paso"
           },
-          "homeworkFeedback": "Retroalimentación a sus apuntes/código o tip pro del profesor",
-          "quizQuestion": "Pregunta de examen del Nivel #${nextLessonNum} para ganar las 3 estrellas",
+          "homeworkFeedback": "Retroalimentación a sus apuntes o consejo experto del profesor",
+          "quizQuestion": "Pregunta de Examen Jefe para aprobar la Lección #${targetLessonNum} y desbloquear el Nivel #${targetLessonNum + 1}",
           "quizOptions": ["Opción A", "Opción B", "Opción C", "Opción D"],
           "correctOptionIndex": 0,
-          "quizExplanation": "Explicación de por qué es la respuesta correcta"
+          "quizExplanation": "Por qué esta respuesta es la correcta"
         }`;
 
         const resText = await callGeminiAPI(prompt, currentTutorImageBase64);
@@ -3838,25 +4268,30 @@
 
         const newLessonObj = {
           ...parsed,
-          lessonNumber: nextLessonNum,
+          lessonNumber: targetLessonNum,
           createdAt: appState.currentDay || '2026-10-22',
           referenceImage: currentTutorImageBase64 || null,
-          stars: 2,
+          stars: 1,
           completedQuiz: false
         };
 
-        subj.lessons.push(newLessonObj);
-        subj.selectedLessonIndex = subj.lessons.length - 1;
+        if (forceRegenerateSameLevel && unpassed) {
+          subj.lessons[unpassed.index] = newLessonObj;
+          subj.selectedLessonIndex = unpassed.index;
+        } else {
+          subj.lessons.push(newLessonObj);
+          subj.selectedLessonIndex = subj.lessons.length - 1;
+        }
 
-        // Actualizar racha diaria real (1 por fecha calendario) y puntos XP
         registerTutorStudyDayToday();
-        td.totalXp = (td.totalXp || 0) + 50;
+        td.totalXp = (td.totalXp || 0) + 40;
         td.lessonsCompleted = Object.values(td.subjectsMap).reduce((acc, sObj) => acc + (sObj.lessons?.length || 0), 0);
         td.lastLesson = newLessonObj;
 
         if (currentTutorImageBase64) clearTutorPhoto();
         saveState();
-        showToast(`¡Lección #${nextLessonNum} de ${subj.name} desbloqueada! (+50 XP)`, "success");
+        switchTutorSubTab('lesson');
+        showToast(`¡Lección #${targetLessonNum} de ${subj.name} lista! Aprueba su examen al final para subir al Nivel #${targetLessonNum + 1}`, "success");
       } catch (err) {
         showToast("Error Profe IA: " + err.message, "error");
       } finally {
@@ -3872,24 +4307,79 @@
         .replace(/>/g, '&gt;');
     }
 
+    // Detector estricto para mostrar el IDE Visual ÚNICAMENTE cuando la clase es de código
+    function isStrictCodeLesson(lesson, subjName) {
+      if (!lesson) return false;
+      const rawCode = String(lesson.codeBlock || '').trim();
+      if (rawCode.length < 6) return false;
+      const lowerCode = rawCode.toLowerCase();
+      if (
+        lowerCode.includes('si es clase de programación') ||
+        lowerCode === 'none' ||
+        lowerCode === 'no aplica' ||
+        lowerCode === 'n/a'
+      ) {
+        return false;
+      }
+      const lang = String(lesson.codeLanguage || '').trim().toLowerCase();
+      if (lang === 'none' || lang === 'no aplica' || lang === 'n/a') return false;
+
+      const cat = String(lesson.category || '').trim().toLowerCase();
+      if (cat === 'code') return true;
+
+      const combinedText = `${subjName || ''} ${lesson.lessonTitle || ''} ${lang}`.toLowerCase();
+      const codeKeywords = ['programac', 'python', 'javascript', 'typescript', 'html', 'css', 'sql', 'java', 'c++', 'c#', 'react', 'node', 'codigo', 'código', 'algoritm', 'bash', 'linux', 'php', 'swift', 'kotlin', 'rust', 'golang'];
+      return codeKeywords.some(kw => combinedText.includes(kw));
+    }
+
+    // Detector estricto para el Pizarrón de Fórmulas Matemáticas
+    function getValidMathFormulas(lesson) {
+      if (!lesson || !Array.isArray(lesson.formulas)) return [];
+      return lesson.formulas.filter(fm => {
+        if (!fm || !fm.expression) return false;
+        const exp = String(fm.expression).trim().toLowerCase();
+        return exp.length > 2 && exp !== 'none' && exp !== 'no aplica' && exp !== 'n/a';
+      });
+    }
+
     function copyLessonCodeBlock() {
       const subj = getActiveSubjectObj();
       const lesson = subj?.lessons?.[subj.selectedLessonIndex];
       if (!lesson || !lesson.codeBlock) return;
-      copyTextSafe(lesson.codeBlock, "Código copiado al portapapeles");
+      copyTextSafe(lesson.codeBlock, "Código copiado del IDE al portapapeles");
+    }
+
+    function simulateIdeRun() {
+      const termOut = document.getElementById('ideSimulatedTerminalOutput');
+      const statusDot = document.getElementById('ideRunStatusText');
+      if (!termOut) return;
+      if (statusDot) statusDot.textContent = 'Compilando y ejecutando...';
+      termOut.classList.add('opacity-40');
+      playBeep();
+      setTimeout(() => {
+        termOut.classList.remove('opacity-40');
+        triggerElementSlideAnim(termOut, 'subview-anim-enter');
+        if (statusDot) statusDot.textContent = '✓ Ejecución completada (0 errores)';
+        showToast("Simulación de código ejecutada en la terminal del IDE", "success");
+      }, 320);
     }
 
     function toggleFlashcardFlip(cardIdx) {
+      const cardWrap = document.getElementById(`fc-wrap-${cardIdx}`);
       const frontEl = document.getElementById(`fc-front-${cardIdx}`);
       const backEl = document.getElementById(`fc-back-${cardIdx}`);
       if (!frontEl || !backEl) return;
+      if (cardWrap) triggerElementSlideAnim(cardWrap, 'subview-anim-enter');
       frontEl.classList.toggle('hidden');
       backEl.classList.toggle('hidden');
     }
 
     function toggleChallengeSolution(type) {
       const el = document.getElementById(`tutor-challenge-${type}`);
-      if (el) el.classList.toggle('hidden');
+      if (el) {
+        el.classList.toggle('hidden');
+        if (!el.classList.contains('hidden')) triggerElementSlideAnim(el, 'subview-anim-enter');
+      }
     }
 
     function answerTutorQuiz(selectedIdx) {
@@ -3911,44 +4401,213 @@
         }
         playBeep();
         saveState();
+        triggerStreakCelebration(
+          `★★★ ¡Lección #${lesson.lessonNumber} Aprobada!`,
+          `Has desbloqueado el Nivel #${lesson.lessonNumber + 1} en ${subj.name} ${firstTime ? '(+100 XP)' : ''}`
+        );
         const updatedFb = document.getElementById('tutorQuizFeedback');
         if (updatedFb) {
           updatedFb.classList.remove('hidden');
-          updatedFb.className = "p-4 rounded-2xl bg-emerald-500/15 border-2 border-emerald-500/50 text-xs text-emerald-300 mt-3 space-y-1";
-          updatedFb.innerHTML = `<div class="font-black text-sm text-emerald-400">★★★ ¡Nivel #${lesson.lessonNumber} Superado con 3 Estrellas! ${firstTime ? '(+100 XP)' : ''}</div><p>${lesson.quizExplanation}</p>`;
+          updatedFb.className = "p-4 rounded-2xl bg-emerald-500/15 border-2 border-emerald-500/50 text-xs text-emerald-300 mt-3 space-y-2 subview-anim-enter";
+          updatedFb.innerHTML = `
+            <div class="font-black text-sm text-emerald-400">★★★ ¡Nivel #${lesson.lessonNumber} Superado con 3 Estrellas!</div>
+            <p>${escapeHtmlSafe(lesson.quizExplanation)}</p>
+            <button onclick="startTutorSession('lesson')" class="w-full mt-2 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5">
+              <i class="fi fi-rr-rocket-lunch"></i>
+              <span>Ir y Generar Siguiente Nivel (Lección #${subj.lessons.length + 1})</span>
+            </button>
+          `;
         }
       } else {
-        fbBox.className = "p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/40 text-xs text-rose-300 mt-3";
-        fbBox.innerHTML = `<strong>Respuesta Incorrecta:</strong> Inténtalo de nuevo o revisa el esquema arriba. Pista: <em>${lesson.quizExplanation}</em>`;
+        fbBox.className = "p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/40 text-xs text-rose-300 mt-3 anim-lock-shake";
+        fbBox.innerHTML = `<strong>Respuesta Incorrecta:</strong> Aún no puedes pasar de nivel. Revisa la explicación e inténtalo de nuevo. Pista: <em>${escapeHtmlSafe(lesson.quizExplanation)}</em>`;
       }
     }
 
-    // Construye el esquema visual / infografía SVG referencial de la lección
+    // Construye una interfaz visual completa de IDE (Estilo VS Code / Cursor) EXCLUSIVA para clases de código
+    function buildFullVisualIdeHtml(lesson, subjName, currentNum) {
+      if (!isStrictCodeLesson(lesson, subjName)) return '';
+
+      const rawLang = (lesson.codeLanguage || 'python').toLowerCase();
+      let ext = 'py';
+      if (rawLang.includes('js') || rawLang.includes('javascript')) ext = 'js';
+      else if (rawLang.includes('ts') || rawLang.includes('typescript')) ext = 'ts';
+      else if (rawLang.includes('html')) ext = 'html';
+      else if (rawLang.includes('sql')) ext = 'sql';
+      else if (rawLang.includes('cpp') || rawLang.includes('c++')) ext = 'cpp';
+      else if (rawLang.includes('java')) ext = 'java';
+
+      const fileName = `leccion_${currentNum}.${ext}`;
+      const codeLines = String(lesson.codeBlock || '').replace(/\r\n/g, '\n').split('\n');
+
+      const numberedCodeRows = codeLines.map((lineText, idx) => {
+        const safeLine = escapeHtmlSafe(lineText) || '&nbsp;';
+        const isComment = lineText.trim().startsWith('#') || lineText.trim().startsWith('//') || lineText.trim().startsWith('--');
+        const lineColorClass = isComment ? 'text-slate-400 italic' : 'text-emerald-300';
+        return `
+          <div class="flex hover:bg-white/5 px-2 py-0.5 rounded">
+            <span class="w-7 shrink-0 select-none text-right pr-3 text-[10px] text-slate-600 font-mono">${idx + 1}</span>
+            <span class="flex-1 font-mono text-[11px] ${lineColorClass} whitespace-pre">${safeLine}${idx === codeLines.length - 1 ? '<span class="ide-cursor ml-0.5"></span>' : ''}</span>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div class="rounded-3xl overflow-hidden border-2 border-emerald-500/40 bg-[#0d1117] text-slate-100 shadow-2xl card-minimal-anim">
+          <!-- BARRA SUPERIOR DE VENTANA DEL IDE -->
+          <div class="flex items-center justify-between px-3.5 py-2 bg-[#161b22] border-b border-slate-800">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <span class="text-[10px] font-mono font-black text-slate-300 ml-1.5 flex items-center gap-1">
+                <i class="fi fi-rr-laptop-code text-emerald-400"></i>
+                <span>TCC Studio IDE • ${escapeHtmlSafe(rawLang.toUpperCase())}</span>
+              </span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button onclick="simulateIdeRun()" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black flex items-center gap-1 shadow">
+                <i class="fi fi-sr-play text-[9px]"></i> <span>Run</span>
+              </button>
+              <button onclick="copyLessonCodeBlock()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-bold flex items-center gap-1 border border-slate-700">
+                <i class="fi fi-rr-copy-alt"></i> <span>Copiar</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- PESTAÑAS DE ARCHIVOS DEL IDE -->
+          <div class="flex items-center bg-[#0d1117] border-b border-slate-800 text-[10px] font-mono overflow-x-auto no-scrollbar">
+            <div class="px-3.5 py-2 bg-[#161b22] border-t-2 border-emerald-400 text-emerald-300 font-bold flex items-center gap-1.5">
+              <i class="fi fi-rr-file-code text-emerald-400"></i>
+              <span>${fileName}</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 ml-1"></span>
+            </div>
+            <div class="px-3 py-2 text-slate-500 border-r border-slate-800/80 flex items-center gap-1">
+              <i class="fi fi-rr-document"></i>
+              <span>apuntes_nivel_${currentNum}.md</span>
+            </div>
+          </div>
+
+          <!-- CUERPO DEL IDE: BARRA DE ICONOS + EXPLORADOR LATERAL + EDITOR NUMERADO -->
+          <div class="grid grid-cols-12 min-h-[190px]">
+            <!-- Explorador lateral visual -->
+            <div class="col-span-4 sm:col-span-3 bg-[#161b22]/70 border-r border-slate-800 p-2.5 font-mono text-[10px] space-y-1.5 select-none">
+              <div class="text-[9px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Explorador</div>
+              <div class="text-slate-300 font-bold flex items-center gap-1 truncate">
+                <i class="fi fi-rr-folder-open text-amber-400"></i>
+                <span class="truncate">${escapeHtmlSafe(normalizeSubjectKey(subjName))}</span>
+              </div>
+              <div class="pl-2 space-y-1">
+                <div class="px-1.5 py-1 rounded bg-emerald-500/15 text-emerald-300 font-bold truncate flex items-center gap-1">
+                  <i class="fi fi-rr-file-code text-[9px]"></i>
+                  <span class="truncate">${fileName}</span>
+                </div>
+                <div class="px-1.5 py-0.5 text-slate-500 truncate flex items-center gap-1">
+                  <i class="fi fi-rr-file text-[9px]"></i>
+                  <span class="truncate">tests_${currentNum}.${ext}</span>
+                </div>
+                <div class="px-1.5 py-0.5 text-slate-500 truncate flex items-center gap-1">
+                  <i class="fi fi-rr-settings text-[9px]"></i>
+                  <span class="truncate">config.json</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Editor principal con numeración de líneas -->
+            <div class="col-span-8 sm:col-span-9 py-2.5 overflow-x-auto bg-[#0d1117]">
+              ${numberedCodeRows}
+            </div>
+          </div>
+
+          <!-- CONSOLA / TERMINAL INTEGRADA DEL IDE -->
+          <div class="bg-[#090d13] border-t border-slate-800 p-3 font-mono text-[11px] space-y-1.5">
+            <div class="flex items-center justify-between text-[9px] text-slate-400 border-b border-slate-800/80 pb-1.5">
+              <div class="flex items-center gap-3 font-bold uppercase">
+                <span class="text-emerald-400 border-b border-emerald-400 pb-0.5">TERMINAL</span>
+                <span class="text-slate-500">SALIDA</span>
+                <span class="text-slate-500">PROBLEMAS (0)</span>
+              </div>
+              <span id="ideRunStatusText" class="text-emerald-400 font-bold">● Listo</span>
+            </div>
+            <div id="ideSimulatedTerminalOutput" class="space-y-1 transition-opacity duration-300">
+              <div class="text-slate-400 text-[10px]">$ ejecutar ${fileName}</div>
+              <div class="text-sky-300 whitespace-pre-wrap pl-2 border-l-2 border-emerald-500/50">${escapeHtmlSafe(lesson.codeOutput || 'Programa ejecutado correctamente.')}</div>
+            </div>
+          </div>
+
+          <!-- BARRA DE ESTADO INFERIOR DEL IDE -->
+          <div class="bg-emerald-600 text-slate-950 px-3 py-1 text-[9px] font-mono font-black flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <span>⎇ main*</span>
+              <span>✓ 0 errores</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <span>Ln ${codeLines.length}, Col 1</span>
+              <span>UTF-8</span>
+              <span>${escapeHtmlSafe(rawLang.toUpperCase())}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Construye láminas gráficas SVG e infografía visual de referencia para la lección
     function buildVisualReferenceCardHtml(lesson, subjName) {
       const vd = lesson.visualDiagram || {};
       const steps = Array.isArray(vd.steps) && vd.steps.length > 0 ? vd.steps : [
-        { badge: "1", title: "Entrada", detail: subjName },
-        { badge: "2", title: "Estructura", detail: lesson.lessonTitle || "Concepto" },
-        { badge: "3", title: "Práctica", detail: "Aplicación" },
-        { badge: "4", title: "Dominio", detail: "Nivel completado" }
+        { badge: "Paso 1", title: "Entrada", detail: subjName },
+        { badge: "Paso 2", title: "Regla", detail: lesson.lessonTitle || "Concepto" },
+        { badge: "Paso 3", title: "Aplicación", detail: "Práctica guiada" },
+        { badge: "Paso 4", title: "Dominio", detail: "Nivel completado" }
       ];
 
       const cat = (lesson.category || 'general').toLowerCase();
       let themeGrad = "from-indigo-950 via-slate-900 to-blue-950 border-blue-500/30";
       let iconClass = "fi-rr-bulb text-amber-400";
+      let customSvgGraphic = `
+        <svg viewBox="0 0 280 70" class="w-full h-16 rounded-2xl bg-black/30 p-2 border border-white/10">
+          <circle cx="35" cy="35" r="18" fill="#3b82f6" fill-opacity="0.25" stroke="#60a5fa" stroke-width="2"/>
+          <text x="35" y="39" text-anchor="middle" fill="#93c5fd" font-size="11" font-weight="bold">01</text>
+          <line x1="55" y1="35" x2="95" y2="35" stroke="#60a5fa" stroke-width="2" stroke-dasharray="4 3"/>
+          <rect x="98" y="17" width="84" height="36" rx="10" fill="#e05a33" fill-opacity="0.25" stroke="#fb923c" stroke-width="2"/>
+          <text x="140" y="39" text-anchor="middle" fill="#fdba74" font-size="10" font-weight="bold">CONCEPTO CLAVE</text>
+          <line x1="184" y1="35" x2="222" y2="35" stroke="#34d399" stroke-width="2" stroke-dasharray="4 3"/>
+          <circle cx="245" cy="35" r="18" fill="#10b981" fill-opacity="0.25" stroke="#34d399" stroke-width="2"/>
+          <text x="245" y="39" text-anchor="middle" fill="#6ee7b7" font-size="11" font-weight="bold">★</text>
+        </svg>
+      `;
+
       if (cat === 'math') {
         themeGrad = "from-amber-950/90 via-slate-900 to-rose-950/90 border-amber-500/40";
         iconClass = "fi-rr-calculator text-amber-400";
+        customSvgGraphic = `
+          <svg viewBox="0 0 280 76" class="w-full h-20 rounded-2xl bg-black/40 p-2 border border-amber-500/30">
+            <line x1="20" y1="62" x2="260" y2="62" stroke="#64748b" stroke-width="1.5"/>
+            <line x1="35" y1="10" x2="35" y2="68" stroke="#64748b" stroke-width="1.5"/>
+            <path d="M 35 58 Q 110 52, 165 28 T 245 12" fill="none" stroke="#fbbf24" stroke-width="3"/>
+            <circle cx="165" cy="28" r="5" fill="#f43f5e"/>
+            <text x="160" y="20" fill="#fde68a" font-size="9" font-family="monospace" font-weight="bold">f(x) • Punto Clave</text>
+          </svg>
+        `;
       } else if (cat === 'code') {
         themeGrad = "from-slate-950 via-emerald-950/60 to-slate-900 border-emerald-500/40";
         iconClass = "fi-rr-laptop-code text-emerald-400";
-      } else if (cat === 'language') {
-        themeGrad = "from-purple-950/90 via-slate-900 to-indigo-950 border-purple-500/40";
-        iconClass = "fi-rr-comment-alt text-purple-400";
+        customSvgGraphic = `
+          <svg viewBox="0 0 280 72" class="w-full h-18 rounded-2xl bg-black/40 p-2 border border-emerald-500/30">
+            <rect x="12" y="16" width="68" height="40" rx="8" fill="#064e3b" stroke="#34d399" stroke-width="1.5"/>
+            <text x="46" y="40" text-anchor="middle" fill="#a7f3d0" font-size="9" font-family="monospace" font-weight="bold">INPUT()</text>
+            <line x1="82" y1="36" x2="106" y2="36" stroke="#34d399" stroke-width="2"/>
+            <rect x="108" y="16" width="68" height="40" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+            <text x="142" y="40" text-anchor="middle" fill="#bae6fd" font-size="9" font-family="monospace" font-weight="bold">LÓGICA</text>
+            <line x1="178" y1="36" x2="202" y2="36" stroke="#38bdf8" stroke-width="2"/>
+            <rect x="204" y="16" width="64" height="40" rx="8" fill="#312e81" stroke="#a78bfa" stroke-width="1.5"/>
+            <text x="236" y="40" text-anchor="middle" fill="#ddd6fe" font-size="9" font-family="monospace" font-weight="bold">OUTPUT</text>
+          </svg>
+        `;
       }
 
       const nodesHtml = steps.slice(0, 4).map((st, idx) => `
-        <div class="relative p-3 rounded-2xl bg-slate-900/90 border border-white/10 flex flex-col justify-between shadow-md">
+        <div class="relative p-3 rounded-2xl bg-slate-900/90 border border-white/10 flex flex-col justify-between shadow-md card-minimal-anim">
           <div class="flex items-center justify-between mb-1">
             <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-terra-500/20 text-terra-400">${escapeHtmlSafe(st.badge || `Paso ${idx + 1}`)}</span>
             <span class="text-[10px] text-slate-500 font-black">0${idx + 1}</span>
@@ -3960,23 +4619,24 @@
 
       const userRefImgHtml = lesson.referenceImage ? `
         <div class="mt-3 pt-3 border-t border-white/10">
-          <span class="text-[10px] font-extrabold uppercase text-sky-400 block mb-1.5">Tu Imagen / Apunte de Referencia en esta Lección:</span>
+          <span class="text-[10px] font-extrabold uppercase text-sky-400 block mb-1.5">Tu Imagen / Apunte Guardado en esta Lección:</span>
           <img src="${lesson.referenceImage}" class="w-full max-h-56 object-contain rounded-2xl border border-white/15 bg-black/40 p-1">
         </div>
       ` : '';
 
       return `
-        <div class="rounded-3xl p-4 bg-gradient-to-br ${themeGrad} border text-white space-y-3 shadow-lg">
+        <div class="rounded-3xl p-4 bg-gradient-to-br ${themeGrad} border text-white space-y-3 shadow-lg card-minimal-anim">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
               <i class="fi ${iconClass} text-base"></i>
               <div>
-                <span class="text-[9px] font-extrabold uppercase tracking-wider text-slate-300 block">Infografía & Esquema Referencial</span>
-                <h4 class="text-xs font-black">${escapeHtmlSafe(vd.diagramTitle || `Mapa Conceptual: ${lesson.lessonTitle}`)}</h4>
+                <span class="text-[9px] font-extrabold uppercase tracking-wider text-slate-300 block">Lámina & Esquema Visual Referencial</span>
+                <h4 class="text-xs font-black">${escapeHtmlSafe(vd.diagramTitle || `Mapa Visual: ${lesson.lessonTitle}`)}</h4>
               </div>
             </div>
-            <span class="text-[9px] px-2 py-0.5 rounded-full bg-white/10 text-slate-200 font-bold">Visual IA</span>
+            <span class="text-[9px] px-2 py-0.5 rounded-full bg-white/10 text-slate-200 font-bold">Ilustración IA</span>
           </div>
+          ${customSvgGraphic}
           <div class="grid grid-cols-2 gap-2.5">
             ${nodesHtml}
           </div>
@@ -3985,7 +4645,7 @@
       `;
     }
 
-    // Construye el mapa sinuoso estilo Candy Crush para la materia activa
+    // Construye el mapa sinuoso estilo Candy Crush con bloqueo de nivel hasta aprobar examen
     function renderCandyCrushMap(subj) {
       const mapEl = document.getElementById('tutorCandyMapContainer');
       const titleEl = document.getElementById('candyMapSubjectTitle');
@@ -3993,10 +4653,11 @@
       if (!mapEl) return;
 
       const lessons = subj.lessons || [];
-      const totalStars = lessons.reduce((acc, l) => acc + (Number(l.stars) || 2), 0);
+      const totalStars = lessons.reduce((acc, l) => acc + (Number(l.stars) || 1), 0);
       if (titleEl) titleEl.textContent = `Mapa de Saga: ${subj.name}`;
       if (starsEl) starsEl.textContent = `★ ${totalStars} estrellas`;
 
+      const unpassed = getUnpassedCurrentLesson(subj);
       const totalNodesToShow = Math.max(5, lessons.length + 2);
       const offsets = ['translate-x-0', 'translate-x-10', 'translate-x-16', 'translate-x-6', '-translate-x-8', '-translate-x-14', '-translate-x-4'];
 
@@ -4004,46 +4665,52 @@
       for (let i = 0; i < totalNodesToShow; i++) {
         const lessonNum = i + 1;
         const offsetClass = offsets[i % offsets.length];
-        const isCompleted = i < lessons.length;
+        const isGenerated = i < lessons.length;
         const isCurrentSelected = i === subj.selectedLessonIndex;
-        const isNextUnlockable = i === lessons.length;
+        const isNextToGenerate = i === lessons.length;
 
         const connectorLine = i < totalNodesToShow - 1 ? `
-          <div class="w-1 h-6 ${i < lessons.length ? 'bg-gradient-to-b from-emerald-400 to-terra-500' : 'bg-slate-300 dark:bg-slate-800'} rounded-full my-0.5"></div>
+          <div class="w-1.5 h-6 ${i < lessons.length && lessons[i].completedQuiz ? 'bg-gradient-to-b from-emerald-400 to-terra-500' : 'bg-slate-300 dark:bg-slate-800'} rounded-full my-0.5"></div>
         ` : '';
 
-        if (isCompleted) {
+        if (isGenerated) {
           const lObj = lessons[i];
-          const starsCount = Number(lObj.stars) || 2;
+          const passed = !!lObj.completedQuiz;
+          const starsCount = passed ? 3 : 1;
           const starsStr = '★'.repeat(starsCount) + '☆'.repeat(Math.max(0, 3 - starsCount));
           nodesMarkup += `
             <div class="flex flex-col items-center">
-              <button onclick="openSavedLessonByIndex(${i})" class="transform ${offsetClass} group relative flex items-center gap-3 px-4 py-2.5 rounded-3xl transition shadow-md ${
+              <button onclick="openSavedLessonByIndex(${i}, 'lesson')" class="transform ${offsetClass} group relative flex items-center gap-3 px-4 py-2.5 rounded-3xl transition shadow-md ${
                 isCurrentSelected
                   ? 'bg-gradient-to-r from-terra-500 to-amber-500 text-white ring-4 ring-terra-500/30 scale-105'
-                  : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                  : (passed ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-amber-500 text-slate-950 candy-node-active')
               }">
                 <div class="w-9 h-9 rounded-2xl bg-black/20 flex items-center justify-center font-black text-sm shrink-0">
                   ${lessonNum}
                 </div>
-                <div class="text-left max-w-[170px]">
-                  <div class="text-[10px] font-black text-amber-200 tracking-widest">${starsStr} • LECCIÓN #${lessonNum}</div>
+                <div class="text-left max-w-[175px]">
+                  <div class="text-[10px] font-black ${passed ? 'text-amber-200' : 'text-slate-900'} tracking-wider">
+                    ${starsStr} • LECCIÓN #${lessonNum} ${passed ? '✓' : '(EXAMEN PENDIENTE)'}
+                  </div>
                   <div class="text-xs font-extrabold truncate">${escapeHtmlSafe(lObj.lessonTitle)}</div>
                 </div>
               </button>
               ${connectorLine}
             </div>
           `;
-        } else if (isNextUnlockable) {
+        } else if (isNextToGenerate) {
+          const lockedByUnpassed = !!unpassed;
           nodesMarkup += `
             <div class="flex flex-col items-center">
-              <button onclick="startTutorSession('lesson')" class="transform ${offsetClass} candy-node-active flex items-center gap-3 px-4 py-2.5 rounded-3xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black shadow-lg ring-4 ring-amber-400/30 transition">
+              <button onclick="startTutorSession('lesson')" class="transform ${offsetClass} ${lockedByUnpassed ? 'bg-slate-300 dark:bg-slate-800 text-slate-400 border border-amber-500/40' : 'candy-node-active bg-amber-500 hover:bg-amber-400 text-slate-950 ring-4 ring-amber-400/30'} flex items-center gap-3 px-4 py-2.5 rounded-3xl font-black shadow-lg transition">
                 <div class="w-9 h-9 rounded-2xl bg-slate-950 text-amber-400 flex items-center justify-center font-black text-sm">
-                  ${lessonNum}
+                  ${lockedByUnpassed ? '<i class="fi fi-rr-lock"></i>' : lessonNum}
                 </div>
                 <div class="text-left">
-                  <div class="text-[9px] uppercase font-black tracking-wider">¡Siguiente Nivel Disponible!</div>
-                  <div class="text-xs font-black">Desbloquear Lección #${lessonNum}</div>
+                  <div class="text-[9px] uppercase font-black tracking-wider">
+                    ${lockedByUnpassed ? `Aprueba Lección #${unpassed.number} primero` : '¡Siguiente Nivel Disponible!'}
+                  </div>
+                  <div class="text-xs font-black">Nivel / Lección #${lessonNum}</div>
                 </div>
               </button>
               ${connectorLine}
@@ -4071,7 +4738,18 @@
       const td = ensureTutorMultiSubjectStructure();
       const subj = getActiveSubjectObj();
 
-      // Renderizar píldoras de materias para cambiar con 1 toque
+      // Actualizar hora de recordatorio de racha y estado de estudio hoy
+      const remInput = document.getElementById('streakReminderTimeInput');
+      if (remInput) remInput.value = td.streakReminderTime || '20:00';
+      const studiedToday = (td.studyDaysHistory || []).includes(appState.currentDay);
+      const riskTextEl = document.getElementById('tutorStreakRiskStatusText');
+      if (riskTextEl) {
+        riskTextEl.innerHTML = studiedToday
+          ? `<span class="text-emerald-400 font-bold">✓ Racha de hoy (${appState.currentDay}) asegurada</span>`
+          : `<span class="text-amber-400 font-bold">⚠ Aún no estudias hoy: toma 1 clase antes de las ${td.streakReminderTime || '20:00'}</span>`;
+      }
+
+      // Renderizar píldoras de materias
       const pillsEl = document.getElementById('tutorSubjectPills');
       if (pillsEl) {
         pillsEl.innerHTML = Object.values(td.subjectsMap).map(sItem => {
@@ -4084,7 +4762,9 @@
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
             }">
               <span>${escapeHtmlSafe(sItem.name)}</span>
-              <span class="text-[10px] px-1.5 py-0.5 rounded-full ${isAct ? 'bg-black/25 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-400'}">Niv. ${countL}</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded-full ${isAct ? 'bg-black/25 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-400'}">
+                ${countL === 0 ? 'Lección 1 lista' : `Niv. ${countL}`}
+              </span>
               <button onclick="deleteTutorSubject('${sItem.key}', event)" class="opacity-70 hover:opacity-100" title="Borrar o reiniciar materia">
                 <i class="fi fi-rr-cross-small"></i>
               </button>
@@ -4093,14 +4773,29 @@
         }).join('');
       }
 
-      document.getElementById('tutorSubjectInput').value = subj.name || '';
-      document.getElementById('tutorLevelSelect').value = subj.level || 'Desde Cero (Principiante Absoluto)';
-      document.getElementById('tutorGoalInput').value = subj.goal || '';
+      const subjInput = document.getElementById('tutorSubjectInput');
+      if (subjInput) subjInput.value = subj.name || '';
+      const lvlSelect = document.getElementById('tutorLevelSelect');
+      if (lvlSelect) lvlSelect.value = subj.level || 'Desde Cero (Principiante Absoluto)';
+      const goalInput = document.getElementById('tutorGoalInput');
+      if (goalInput) goalInput.value = subj.goal || '';
 
       const lessonsCount = (subj.lessons || []).length;
-      const nextNum = lessonsCount + 1;
+      const unpassed = getUnpassedCurrentLesson(subj);
       const nextBtnLabel = document.getElementById('tutorNextLessonBtnLabel');
-      if (nextBtnLabel) nextBtnLabel.textContent = `Generar Lección #${nextNum}`;
+      const gateStatusLabel = document.getElementById('tutorGateStatusLabel');
+      const examDot = document.getElementById('tbottomExamDot');
+
+      if (unpassed) {
+        if (gateStatusLabel) gateStatusLabel.textContent = `🔒 Nivel #${unpassed.number + 1} bloqueado hasta aprobar:`;
+        if (nextBtnLabel) nextBtnLabel.textContent = `Aprobar Examen Lección #${unpassed.number}`;
+        if (examDot) examDot.classList.remove('hidden');
+      } else {
+        const nextNum = lessonsCount + 1;
+        if (gateStatusLabel) gateStatusLabel.textContent = `Siguiente nivel en ${subj.name}:`;
+        if (nextBtnLabel) nextBtnLabel.textContent = `Generar Lección #${nextNum}`;
+        if (examDot) examDot.classList.add('hidden');
+      }
 
       const dailyStreak = calculateTutorDailyStreak();
       document.getElementById('tutorProgressBadge').textContent = `${lessonsCount} lección(es) en ${subj.name}`;
@@ -4108,15 +4803,18 @@
       const xpEl = document.getElementById('tutorXpBadge');
       if (xpEl) xpEl.innerHTML = `<i class="fi fi-sr-star"></i> <span>${td.totalXp || 0} XP</span>`;
 
-      // Renderizar Mapa estilo Candy Crush
       renderCandyCrushMap(subj);
 
       const container = document.getElementById('tutorLessonContainer');
+      if (!container) return;
+
       if (lessonsCount === 0) {
+        const pracLabel = document.getElementById('tbottomPracticeLabel');
+        if (pracLabel) pracLabel.textContent = 'Práctica/Lab';
         container.innerHTML = `
-          <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 text-center space-y-2">
+          <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 text-center space-y-2 card-minimal-anim">
             <p class="text-xs font-extrabold text-terra-500 uppercase">Materia lista: ${escapeHtmlSafe(subj.name)}</p>
-            <p class="text-xs text-slate-400">Aún no tienes lecciones en <strong>${escapeHtmlSafe(subj.name)}</strong>. Presiona <strong>"Generar Lección #1"</strong> arriba o el botón dorado del mapa para comenzar desde la Lección 1.</p>
+            <p class="text-xs text-slate-400">Esta materia está en 0 lecciones. Presiona <strong>"Darme Clase + Examen"</strong> arriba para generar tu <strong>Lección #1</strong>.</p>
           </div>
         `;
         return;
@@ -4127,31 +4825,40 @@
       }
 
       const lesson = subj.lessons[subj.selectedLessonIndex];
-      const currentNum = lesson.lessonNumber || (subj.selectedLessonIndex + 1);
+      const currentNum = idxToLessonNum(subj.selectedLessonIndex);
+      const isCode = isStrictCodeLesson(lesson, subj.name);
+      const formulasList = getValidMathFormulas(lesson);
 
-      // Barra rápida para navegar entre Lección Anterior / Siguiente de esta materia
+      const pracLabel = document.getElementById('tbottomPracticeLabel');
+      if (pracLabel) {
+        pracLabel.textContent = isCode ? 'IDE Código' : (formulasList.length > 0 ? 'Fórmulas/Lab' : 'Flashcards');
+      }
+
+      // Barra rápida para navegar entre Lección Anterior / Siguiente guardadas en esta materia
       const prevDisabled = subj.selectedLessonIndex <= 0;
       const nextDisabled = subj.selectedLessonIndex >= lessonsCount - 1;
       const navHeaderHtml = `
-        <div class="flex items-center justify-between bg-slate-900 text-white px-4 py-2.5 rounded-2xl border border-slate-800 text-xs">
-          <button onclick="${!prevDisabled ? `openSavedLessonByIndex(${subj.selectedLessonIndex - 1})` : ''}" ${prevDisabled ? 'disabled' : ''} class="px-2.5 py-1 rounded-xl font-bold flex items-center gap-1 ${prevDisabled ? 'opacity-30 cursor-not-allowed' : 'bg-white/10 hover:bg-white/20'}">
+        <div class="flex items-center justify-between bg-slate-900 text-white px-4 py-2.5 rounded-2xl border border-slate-800 text-xs shadow-sm">
+          <button onclick="${!prevDisabled ? `openSavedLessonByIndex(${subj.selectedLessonIndex - 1}, '${activeTutorSubTab === 'map' ? 'lesson' : activeTutorSubTab}')` : ''}" ${prevDisabled ? 'disabled' : ''} class="px-2.5 py-1 rounded-xl font-bold flex items-center gap-1 ${prevDisabled ? 'opacity-30 cursor-not-allowed' : 'bg-white/10 hover:bg-white/20'}">
             <i class="fi fi-rr-angle-left"></i> <span>Lección Anterior</span>
           </button>
-          <span class="font-black text-amber-400">Lección #${currentNum} de ${lessonsCount}</span>
-          <button onclick="${!nextDisabled ? `openSavedLessonByIndex(${subj.selectedLessonIndex + 1})` : ''}" ${nextDisabled ? 'disabled' : ''} class="px-2.5 py-1 rounded-xl font-bold flex items-center gap-1 ${nextDisabled ? 'opacity-30 cursor-not-allowed' : 'bg-white/10 hover:bg-white/20'}">
+          <div class="text-center">
+            <span class="font-black text-amber-400 block">Lección #${currentNum} de ${lessonsCount}</span>
+            <span class="text-[9px] text-slate-400">${lesson.completedQuiz ? '★★★ Nivel Aprobado' : '🔒 Examen Pendiente'}</span>
+          </div>
+          <button onclick="${!nextDisabled ? `openSavedLessonByIndex(${subj.selectedLessonIndex + 1}, '${activeTutorSubTab === 'map' ? 'lesson' : activeTutorSubTab}')` : ''}" ${nextDisabled ? 'disabled' : ''} class="px-2.5 py-1 rounded-xl font-bold flex items-center gap-1 ${nextDisabled ? 'opacity-30 cursor-not-allowed' : 'bg-white/10 hover:bg-white/20'}">
             <span>Siguiente</span> <i class="fi fi-rr-angle-right"></i>
           </button>
         </div>
       `;
 
-      // 1. Pizarrón de Fórmulas Matemáticas resaltadas (si aplica)
-      const formulasList = Array.isArray(lesson.formulas) ? lesson.formulas.filter(f => f && f.expression) : [];
+      // 1. Pizarrón de Fórmulas Matemáticas resaltadas (SOLO si hay fórmulas reales)
       const formulasHtml = formulasList.length > 0 ? `
-        <div class="p-4 rounded-3xl bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-rose-500/15 border-2 border-amber-500/40 space-y-3">
+        <div class="p-4 rounded-3xl bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-rose-500/15 border-2 border-amber-500/40 space-y-3 card-minimal-anim">
           <div class="flex items-center justify-between">
             <span class="text-[10px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
               <i class="fi fi-rr-square-root"></i>
-              <span>Pizarrón de Fórmulas y Ecuaciones Destacadas</span>
+              <span>Pizarrón de Fórmulas y Ecuaciones Resaltadas</span>
             </span>
             <span class="text-[10px] px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-bold">Matemáticas / Ciencias</span>
           </div>
@@ -4159,68 +4866,47 @@
             ${formulasList.map(fm => `
               <div class="p-3.5 rounded-2xl bg-slate-950/90 border border-amber-400/40 space-y-1.5 shadow-inner">
                 <span class="text-[10px] font-extrabold text-amber-300 uppercase block">${escapeHtmlSafe(fm.name || 'Fórmula Clave')}</span>
-                <div class="py-2 px-3 rounded-xl bg-amber-500/10 border border-amber-400/30 font-mono text-sm font-black text-amber-200 text-center tracking-wide overflow-x-auto">
+                <div class="py-2.5 px-3 rounded-xl bg-amber-500/10 border border-amber-400/30 font-mono text-sm font-black text-amber-200 text-center tracking-wide overflow-x-auto">
                   ${escapeHtmlSafe(fm.expression)}
                 </div>
                 ${fm.variables ? `<p class="text-[11px] text-slate-300"><strong>Variables:</strong> ${escapeHtmlSafe(fm.variables)}</p>` : ''}
-                ${fm.example ? `<p class="text-[11px] text-emerald-300 font-mono"><strong>Ejemplo paso a paso:</strong> ${escapeHtmlSafe(fm.example)}</p>` : ''}
+                ${fm.example ? `<p class="text-[11px] text-emerald-300 font-mono"><strong>Sustitución paso a paso:</strong> ${escapeHtmlSafe(fm.example)}</p>` : ''}
               </div>
             `).join('')}
           </div>
         </div>
       ` : '';
 
-      // 2. Bloque de Código estilo IDE oscuro con sintaxis resaltada y salida de terminal (si aplica)
-      const hasRealCode = lesson.codeBlock && String(lesson.codeBlock).trim().length > 5 && (!lesson.codeLanguage || lesson.codeLanguage.toLowerCase() !== 'none');
-      const codeIdeHtml = hasRealCode ? `
-        <div class="rounded-3xl overflow-hidden border-2 border-emerald-500/40 bg-[#0b1120] text-slate-100 shadow-xl">
-          <div class="flex items-center justify-between px-4 py-2.5 bg-slate-900 border-b border-slate-800">
-            <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-              <span class="text-[10px] font-mono font-extrabold uppercase text-emerald-400 ml-1">${escapeHtmlSafe(lesson.codeLanguage || 'código')} • IDE Profe IA</span>
-            </div>
-            <button onclick="copyLessonCodeBlock()" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-[10px] font-bold flex items-center gap-1">
-              <i class="fi fi-rr-copy-alt"></i> <span>Copiar Código</span>
-            </button>
-          </div>
-          <pre class="p-4 text-xs font-mono leading-relaxed text-emerald-300 overflow-x-auto whitespace-pre"><code>${escapeHtmlSafe(lesson.codeBlock)}</code></pre>
-          ${lesson.codeOutput ? `
-            <div class="px-4 py-2.5 bg-black/60 border-t border-slate-800 font-mono text-[11px] text-sky-300">
-              <span class="text-[9px] uppercase font-bold text-slate-400 block mb-0.5">▶ Salida en Consola / Terminal:</span>
-              ${escapeHtmlSafe(lesson.codeOutput)}
-            </div>
-          ` : ''}
-        </div>
-      ` : '';
+      // 2. Interfaz Visual de IDE Completa (SOLO cuando es clase de código; cuando no, es cadena vacía '')
+      const codeIdeHtml = buildFullVisualIdeHtml(lesson, subj.name, currentNum);
 
-      // 3. Flashcards Interactivas (Toca para voltear)
+      // 3. Flashcards Interactivas con animación
       const flashcards = Array.isArray(lesson.flashcards) ? lesson.flashcards : [];
       const flashcardsHtml = flashcards.length > 0 ? `
-        <div class="space-y-2">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200 dark:border-slate-800 space-y-3 card-minimal-anim">
           <div class="flex items-center justify-between">
-            <span class="text-[10px] font-extrabold uppercase text-terra-500 flex items-center gap-1">
+            <span class="text-[10px] font-extrabold uppercase text-terra-500 flex items-center gap-1.5">
               <i class="fi fi-rr-playing-cards"></i>
-              <span>Tarjetas Memorama Interactivas (Toca una tarjeta para voltearla)</span>
+              <span>Tarjetas Memorama Interactivas (Toca para voltear)</span>
             </span>
+            <span class="text-[10px] text-slate-400 font-bold">${flashcards.length} tarjetas</span>
           </div>
-          <div class="grid grid-cols-1 gap-2">
+          <div class="grid grid-cols-1 gap-2.5">
             ${flashcards.map((fc, idx) => `
-              <div onclick="toggleFlashcardFlip(${idx})" class="p-3.5 rounded-2xl cursor-pointer transition border-2 border-terra-500/30 hover:border-terra-500 bg-slate-50 dark:bg-slate-800/80">
+              <div id="fc-wrap-${idx}" onclick="toggleFlashcardFlip(${idx})" class="flashcard-flip-anim p-4 rounded-2xl cursor-pointer border-2 border-terra-500/30 hover:border-terra-500 bg-slate-50 dark:bg-slate-800/80">
                 <div id="fc-front-${idx}" class="flex items-center justify-between gap-2">
                   <div>
-                    <span class="text-[9px] font-black uppercase text-terra-500 block">Tarjeta #${idx + 1} • Pregunta (Toca para ver respuesta)</span>
-                    <p class="text-xs font-bold mt-0.5">${escapeHtmlSafe(fc.front)}</p>
+                    <span class="text-[9px] font-black uppercase text-terra-500 block">Tarjeta #${idx + 1} • Pregunta (Toca para girar)</span>
+                    <p class="text-xs font-bold mt-1">${escapeHtmlSafe(fc.front)}</p>
                   </div>
-                  <i class="fi fi-rr-refresh text-terra-500"></i>
+                  <i class="fi fi-rr-refresh text-terra-500 text-base"></i>
                 </div>
                 <div id="fc-back-${idx}" class="hidden flex items-center justify-between gap-2 text-emerald-400">
                   <div>
                     <span class="text-[9px] font-black uppercase text-emerald-400 block">✓ Respuesta / Concepto</span>
-                    <p class="text-xs font-extrabold mt-0.5">${escapeHtmlSafe(fc.back)}</p>
+                    <p class="text-xs font-extrabold mt-1">${escapeHtmlSafe(fc.back)}</p>
                   </div>
-                  <i class="fi fi-sr-check-circle text-emerald-400"></i>
+                  <i class="fi fi-sr-check-circle text-emerald-400 text-base"></i>
                 </div>
               </div>
             `).join('')}
@@ -4231,14 +4917,14 @@
       // 4. Reto práctico con Pista y Solución desplegable
       const ch = lesson.interactiveChallenge;
       const challengeHtml = ch && ch.prompt ? `
-        <div class="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 space-y-2.5 text-xs">
+        <div class="p-4 rounded-3xl bg-indigo-500/10 border border-indigo-500/30 space-y-2.5 text-xs card-minimal-anim">
           <div class="flex items-center justify-between">
             <span class="text-[10px] font-black uppercase text-indigo-400 flex items-center gap-1">
               <i class="fi fi-rr-rocket-lunch"></i> <span>Mini-Reto Interactivo de Práctica</span>
             </span>
             <div class="flex gap-1.5">
-              <button onclick="toggleChallengeSolution('hint')" class="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 text-[10px] font-bold">Ver Pista</button>
-              <button onclick="toggleChallengeSolution('sol')" class="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">Ver Solución</button>
+              <button onclick="toggleChallengeSolution('hint')" class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 text-[10px] font-bold">Ver Pista</button>
+              <button onclick="toggleChallengeSolution('sol')" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">Ver Solución</button>
             </div>
           </div>
           <p class="font-bold text-slate-700 dark:text-slate-200">${escapeHtmlSafe(ch.prompt)}</p>
@@ -4253,21 +4939,23 @@
 
       const termsHtml = (lesson.keyTerms || []).map(k => `<span class="px-2.5 py-1 rounded-full bg-terra-500/15 text-terra-500 font-bold text-[11px]">+ ${escapeHtmlSafe(k)}</span>`).join('');
       const optionsHtml = (lesson.quizOptions || []).map((opt, idx) => `
-        <button onclick="answerTutorQuiz(${idx})" class="p-3 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-terra-500 text-left text-xs font-bold flex items-center gap-2 transition bg-slate-50 dark:bg-slate-800/60">
-          <span class="w-6 h-6 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px]">${['A','B','C','D'][idx] || idx+1}</span>
+        <button onclick="answerTutorQuiz(${idx})" class="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-terra-500 text-left text-xs font-bold flex items-center gap-2.5 transition bg-slate-50 dark:bg-slate-800/60">
+          <span class="w-6 h-6 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-black">${['A','B','C','D'][idx] || idx+1}</span>
           <span>${escapeHtmlSafe(opt)}</span>
         </button>
       `).join('');
 
-      container.innerHTML = `
-        ${navHeaderHtml}
-
-        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
+      // Bloque de Clase Teórica + Esquema Visual
+      const theoryCardHtml = `
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4 card-minimal-anim">
           <div class="flex items-center justify-between">
             <span class="text-[10px] font-extrabold uppercase bg-terra-500 text-white px-3 py-1 rounded-full">
               ${escapeHtmlSafe(subj.name)} • Lección #${currentNum}
             </span>
-            <span class="text-xs font-black text-amber-400">${'★'.repeat(Number(lesson.stars) || 2)}</span>
+            <div class="flex items-center gap-2">
+              ${!lesson.completedQuiz ? `<button onclick="regenerateCurrentTutorLesson()" class="text-[10px] px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-terra-500 font-bold" title="Explicar de nuevo esta misma lección sin subir de nivel"><i class="fi fi-rr-refresh"></i> Re-explicar #${currentNum}</button>` : ''}
+              <span class="text-xs font-black text-amber-400">${'★'.repeat(lesson.completedQuiz ? 3 : 1)}</span>
+            </div>
           </div>
 
           <div>
@@ -4281,39 +4969,79 @@
           <!-- EXPLICACIÓN DEL PROFESOR -->
           <div class="text-xs leading-relaxed whitespace-pre-wrap text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800">${escapeHtmlSafe(lesson.explanation)}</div>
 
-          <!-- PIZARRÓN DE FÓRMULAS MATEMÁTICAS RESALTADAS -->
           ${formulasHtml}
-
-          <!-- CONSOLA / IDE DE CÓDIGO FORMATEADO -->
           ${codeIdeHtml}
-
-          <!-- RETO PRÁCTICO INTERACTIVO -->
-          ${challengeHtml}
-
-          <!-- FLASHCARDS INTERACTIVAS -->
-          ${flashcardsHtml}
 
           ${lesson.homeworkFeedback ? `<div class="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-xs"><strong class="text-blue-400 block mb-0.5">Nota del Profesor / Revisión:</strong> ${escapeHtmlSafe(lesson.homeworkFeedback)}</div>` : ''}
 
           <div>
-            <span class="text-[10px] font-bold uppercase text-slate-400 block mb-1.5">Conceptos Clave Dominados en la Lección #${currentNum}</span>
+            <span class="text-[10px] font-bold uppercase text-slate-400 block mb-1.5">Conceptos Clave de la Lección #${currentNum}</span>
             <div class="flex flex-wrap gap-1.5">${termsHtml}</div>
           </div>
-        </div>
 
-        <!-- EXAMEN GAMIFICADO DE LA LECCIÓN PARA GANAR LAS 3 ESTRELLAS -->
-        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border-2 border-terra-500/40 space-y-3">
+          <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex gap-2">
+            <button onclick="switchTutorSubTab('practice')" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5">
+              <i class="fi fi-rr-playing-cards"></i> <span>Ir a Práctica / Flashcards</span>
+            </button>
+            <button onclick="switchTutorSubTab('exam')" class="flex-1 py-2.5 bg-terra-500 hover:bg-terra-600 text-white font-black text-xs rounded-xl flex items-center justify-center gap-1.5">
+              <i class="fi fi-rr-trophy"></i> <span>Ir al Examen Jefe #${currentNum}</span>
+            </button>
+          </div>
+        </div>
+      `;
+
+      // Bloque de Examen Jefe obligatorio para desbloquear el siguiente nivel
+      const examCardHtml = `
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border-2 ${lesson.completedQuiz ? 'border-emerald-500/50' : 'border-terra-500/50'} space-y-3 card-minimal-anim">
           <div class="flex items-center justify-between">
-            <span class="text-[10px] font-extrabold uppercase text-terra-500 block">Jefe de Nivel #${currentNum} • Gana las 3 Estrellas (★★★)</span>
+            <span class="text-[10px] font-extrabold uppercase ${lesson.completedQuiz ? 'text-emerald-400' : 'text-terra-500'} block">
+              ${lesson.completedQuiz ? `✓ Nivel #${currentNum} Superado (★★★)` : `🔒 Jefe de Nivel #${currentNum} • Obligatorio para pasar al Nivel #${currentNum + 1}`}
+            </span>
             <span class="text-[10px] font-bold text-amber-400">+100 XP</span>
           </div>
           <h4 class="text-sm font-black">${escapeHtmlSafe(lesson.quizQuestion)}</h4>
           <div class="grid grid-cols-1 gap-2">${optionsHtml}</div>
-          <div id="tutorQuizFeedback" class="${lesson.completedQuiz ? 'p-3.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-xs text-emerald-300 mt-3' : 'hidden'}">
-            ${lesson.completedQuiz ? `<strong>★★★ Nivel Superado:</strong> ${escapeHtmlSafe(lesson.quizExplanation)}` : ''}
+          <div id="tutorQuizFeedback" class="${lesson.completedQuiz ? 'p-4 rounded-2xl bg-emerald-500/15 border-2 border-emerald-500/40 text-xs text-emerald-300 mt-3 space-y-2' : 'hidden'}">
+            ${lesson.completedQuiz ? `
+              <div class="font-black text-sm text-emerald-400">★★★ ¡Nivel #${currentNum} Aprobado!</div>
+              <p>${escapeHtmlSafe(lesson.quizExplanation)}</p>
+              <button onclick="startTutorSession('lesson')" class="w-full mt-2 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black text-xs rounded-xl shadow flex items-center justify-center gap-1.5">
+                <i class="fi fi-rr-rocket-lunch"></i>
+                <span>Generar Siguiente Nivel (Lección #${lessonsCount + 1})</span>
+              </button>
+            ` : ''}
           </div>
         </div>
       `;
+
+      // Mostrar contenido según la pestaña activa de la Barra Multitarea Inferior de Profe IA
+      if (activeTutorSubTab === 'practice') {
+        container.innerHTML = `
+          ${navHeaderHtml}
+          ${codeIdeHtml}
+          ${formulasHtml}
+          ${challengeHtml}
+          ${flashcardsHtml}
+          <button onclick="switchTutorSubTab('exam')" class="w-full py-3 bg-gradient-to-r from-terra-500 to-amber-500 text-white font-black text-xs rounded-2xl shadow-md flex items-center justify-center gap-2">
+            <i class="fi fi-rr-trophy"></i>
+            <span>Listo: Presentar Examen Jefe de la Lección #${currentNum}</span>
+          </button>
+        `;
+      } else if (activeTutorSubTab === 'exam') {
+        container.innerHTML = `
+          ${navHeaderHtml}
+          ${examCardHtml}
+        `;
+      } else {
+        container.innerHTML = `
+          ${navHeaderHtml}
+          ${theoryCardHtml}
+        `;
+      }
+    }
+
+    function idxToLessonNum(idx) {
+      return (typeof idx === 'number' && idx >= 0) ? (idx + 1) : 1;
     }
 
     // ==================== 4. HÁBITOS ====================
@@ -4453,6 +5181,12 @@
       const dayData = appState.days[appState.currentDay];
       dayData.habitsState[id] = !dayData.habitsState[id];
       saveState();
+      if (dayData.habitsState[id]) {
+        const s = calculateHabitStreak(id);
+        const hObj = (appState.habitsList || []).find(x => x.id === id);
+        playBeep();
+        triggerStreakCelebration(`🔥 ¡Hábito Cumplido! (${s}d racha)`, hObj ? hObj.name : 'Sigue sumando días');
+      }
     }
 
     function toggleHabitOnSpecificDay(dayId, habitId) {
