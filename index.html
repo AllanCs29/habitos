@@ -996,7 +996,7 @@
 
         <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3">
           <div class="flex gap-2">
-            <input id="newHabitInput" type="text" placeholder="Nuevo hábito (ej. Tomar 2L de agua, Leer 20 min)..." class="flex-1 px-3.5 py-2 text-xs rounded-2xl bg-slate-100 dark:bg-slate-800 outline-none">
+            <input id="newHabitInput" type="text" onkeydown="if(event.key==='Enter') addHabit()" placeholder="Nuevo hábito (ej. Tomar 2L de agua, Leer 20 min)..." class="flex-1 px-3.5 py-2 text-xs rounded-2xl bg-slate-100 dark:bg-slate-800 outline-none">
             <button onclick="addHabit()" class="bg-terra-500 text-white px-4 py-2 rounded-2xl font-black text-xs">+</button>
           </div>
           <div id="habitsList" class="space-y-3 pt-1"></div>
@@ -1466,6 +1466,8 @@
         gymStructured: {},
         exerciseHistory: {},
         habitsList: [],
+        deletedHabitsRegistry: [],
+        habitsModifiedAt: 0,
         groceries: [],
         mealPlanStructured: [],
         lastFridgePlan: null,
@@ -1485,6 +1487,50 @@
       return state;
     }
 
+    function normalizeHabitsStructure(st) {
+      if (!st || typeof st !== 'object') return;
+      if (!Array.isArray(st.deletedHabitsRegistry)) st.deletedHabitsRegistry = [];
+      const deletedSet = new Set(st.deletedHabitsRegistry.map(x => String(x || '').trim().toLowerCase()).filter(Boolean));
+      if (!Array.isArray(st.habitsList)) st.habitsList = [];
+
+      const seenIds = new Set();
+      const seenNames = new Set();
+      const cleanList = [];
+
+      st.habitsList.forEach((rawH, idx) => {
+        if (!rawH) return;
+        const name = String(typeof rawH === 'string' ? rawH : (rawH.name || rawH.text || '')).trim();
+        if (!name) return;
+        const lowerName = name.toLowerCase();
+        let id = String((typeof rawH === 'object' && rawH.id) ? rawH.id : ('h_' + idx + '_' + lowerName.replace(/[^a-z0-9]/g, ''))).trim();
+        if (!id) id = 'h_' + idx;
+
+        if (deletedSet.has(id.toLowerCase()) || deletedSet.has(lowerName)) return;
+        if (seenNames.has(lowerName)) return;
+        if (seenIds.has(id)) {
+          id = id + '_' + idx;
+        }
+        seenIds.add(id);
+        seenNames.add(lowerName);
+        cleanList.push({ id, name });
+      });
+
+      st.habitsList = cleanList;
+
+      // Limpiar estados huérfanos o de hábitos eliminados en todos los días
+      if (st.days && typeof st.days === 'object') {
+        Object.keys(st.days).forEach(dId => {
+          const dObj = st.days[dId];
+          if (!dObj || !dObj.habitsState || typeof dObj.habitsState !== 'object') return;
+          Object.keys(dObj.habitsState).forEach(k => {
+            if (deletedSet.has(String(k).trim().toLowerCase())) {
+              delete dObj.habitsState[k];
+            }
+          });
+        });
+      }
+    }
+
     // Evalúa la riqueza de un estado para jamás perder información
     function getStateRichnessScore(st) {
       if (!st || typeof st !== 'object') return 0;
@@ -1502,21 +1548,27 @@
           score += (d.meals || []).length * 5;
           if ((d.water || 0) > 0) score += 3;
           score += (d.impulses || []).length * 3;
-          score += Object.keys(d.habitsState || {}).filter(k => d.habitsState[k]).length * 2;
+          score += Object.keys(d.habitsState || {}).filter(k => d.habitsState[k] === true).length * 2;
         });
       }
       return score;
     }
 
-    // Fusión no destructiva entre dos estados (rescata comidas, tareas, hábitos, perfil y API key de ambos)
+    // Fusión inteligente que respeta borrados explícitos (tombstones) y timestamps (updatedAt / habitsModifiedAt)
     function mergeStatesNonDestructively(baseSt, incomingSt) {
       if (!incomingSt) return baseSt;
       if (!baseSt) return incomingSt;
       const merged = JSON.parse(JSON.stringify(baseSt));
 
+      const combinedDeletedHabits = new Set([
+        ...(merged.deletedHabitsRegistry || []).map(x => String(x || '').trim().toLowerCase()),
+        ...(incomingSt.deletedHabitsRegistry || []).map(x => String(x || '').trim().toLowerCase())
+      ].filter(Boolean));
+      merged.deletedHabitsRegistry = Array.from(combinedDeletedHabits);
+
       if (!merged.apiKey && incomingSt.apiKey) merged.apiKey = incomingSt.apiKey;
-      if (incomingSt.selectedModel) merged.selectedModel = incomingSt.selectedModel;
-      if (incomingSt.thinkingLevel) merged.thinkingLevel = incomingSt.thinkingLevel;
+      if (incomingSt.selectedModel && !merged.selectedModel) merged.selectedModel = incomingSt.selectedModel;
+      if (incomingSt.thinkingLevel && !merged.thinkingLevel) merged.thinkingLevel = incomingSt.thinkingLevel;
 
       if (incomingSt.profile) {
         if (!merged.profile) merged.profile = {};
@@ -1531,26 +1583,54 @@
         if ((!merged[tk] || merged[tk] === 2100) && incomingSt[tk]) merged[tk] = incomingSt[tk];
       });
 
-      // Unir tareas sin duplicar
-      const existingTaskKeys = new Set((merged.tasks || []).map(t => `${t.text}_${t.project || ''}`));
-      (incomingSt.tasks || []).forEach(t => {
-        const key = `${t.text}_${t.project || ''}`;
-        if (!existingTaskKeys.has(key)) {
-          merged.tasks.push(t);
-          existingTaskKeys.add(key);
+      const baseTime = Number(baseSt.updatedAt || 0);
+      const incTime = Number(incomingSt.updatedAt || 0);
+      const baseHabitsTime = Number(baseSt.habitsModifiedAt || baseSt.updatedAt || 0);
+      const incHabitsTime = Number(incomingSt.habitsModifiedAt || incomingSt.updatedAt || 0);
+      const incomingHabitsNewer = incHabitsTime > baseHabitsTime;
+
+      // Unir tareas solo si el estado base estaba vacío o rescatando sin duplicar
+      if (!merged.tasks || merged.tasks.length === 0) {
+        merged.tasks = JSON.parse(JSON.stringify(incomingSt.tasks || []));
+      } else if (baseTime === 0 && (incomingSt.tasks || []).length > 0) {
+        const existingTaskKeys = new Set((merged.tasks || []).map(t => `${t.text}_${t.project || ''}`));
+        (incomingSt.tasks || []).forEach(t => {
+          const key = `${t.text}_${t.project || ''}`;
+          if (!existingTaskKeys.has(key)) {
+            merged.tasks.push(t);
+            existingTaskKeys.add(key);
+          }
+        });
+      }
+
+      // Unir hábitos respetando estrictamente deletedHabitsRegistry y quién es más reciente
+      const primaryHabits = incomingHabitsNewer ? (incomingSt.habitsList || []) : (merged.habitsList || []);
+      const secondaryHabits = incomingHabitsNewer ? (merged.habitsList || []) : (incomingSt.habitsList || []);
+      const habitMapByName = new Map();
+      primaryHabits.forEach(h => {
+        if (!h || !h.name) return;
+        const ln = String(h.name).trim().toLowerCase();
+        const lid = String(h.id || '').trim().toLowerCase();
+        if (!combinedDeletedHabits.has(ln) && !combinedDeletedHabits.has(lid)) {
+          habitMapByName.set(ln, h);
         }
       });
+      // Solo agregar hábitos secundarios si el estado más reciente no fue una modificación explícita de hábitos
+      if (baseHabitsTime === 0 || incHabitsTime === 0) {
+        secondaryHabits.forEach(h => {
+          if (!h || !h.name) return;
+          const ln = String(h.name).trim().toLowerCase();
+          const lid = String(h.id || '').trim().toLowerCase();
+          if (!combinedDeletedHabits.has(ln) && !combinedDeletedHabits.has(lid) && !habitMapByName.has(ln)) {
+            habitMapByName.set(ln, h);
+          }
+        });
+      }
+      merged.habitsList = Array.from(habitMapByName.values());
+      merged.habitsModifiedAt = Math.max(baseHabitsTime, incHabitsTime);
+      merged.updatedAt = Math.max(baseTime, incTime);
 
-      // Unir hábitos sin duplicar
-      const existingHabitNames = new Set((merged.habitsList || []).map(h => (h.name || '').toLowerCase()));
-      (incomingSt.habitsList || []).forEach(h => {
-        if (h.name && !existingHabitNames.has(h.name.toLowerCase())) {
-          merged.habitsList.push(h);
-          existingHabitNames.add(h.name.toLowerCase());
-        }
-      });
-
-      // Unir días (comidas, agua, impulsos, checks de hábitos)
+      // Unir días (comidas, agua, impulsos, checks de hábitos respetando desmarcados recientes)
       if (incomingSt.days) {
         if (!merged.days) merged.days = {};
         Object.keys(incomingSt.days).forEach(dayId => {
@@ -1561,23 +1641,33 @@
           } else {
             const mDay = merged.days[dayId];
             mDay.water = Math.max(mDay.water || 0, incDay.water || 0);
-            const mealNames = new Set((mDay.meals || []).map(m => `${m.name}_${m.kcal}`));
-            (incDay.meals || []).forEach(m => {
-              const mk = `${m.name}_${m.kcal}`;
-              if (!mealNames.has(mk)) {
-                mDay.meals.push(m);
-                mealNames.add(mk);
-              }
-            });
-            mDay.habitsState = { ...(incDay.habitsState || {}), ...(mDay.habitsState || {}) };
-            if ((incDay.impulses || []).length > (mDay.impulses || []).length) {
+            if ((!mDay.meals || mDay.meals.length === 0) && (incDay.meals || []).length > 0 && baseTime === 0) {
+              mDay.meals = JSON.parse(JSON.stringify(incDay.meals));
+            }
+            // Para habitsState: el estado con habitsModifiedAt más reciente tiene la última palabra (permite quitar checks)
+            if (incomingHabitsNewer) {
+              mDay.habitsState = { ...(mDay.habitsState || {}), ...(incDay.habitsState || {}) };
+              // Si en incDay una llave no está o es false, asegurar que quede false
+              Object.keys(mDay.habitsState).forEach(hk => {
+                if (!incDay.habitsState || incDay.habitsState[hk] === false || incDay.habitsState[hk] === undefined) {
+                  mDay.habitsState[hk] = Boolean(incDay.habitsState && incDay.habitsState[hk]);
+                }
+              });
+            } else if (baseHabitsTime > 0) {
+              // baseSt (merged) es el más reciente: mantener exactamente los checks/unchecks de merged
+              mDay.habitsState = { ...(mDay.habitsState || {}) };
+            } else {
+              mDay.habitsState = { ...(incDay.habitsState || {}), ...(mDay.habitsState || {}) };
+            }
+
+            if ((incDay.impulses || []).length > (mDay.impulses || []).length && baseTime === 0) {
               mDay.impulses = incDay.impulses;
             }
           }
         });
       }
 
-      if ((incomingSt.groceries || []).length > (merged.groceries || []).length) merged.groceries = incomingSt.groceries;
+      if ((incomingSt.groceries || []).length > (merged.groceries || []).length && baseTime === 0) merged.groceries = incomingSt.groceries;
       if ((incomingSt.mealPlanStructured || []).length > (merged.mealPlanStructured || []).length) merged.mealPlanStructured = incomingSt.mealPlanStructured;
       if (!merged.lastFridgePlan && incomingSt.lastFridgePlan) merged.lastFridgePlan = incomingSt.lastFridgePlan;
       if (incomingSt.tutorData) {
@@ -1598,6 +1688,7 @@
           merged.tutorData.totalXp = Math.max(merged.tutorData.totalXp || 0, incomingSt.tutorData.totalXp || 0);
         }
       }
+      normalizeHabitsStructure(merged);
       if (getStateRichnessScore(merged) > 0) merged.onboardingComplete = true;
 
       return merged;
@@ -1657,32 +1748,48 @@
       });
     }
 
-    // Escanea TODAS las llaves de localStorage sin importar el nombre de versión anterior
+    // Carga el estado principal respetando borrados y desmarcados recientes
     function loadInitialState() {
-      let combinedState = createDefaultState();
-      let bestScore = -1;
-
+      let primaryState = null;
       try {
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (!k || k === 'allan_tcc_firebase_config') continue;
-          try {
-            const raw = localStorage.getItem(k);
-            if (raw && raw.trim().startsWith('{')) {
-              const parsed = JSON.parse(raw);
-              if (parsed && (parsed.days || parsed.profile || parsed.tasks || parsed.targetKcal)) {
-                const sc = getStateRichnessScore(parsed);
-                if (sc > bestScore) {
-                  bestScore = sc;
-                  combinedState = mergeStatesNonDestructively(parsed, combinedState);
-                } else {
-                  combinedState = mergeStatesNonDestructively(combinedState, parsed);
-                }
-              }
-            }
-          } catch (e) {}
+        const directRaw = localStorage.getItem(STORAGE_KEY);
+        if (directRaw && directRaw.trim().startsWith('{')) {
+          const parsed = JSON.parse(directRaw);
+          if (parsed && (parsed.updatedAt > 0 || parsed.onboardingComplete || getStateRichnessScore(parsed) > 0)) {
+            primaryState = parsed;
+          }
         }
       } catch (e) {}
+
+      let combinedState = primaryState ? JSON.parse(JSON.stringify(primaryState)) : createDefaultState();
+
+      // Solo escanear llaves antiguas si STORAGE_KEY no existía o estaba en blanco
+      if (!primaryState) {
+        let bestScore = -1;
+        try {
+          for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (!k || k === 'allan_tcc_firebase_config') continue;
+            try {
+              const raw = localStorage.getItem(k);
+              if (raw && raw.trim().startsWith('{')) {
+                const parsed = JSON.parse(raw);
+                if (parsed && (parsed.days || parsed.profile || parsed.tasks || parsed.targetKcal)) {
+                  const sc = getStateRichnessScore(parsed);
+                  if (sc > bestScore) {
+                    bestScore = sc;
+                    combinedState = mergeStatesNonDestructively(parsed, combinedState);
+                  } else {
+                    combinedState = mergeStatesNonDestructively(combinedState, parsed);
+                  }
+                }
+              }
+            } catch (e) {}
+          }
+        } catch (e) {}
+      }
+
+      normalizeHabitsStructure(combinedState);
 
       // Asegurar que el modelo pedido por el usuario sea el predeterminado si tenía el lite por defecto
       if (!combinedState.selectedModel || combinedState.selectedModel === 'gemini-3.5-flash-lite') {
@@ -1702,20 +1809,27 @@
     if (!appState.selectedModel) appState.selectedModel = 'gemini-3.8-live-extended-thinking';
     if (!appState.thinkingLevel) appState.thinkingLevel = 'HIGH';
     if (!appState.tutorData) appState.tutorData = createDefaultState().tutorData;
+    if (!Array.isArray(appState.deletedHabitsRegistry)) appState.deletedHabitsRegistry = [];
     DAYS_CONFIG.forEach(d => {
       if (!appState.days[d.id]) appState.days[d.id] = { water: 0, meals: [], habitsState: {}, impulses: [] };
       if (!appState.days[d.id].impulses) appState.days[d.id].impulses = [];
     });
+    normalizeHabitsStructure(appState);
 
-    // Hidratar desde la bóveda IndexedDB automáticamente al arrancar por si el navegador limpió localStorage
+    // Hidratar desde la bóveda IndexedDB automáticamente solo si localStorage estaba vacío o si la bóveda tiene un timestamp más reciente
     restoreFromIndexedDBVault().then(vaultState => {
-      if (vaultState && getStateRichnessScore(vaultState) > getStateRichnessScore(appState)) {
+      if (!vaultState) return;
+      const localEmpty = !appState.onboardingComplete && getStateRichnessScore(appState) === 0 && !(appState.updatedAt > 0);
+      const vaultNewer = Number(vaultState.updatedAt || 0) > Number(appState.updatedAt || 0);
+      if (localEmpty || vaultNewer) {
         appState = mergeStatesNonDestructively(vaultState, appState);
         appState.onboardingComplete = true;
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch (e) {}
         renderAll();
         checkOnboarding();
-        showToast("Datos recuperados automáticamente de la bóveda permanente", "success");
+        if (localEmpty && getStateRichnessScore(appState) > 0) {
+          showToast("Datos recuperados automáticamente de la bóveda permanente", "success");
+        }
       }
     });
 
@@ -1890,44 +2004,49 @@
       } catch (e) { console.warn("Firebase init:", e); }
     }
 
-    // Descarga y FUSIONA sin destruir datos locales ni datos de backup en la nube
+    // Descarga y sincroniza respetando timestamps y borrados intencionales (como eliminar o desmarcar hábitos)
     async function pullCloudDataFirst(uid) {
       if (!fbDb) return;
       try {
         const doc = await fbDb.collection('tcc_users').doc(uid).get();
         if (doc.exists) {
           const data = doc.data();
-          const candidates = [data.stateJson, data.backupStateJson].filter(Boolean);
+          // Priorizar stateJson actual sobre backupStateJson para jamás revivir hábitos eliminados desde el backup
+          const rawPrimary = data.stateJson || data.backupStateJson;
           let bestRemote = null;
-          let bestRemoteScore = -1;
-
-          candidates.forEach(raw => {
-            try {
-              const parsed = JSON.parse(raw);
-              const sc = getStateRichnessScore(parsed);
-              if (sc > bestRemoteScore) {
-                bestRemoteScore = sc;
-                bestRemote = parsed;
-              }
-            } catch (e) {}
-          });
+          if (rawPrimary) {
+            try { bestRemote = JSON.parse(rawPrimary); } catch (e) {}
+          }
 
           if (bestRemote) {
             isApplyingRemoteUpdate = true;
-            const localScore = getStateRichnessScore(appState);
-            if (bestRemoteScore >= localScore) {
+            const remoteTime = Number(bestRemote.updatedAt || data.updatedAt || 0);
+            const localTime = Number(appState.updatedAt || 0);
+            const localEmpty = !appState.onboardingComplete && getStateRichnessScore(appState) === 0 && localTime === 0;
+
+            if (localEmpty || remoteTime > localTime) {
               appState = mergeStatesNonDestructively(bestRemote, appState);
             } else {
               appState = mergeStatesNonDestructively(appState, bestRemote);
             }
+            normalizeHabitsStructure(appState);
             appState.onboardingComplete = true;
             if (!appState.tutorData) appState.tutorData = createDefaultState().tutorData;
             if (appState.profile && appState.profile.medicalCondition === undefined) appState.profile.medicalCondition = '';
-            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch (e) {}
+            try {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+              localStorage.setItem('allan_tcc_backup_mirror', JSON.stringify(appState));
+            } catch (e) {}
             saveToIndexedDBVault(appState);
             renderAll();
             checkOnboarding();
             isApplyingRemoteUpdate = false;
+
+            // Si el estado local tenía cambios más recientes (ej. hábitos borrados/desmarcados), actualizar la nube
+            if (localTime > remoteTime && !localEmpty) {
+              isCloudHydrated = true;
+              await pushStateToCloud();
+            }
           }
         }
         isCloudHydrated = true;
@@ -1946,12 +2065,18 @@
               const remoteState = JSON.parse(data.stateJson);
               const remoteScore = getStateRichnessScore(remoteState);
               const localScore = getStateRichnessScore(appState);
+              const remoteTime = Number(remoteState.updatedAt || data.updatedAt || 0);
+              const localTime = Number(appState.updatedAt || 0);
 
-              if (((remoteState.updatedAt || 0) > (appState.updatedAt || 0) && remoteScore >= localScore) || (localScore === 0 && remoteScore > 0)) {
+              if ((remoteTime > localTime) || (localScore === 0 && !appState.onboardingComplete && remoteScore > 0)) {
                 isApplyingRemoteUpdate = true;
                 appState = mergeStatesNonDestructively(remoteState, appState);
+                normalizeHabitsStructure(appState);
                 appState.onboardingComplete = true;
-                try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch (e) {}
+                try {
+                  localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+                  localStorage.setItem('allan_tcc_backup_mirror', JSON.stringify(appState));
+                } catch (e) {}
                 saveToIndexedDBVault(appState);
                 renderAll();
                 checkOnboarding();
@@ -1971,22 +2096,25 @@
       if (!fbUser || !fbDb || isApplyingRemoteUpdate || !isCloudHydrated) return;
       try {
         const docRef = fbDb.collection('tcc_users').doc(fbUser.uid);
-        const existingDoc = await docRef.get();
+        const existingDoc = await fbRefGetSafe(docRef);
         let backupJson = null;
 
-        if (existingDoc.exists && existingDoc.data().stateJson) {
-          const prevRemote = JSON.parse(existingDoc.data().stateJson);
+        if (existingDoc && existingDoc.exists && existingDoc.data().stateJson) {
+          const prevRaw = existingDoc.data().stateJson;
+          const prevRemote = JSON.parse(prevRaw);
           const prevScore = getStateRichnessScore(prevRemote);
           const currentScore = getStateRichnessScore(appState);
-          // Protección estricta: si la nube tenía más datos que el estado actual, fusionamos antes de subir y guardamos respaldo
-          if (prevScore > currentScore) {
-            backupJson = existingDoc.data().stateJson;
+          const isLocalBlank = !appState.onboardingComplete && currentScore === 0 && !(appState.updatedAt > 0);
+
+          // Solo rescatar de prevRemote si el estado local está completamente en blanco (ej. recién abierto sin hidratar)
+          // Si el usuario borró o desmarcó un hábito intencionalmente, NUNCA sobrescribir appState con prevRemote
+          if (isLocalBlank && prevScore > 0) {
             appState = mergeStatesNonDestructively(prevRemote, appState);
-          } else {
-            backupJson = existingDoc.data().backupStateJson || existingDoc.data().stateJson;
           }
+          backupJson = prevRaw;
         }
 
+        normalizeHabitsStructure(appState);
         const payload = {
           stateJson: JSON.stringify(appState),
           updatedAt: appState.updatedAt || Date.now()
@@ -1995,6 +2123,10 @@
 
         await docRef.set(payload, { merge: true });
       } catch (e) { console.warn("Sync error:", e); }
+    }
+
+    async function fbRefGetSafe(docRef) {
+      try { return await docRef.get(); } catch (e) { return null; }
     }
 
     async function restoreFromCloudBackup() {
@@ -2009,7 +2141,10 @@
             appState = mergeStatesNonDestructively(restored, appState);
             appState.onboardingComplete = true;
             appState.updatedAt = Date.now();
-            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch (e) {}
+            try {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+              localStorage.setItem('allan_tcc_backup_mirror', JSON.stringify(appState));
+            } catch (e) {}
             saveToIndexedDBVault(appState);
             renderAll();
             await pushStateToCloud();
@@ -2142,9 +2277,11 @@
 
     function saveState() {
       appState.updatedAt = Date.now();
+      normalizeHabitsStructure(appState);
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-        localStorage.setItem('allan_tcc_backup_mirror', JSON.stringify(appState));
+        const serialized = JSON.stringify(appState);
+        localStorage.setItem(STORAGE_KEY, serialized);
+        localStorage.setItem('allan_tcc_backup_mirror', serialized);
       } catch (e) {}
       saveToIndexedDBVault(appState);
       renderAll();
@@ -5252,25 +5389,55 @@
       breatheTimer = setInterval(() => { phase = (phase + 1) % phases.length; text.textContent = phases[phase]; }, 4000);
     }
 
-    function calculateHabitStreak(habitId) {
+    function isHabitCheckedOnDay(dayId, habitObj) {
+      if (!dayId || !habitObj || !appState.days || !appState.days[dayId]) return false;
+      const hs = appState.days[dayId].habitsState;
+      if (!hs || typeof hs !== 'object') return false;
+      return Boolean(hs[habitObj.id] === true || (habitObj.name && hs[habitObj.name] === true));
+    }
+
+    function setHabitCheckedOnDay(dayId, habitObj, newVal) {
+      if (!dayId || !habitObj) return;
+      if (!appState.days[dayId]) {
+        appState.days[dayId] = { water: 0, meals: [], habitsState: {}, impulses: [] };
+      }
+      if (!appState.days[dayId].habitsState || typeof appState.days[dayId].habitsState !== 'object') {
+        appState.days[dayId].habitsState = {};
+      }
+      const hs = appState.days[dayId].habitsState;
+      if (habitObj.name && hs[habitObj.name] !== undefined) {
+        delete hs[habitObj.name];
+      }
+      hs[habitObj.id] = Boolean(newVal);
+      appState.habitsModifiedAt = Date.now();
+    }
+
+    function calculateHabitStreak(habitIdOrObj) {
+      const hObj = typeof habitIdOrObj === 'object'
+        ? habitIdOrObj
+        : (appState.habitsList || []).find(x => x.id === habitIdOrObj || x.name === habitIdOrObj);
+      if (!hObj) return 0;
       const currentIdx = DAYS_CONFIG.findIndex(d => d.id === appState.currentDay);
       if (currentIdx === -1) return 0;
       let streak = 0;
       for (let i = currentIdx; i >= 0; i--) {
         const dId = DAYS_CONFIG[i].id;
-        if (appState.days[dId]?.habitsState?.[habitId]) streak++;
+        if (isHabitCheckedOnDay(dId, hObj)) streak++;
         else if (i !== currentIdx) break;
       }
       return streak;
     }
 
     function renderHabits() {
-      if (!appState.habitsList) appState.habitsList = [];
+      normalizeHabitsStructure(appState);
+      if (!appState.days[appState.currentDay]) {
+        appState.days[appState.currentDay] = { water: 0, meals: [], habitsState: {}, impulses: [] };
+      }
       const dayData = appState.days[appState.currentDay];
       if (!dayData.habitsState) dayData.habitsState = {};
 
       const totalHabits = appState.habitsList.length;
-      const doneTodayCount = appState.habitsList.filter(h => !!dayData.habitsState[h.id]).length;
+      const doneTodayCount = appState.habitsList.filter(h => isHabitCheckedOnDay(appState.currentDay, h)).length;
       document.getElementById('habitsDoneSummaryTitle').textContent = `${doneTodayCount} de ${totalHabits} hechos hoy`;
       document.getElementById('habitsDoneRatioCircle').textContent = `${doneTodayCount}/${totalHabits}`;
 
@@ -5280,28 +5447,42 @@
       } else {
         const weekDays = DAYS_CONFIG.slice(0, 7);
         el.innerHTML = appState.habitsList.map((h, i) => {
-          const checked = !!dayData.habitsState[h.id];
-          const streak = calculateHabitStreak(h.id);
+          const checked = isHabitCheckedOnDay(appState.currentDay, h);
+          const streak = calculateHabitStreak(h);
+          const anyDayChecked = DAYS_CONFIG.some(wd => isHabitCheckedOnDay(wd.id, h));
+
           const dotsHtml = weekDays.map(wd => {
-            const isDoneDay = !!appState.days[wd.id]?.habitsState?.[h.id];
+            const isDoneDay = isHabitCheckedOnDay(wd.id, h);
+            const isSelectedDay = wd.id === appState.currentDay;
             return `
-              <div onclick="toggleHabitOnSpecificDay('${wd.id}', '${h.id}')" class="flex flex-col items-center gap-1 cursor-pointer">
-                <span class="text-[9px] text-slate-400 font-bold">${wd.short}</span>
-                <span class="w-4 h-4 rounded-full border ${isDoneDay ? 'bg-terra-500 border-terra-500' : 'border-slate-300 dark:border-slate-700'}"></span>
-              </div>
+              <button type="button" onclick="toggleHabitDayByIndex('${wd.id}', ${i}, event)" title="${wd.label}: toca para marcar o quitar check" class="flex flex-col items-center gap-1 cursor-pointer group px-1.5 py-1 rounded-xl hover:bg-slate-200/60 dark:hover:bg-slate-700/50 transition">
+                <span class="text-[9px] ${isSelectedDay ? 'text-terra-500 font-black underline' : 'text-slate-400 font-bold'}">${wd.short}</span>
+                <span class="w-4 h-4 rounded-full border-2 flex items-center justify-center transition ${isDoneDay ? 'bg-terra-500 border-terra-500 text-white shadow-sm group-hover:bg-rose-500 group-hover:border-rose-500' : 'border-slate-300 dark:border-slate-600 group-hover:border-terra-500'}">
+                  ${isDoneDay ? '<span class="w-1.5 h-1.5 rounded-full bg-white"></span>' : ''}
+                </span>
+              </button>
             `;
           }).join('');
 
           return `
             <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 space-y-3">
-              <div class="flex items-center justify-between">
-                <label class="flex items-center gap-3 cursor-pointer flex-1">
-                  <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleHabitState('${h.id}')" class="w-5 h-5 accent-terra-500 rounded-full">
-                  <span class="text-xs font-extrabold ${checked ? 'line-through text-slate-400' : ''}">${h.name}</span>
-                </label>
-                <div class="flex items-center gap-2">
-                  <span class="text-[11px] font-black text-terra-500 flex items-center gap-1"><i class="fi fi-sr-flame"></i> ${streak}d</span>
-                  <button onclick="deleteHabit(${i})" class="text-slate-400 hover:text-rose-500 text-xs"><i class="fi fi-rr-trash"></i></button>
+              <div class="flex items-center justify-between gap-2">
+                <div onclick="toggleHabitByIndex(${i}, event)" class="flex items-center gap-3 cursor-pointer flex-1 select-none py-0.5 group">
+                  <button type="button" role="checkbox" aria-checked="${checked}" class="w-5 h-5 rounded-md border-2 flex items-center justify-center transition shrink-0 ${checked ? 'bg-terra-500 border-terra-500 text-white shadow-sm group-hover:bg-rose-500 group-hover:border-rose-500' : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 text-transparent group-hover:border-terra-500'}" title="${checked ? 'Toca para quitar check de hoy' : 'Toca para marcar hoy'}">
+                    <span class="text-[11px] font-black leading-none ${checked ? '' : 'opacity-0'}">✓</span>
+                  </button>
+                  <span class="text-xs font-extrabold ${checked ? 'line-through text-slate-400' : 'text-slate-700 dark:text-slate-100'}">${escapeHtmlSafe(h.name)}</span>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                  <span class="text-[11px] font-black text-terra-500 flex items-center gap-1 mr-1"><i class="fi fi-sr-flame"></i> ${streak}d</span>
+                  ${anyDayChecked ? `
+                    <button type="button" onclick="clearAllDaysForHabit(${i}, event)" title="Quitar todos los checks de la semana" class="px-2 py-1 rounded-lg bg-slate-200/70 dark:bg-slate-700/70 hover:bg-amber-500/20 text-slate-500 dark:text-slate-300 hover:text-amber-500 text-[10px] font-bold transition cursor-pointer">
+                      Limpiar
+                    </button>
+                  ` : ''}
+                  <button type="button" onclick="deleteHabit(${i}, event)" title="Eliminar hábito permanentemente" class="w-7 h-7 rounded-xl bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white flex items-center justify-center text-xs transition cursor-pointer">
+                    <i class="fi fi-rr-trash"></i>
+                  </button>
                 </div>
               </div>
               <div class="flex justify-between items-center pt-2 border-t border-slate-200/60 dark:border-slate-700/50">
@@ -5319,15 +5500,15 @@
       const barsEl = document.getElementById('habitStatsBars');
       if (barsEl) {
         barsEl.innerHTML = appState.habitsList.map(h => {
-          const s = calculateHabitStreak(h.id);
+          const s = calculateHabitStreak(h);
           if (s > maxStreak) maxStreak = s;
           let countH = 0;
-          DAYS_CONFIG.forEach(d => { if (appState.days[d.id]?.habitsState?.[h.id]) { countH++; totalChecks++; } });
+          DAYS_CONFIG.forEach(d => { if (isHabitCheckedOnDay(d.id, h)) { countH++; totalChecks++; } });
           const pct = Math.round((countH / DAYS_CONFIG.length) * 100);
           return `
             <div class="text-xs">
               <div class="flex justify-between font-bold mb-1">
-                <span>${h.name}</span>
+                <span>${escapeHtmlSafe(h.name)}</span>
                 <span>${pct}%</span>
               </div>
               <div class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
@@ -5344,7 +5525,7 @@
       const heatEl = document.getElementById('habitHeatmapGrid');
       if (heatEl) {
         heatEl.innerHTML = DAYS_CONFIG.map(d => {
-          const doneC = appState.habitsList.filter(h => !!appState.days[d.id]?.habitsState?.[h.id]).length;
+          const doneC = appState.habitsList.filter(h => isHabitCheckedOnDay(d.id, h)).length;
           const active = doneC > 0;
           return `<div class="h-7 rounded-lg flex items-center justify-center text-[9px] font-bold ${active ? 'bg-terra-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}" title="${d.label}">${d.label.split(' ')[1]}</div>`;
         }).join('');
@@ -5364,31 +5545,110 @@
 
     function addHabit() {
       const input = document.getElementById('newHabitInput');
-      if (!input.value.trim()) return;
-      appState.habitsList.push({ id: 'h_' + Date.now(), name: input.value.trim() });
+      if (!input || !input.value.trim()) return;
+      const cleanName = input.value.trim();
+      const lowerName = cleanName.toLowerCase();
+
+      // Si el usuario vuelve a agregar manualmente un hábito que antes había borrado, quitarlo de la lista de borrados
+      if (Array.isArray(appState.deletedHabitsRegistry)) {
+        appState.deletedHabitsRegistry = appState.deletedHabitsRegistry.filter(x => String(x || '').trim().toLowerCase() !== lowerName);
+      } else {
+        appState.deletedHabitsRegistry = [];
+      }
+
+      const newId = 'h_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+      appState.habitsList.push({ id: newId, name: cleanName });
+      appState.habitsModifiedAt = Date.now();
       input.value = '';
       saveState();
+      showToast(`Hábito "${cleanName}" agregado`, "success");
     }
 
-    function toggleHabitState(id) {
-      const dayData = appState.days[appState.currentDay];
-      dayData.habitsState[id] = !dayData.habitsState[id];
+    function toggleHabitByIndex(idx, ev) {
+      if (ev) { ev.stopPropagation(); ev.preventDefault(); }
+      if (!appState.habitsList || !appState.habitsList[idx]) return;
+      const hObj = appState.habitsList[idx];
+      const currentlyChecked = isHabitCheckedOnDay(appState.currentDay, hObj);
+      const nextVal = !currentlyChecked;
+      setHabitCheckedOnDay(appState.currentDay, hObj, nextVal);
       saveState();
-      if (dayData.habitsState[id]) {
-        const s = calculateHabitStreak(id);
-        const hObj = (appState.habitsList || []).find(x => x.id === id);
+      if (nextVal) {
+        const s = calculateHabitStreak(hObj);
         playBeep();
-        triggerStreakCelebration(`🔥 ¡Hábito Cumplido! (${s}d racha)`, hObj ? hObj.name : 'Sigue sumando días');
+        triggerStreakCelebration(`🔥 ¡Hábito Cumplido! (${s}d racha)`, hObj.name);
       }
     }
 
-    function toggleHabitOnSpecificDay(dayId, habitId) {
-      if (!appState.days[dayId].habitsState) appState.days[dayId].habitsState = {};
-      appState.days[dayId].habitsState[habitId] = !appState.days[dayId].habitsState[habitId];
+    function toggleHabitState(id) {
+      const idx = (appState.habitsList || []).findIndex(x => x.id === id || x.name === id);
+      if (idx !== -1) toggleHabitByIndex(idx);
+    }
+
+    function toggleHabitDayByIndex(dayId, idx, ev) {
+      if (ev) { ev.stopPropagation(); ev.preventDefault(); }
+      if (!appState.habitsList || !appState.habitsList[idx]) return;
+      const hObj = appState.habitsList[idx];
+      const currentlyChecked = isHabitCheckedOnDay(dayId, hObj);
+      setHabitCheckedOnDay(dayId, hObj, !currentlyChecked);
       saveState();
     }
 
-    function deleteHabit(i) { appState.habitsList.splice(i, 1); saveState(); }
+    function toggleHabitOnSpecificDay(dayId, habitId) {
+      const idx = (appState.habitsList || []).findIndex(x => x.id === habitId || x.name === habitId);
+      if (idx !== -1) toggleHabitDayByIndex(dayId, idx);
+    }
+
+    function clearAllDaysForHabit(idx, ev) {
+      if (ev) { ev.stopPropagation(); ev.preventDefault(); }
+      if (!appState.habitsList || !appState.habitsList[idx]) return;
+      const hObj = appState.habitsList[idx];
+      DAYS_CONFIG.forEach(d => {
+        setHabitCheckedOnDay(d.id, hObj, false);
+      });
+      appState.habitsModifiedAt = Date.now();
+      saveState();
+      showToast(`Checks de "${hObj.name}" desmarcados`, "info");
+    }
+
+    function deleteHabit(i, ev) {
+      if (ev) { ev.stopPropagation(); ev.preventDefault(); }
+      if (!appState.habitsList || !appState.habitsList[i]) return;
+      const target = appState.habitsList[i];
+      const removedName = target.name || 'Hábito';
+      const removedId = String(target.id || '').trim().toLowerCase();
+      const removedLowerName = String(target.name || '').trim().toLowerCase();
+
+      if (!Array.isArray(appState.deletedHabitsRegistry)) appState.deletedHabitsRegistry = [];
+      if (removedId && !appState.deletedHabitsRegistry.includes(removedId)) {
+        appState.deletedHabitsRegistry.push(removedId);
+      }
+      if (removedLowerName && !appState.deletedHabitsRegistry.includes(removedLowerName)) {
+        appState.deletedHabitsRegistry.push(removedLowerName);
+      }
+
+      // Eliminar hábito y cualquier duplicado con el mismo nombre o ID
+      appState.habitsList = appState.habitsList.filter((h, idx) => {
+        if (idx === i) return false;
+        const hId = String(h?.id || '').trim().toLowerCase();
+        const hName = String(h?.name || '').trim().toLowerCase();
+        return hId !== removedId && hName !== removedLowerName;
+      });
+
+      // Limpiar checks de ese hábito en todos los días
+      if (appState.days && typeof appState.days === 'object') {
+        Object.keys(appState.days).forEach(dId => {
+          const hs = appState.days[dId]?.habitsState;
+          if (hs && typeof hs === 'object') {
+            delete hs[target.id];
+            if (target.name) delete hs[target.name];
+          }
+        });
+      }
+
+      appState.habitsModifiedAt = Date.now();
+      saveState();
+      showToast(`Hábito "${removedName}" eliminado`, "info");
+    }
 
     function addImpulseLog() {
       const cat = document.getElementById('impulseCategory').value;
