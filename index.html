@@ -97,10 +97,24 @@
       100% { transform: translateY(-42px) scale(1.25); opacity: 0; }
     }
     .section-anim-enter {
-      animation: viewSlideUpFade 0.34s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      animation: viewSlideUpFade 0.28s cubic-bezier(0.22, 1, 0.36, 1);
     }
     .subview-anim-enter {
-      animation: subtleSlideRight 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      animation: subtleSlideRight 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .fixed-bottom-dock {
+      position: fixed !important;
+      bottom: 12px !important;
+      left: 0 !important;
+      right: 0 !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+      width: calc(100% - 1.5rem) !important;
+      max-width: 26.5rem !important;
+      z-index: 60 !important;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 14px 34px -6px rgba(2, 6, 23, 0.65), 0 0 0 1px rgba(224, 90, 51, 0.22) !important;
     }
     .streak-celebration-anim {
       animation: streakPopGlow 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
@@ -136,7 +150,7 @@
     }
   </style>
 </head>
-<body class="bg-[#f6f4f0] dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen pb-12 transition-colors duration-200">
+<body class="bg-[#f6f4f0] dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen pb-28 transition-colors duration-200">
 
   <!-- CONTENEDOR DE NOTIFICACIONES CENTRADO -->
   <div id="toastContainer" class="fixed top-4 inset-x-0 mx-auto z-[120] pointer-events-none w-11/12 max-w-sm flex flex-col items-center space-y-2"></div>
@@ -492,8 +506,9 @@
   <main class="max-w-md mx-auto px-4 pt-4 space-y-5">
 
     <!-- ==================== PESTAÑA 1: NUTRICIÓN ==================== -->
-    <section id="tab-nutrition" class="space-y-4">
+    <section id="tab-nutrition" class="space-y-4 pb-14">
 
+      <div id="nutSubView-macros" class="space-y-4 subview-anim-enter">
       <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-4">
         <div class="flex justify-between items-center">
           <div>
@@ -600,6 +615,7 @@
       </div>
 
       <!-- ESCÁNER DE ALIMENTOS IA -->
+      <div id="nutSubView-scanner" class="space-y-4 hidden subview-anim-enter">
       <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3">
         <div class="flex justify-between items-center">
           <div class="flex items-center gap-2">
@@ -641,7 +657,9 @@
         </div>
       </div>
 
+      </div>
       <!-- COMIDAS DE HOY (CON OPCIÓN DE REGISTRO Y EDICIÓN MANUAL SIN GASTAR TOKENS) -->
+      <div id="nutSubView-mealsWrap" class="space-y-4">
       <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3">
         <div class="flex justify-between items-center gap-2">
           <div>
@@ -684,7 +702,10 @@
         <div id="mealsList" class="space-y-2"></div>
       </div>
 
+      </div>
+      </div>
       <!-- HIDRATACIÓN -->
+      <div id="nutSubView-waterWrap" class="space-y-4">
       <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 flex items-center gap-4">
         <div class="relative w-14 h-20 bg-slate-100 dark:bg-slate-800 rounded-b-2xl border-2 border-t-0 border-sky-400 overflow-hidden flex flex-col justify-end shrink-0">
           <div id="waterLiquid" class="w-full bg-sky-500 transition-all duration-500" style="height: 0%"></div>
@@ -706,7 +727,9 @@
         </div>
       </div>
 
+      </div>
       <!-- CHEF IA INTELIGENTE ORIENTADO A COMPLETAR MACROS Y META -->
+      <div id="nutSubView-chef" class="space-y-4 hidden subview-anim-enter">
       <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border-2 border-emerald-500/30 space-y-3">
         <div class="flex items-start justify-between gap-2">
           <div class="flex items-center gap-2">
@@ -758,6 +781,23 @@
         </button>
         <div id="fridgeRecommendations" class="space-y-2.5 pt-1"></div>
       </div>
+      </div>
+
+      <!-- BARRA FIJA INFERIOR DE NUTRICIÓN -->
+      <div class="fixed-bottom-dock grid grid-cols-3 gap-1 bg-white/95 dark:bg-slate-900/95 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 text-[11px] font-extrabold">
+        <button onclick="switchNutritionSubTab('macros')" id="nsub-macros" class="py-2 px-2 rounded-xl bg-terra-500 text-white shadow-sm transition flex items-center justify-center gap-1.5">
+          <i class="fi fi-rr-utensils text-xs"></i>
+          <span class="truncate">Calorías & Día</span>
+        </button>
+        <button onclick="switchNutritionSubTab('scanner')" id="nsub-scanner" class="py-2 px-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-center gap-1.5">
+          <i class="fi fi-rr-camera text-xs"></i>
+          <span class="truncate">Foto IA & Agua</span>
+        </button>
+        <button onclick="switchNutritionSubTab('chef')" id="nsub-chef" class="py-2 px-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-center gap-1.5">
+          <i class="fi fi-rr-hat-chef text-xs"></i>
+          <span class="truncate">Chef Macros</span>
+        </button>
+      </div>
     </section>
 
     <!-- ==================== PESTAÑA 2: HUB DE TRABAJO (AGENDA DIARIA + CORREO/WHATS TICKETS & SESIONES + TAREAS & PDF OFICIAL) ==================== -->
@@ -804,8 +844,8 @@
         </div>
       </div>
 
-      <!-- BARRA ESTÁTICA DE SUB-SECCIONES DE TRABAJO (ESTILO SEGMENTADO FIJO ARRIBA) -->
-      <div class="grid grid-cols-3 gap-1.5 bg-white dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs font-extrabold shadow-sm">
+      <!-- BARRA FIJA INFERIOR DE TRABAJO -->
+      <div class="fixed-bottom-dock grid grid-cols-3 gap-1.5 bg-white/95 dark:bg-slate-900/95 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs font-extrabold shadow-sm">
         <button onclick="switchFocusSubTab('agenda')" id="fsub-agenda" class="py-2 px-2 rounded-xl bg-terra-500 text-white shadow-sm transition flex items-center justify-center gap-1.5">
           <i class="fi fi-rr-calendar-clock text-xs"></i>
           <span class="truncate">Agenda & Horario</span>
@@ -884,19 +924,94 @@
             <p class="text-[11px] text-slate-400">Conecta tu correo y número o pega cualquier correo/mensaje de WhatsApp o captura: la IA ignora pláticas personales y ordena únicamente tus Tickets, Sesiones y Tareas del trabajo.</p>
           </div>
 
-          <!-- Configuración de Correo y Número de WhatsApp -->
-          <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
-            <div>
-              <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">📧 Mi Correo Laboral</label>
-              <input type="email" id="workEmailConfigInput" placeholder="ejemplo@empresa.com" onchange="saveWorkContactSyncConfig()" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-semibold outline-none">
+          <!-- CONECTOR API WHATSAPP BIDIRECCIONAL (GREEN-API + CALLMEBOT) Y FILTRO POR PERSONA/GRUPO -->
+          <div class="p-4 rounded-2xl bg-emerald-500/5 border-2 border-emerald-500/30 space-y-3 text-xs">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-black">📲</span>
+                <div>
+                  <span class="text-[10px] font-black uppercase text-emerald-400 block">API Recomendada: Green-API (Lectura de Grupos + Envío Directo)</span>
+                  <h4 class="font-extrabold text-xs">Conexión Directa con tu WhatsApp y Grupo de Trabajo</h4>
+                </div>
+              </div>
+              <span id="waApiStatusBadge" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-400">Sin vincular</span>
             </div>
-            <div>
-              <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">📱 Mi WhatsApp (código país + núm)</label>
-              <input type="tel" id="workPhoneConfigInput" placeholder="Ej. 525512345678" onchange="saveWorkContactSyncConfig()" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-semibold outline-none">
+
+            <!-- Filtro Inteligente de tus Asignaciones y Tickets -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div>
+                <label class="text-[10px] font-bold uppercase text-emerald-400 block mb-1">👤 Mi Nombre/Alias (Solo lo que me pidan a mí)</label>
+                <input type="text" id="workAliasFilterInput" placeholder="Ej. Allan, @Allan, Ing..." onchange="saveWorkContactSyncConfig()" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none border border-emerald-500/30">
+              </div>
+              <div>
+                <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">🎫 Palabras Clave / Tickets</label>
+                <input type="text" id="workKeywordsConfigInput" placeholder="Ej. ticket, folio, urgente, junta, apoyo..." onchange="saveWorkContactSyncConfig()" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-semibold outline-none border border-slate-200 dark:border-slate-700">
+              </div>
+              <div>
+                <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">📱 Mi Número WhatsApp (Código país + núm)</label>
+                <input type="tel" id="workPhoneConfigInput" placeholder="Ej. 5215512345678" onchange="saveWorkContactSyncConfig()" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none border border-slate-200 dark:border-slate-700">
+              </div>
             </div>
-            <div>
-              <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">🔍 Palabras Clave del Trabajo</label>
-              <input type="text" id="workKeywordsConfigInput" placeholder="Ticket, Jira, Sesión, PLS, Lucia, Urgente..." onchange="saveWorkContactSyncConfig()" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-semibold outline-none">
+
+            <!-- Credenciales API (Desplegable limpio para no saturar la vista) -->
+            <details class="bg-white/70 dark:bg-slate-900/80 rounded-2xl p-3 border border-slate-200 dark:border-slate-800">
+              <summary class="font-extrabold text-[11px] cursor-pointer text-emerald-400 flex items-center justify-between">
+                <span>⚙️ Configurar Credenciales API de WhatsApp (Green-API / CallMeBot) y Correo</span>
+                <span class="text-[10px] underline">Abrir / Editar</span>
+              </summary>
+              <div class="mt-3 space-y-2.5 pt-2 border-t border-slate-200 dark:border-slate-800">
+                <p class="text-[10px] text-slate-400 leading-relaxed">
+                  • <strong>Green-API (Recomendada, gratuita en <code>green-api.com</code>)</strong>: Vinculas tu WhatsApp con QR y te da un <code>idInstance</code> y <code>apiTokenInstance</code>. Permite <strong>leer mensajes de tu Grupo de Trabajo/Contactos</strong> y <strong>enviarte mensajes automáticos</strong>.<br>
+                  • <strong>CallMeBot (Opcional)</strong>: Si solo quieres recibir WhatsApps automáticos sin instancia QR, pon tu <code>CallMeBot API Key</code>.
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div>
+                    <label class="text-[9px] font-bold uppercase text-slate-400 block mb-0.5">Green-API idInstance</label>
+                    <input type="text" id="greenApiIdInput" placeholder="Ej. 7103948572" onchange="saveWorkContactSyncConfig()" class="w-full px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 font-mono text-[11px] outline-none">
+                  </div>
+                  <div>
+                    <label class="text-[9px] font-bold uppercase text-slate-400 block mb-0.5">Green-API apiTokenInstance</label>
+                    <input type="password" id="greenApiTokenInput" placeholder="Tu token de Green-API..." onchange="saveWorkContactSyncConfig()" class="w-full px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 font-mono text-[11px] outline-none">
+                  </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end">
+                  <div class="sm:col-span-2">
+                    <label class="text-[9px] font-bold uppercase text-slate-400 block mb-0.5">Grupo de Trabajo o Contacto a Leer (Selecciona o escribe ID)</label>
+                    <div class="flex gap-1.5">
+                      <select id="greenApiChatsDropdown" onchange="selectGreenApiChat(this.value)" class="flex-1 px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-[11px] font-bold outline-none">
+                        <option value="">Todos mis mensajes entrantes recientes</option>
+                      </select>
+                      <button onclick="fetchWhatsAppChatsListViaAPI()" class="px-2.5 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-extrabold shrink-0">Cargar Grupos</button>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="text-[9px] font-bold uppercase text-slate-400 block mb-0.5">ID Chat / Grupo Manual</label>
+                    <input type="text" id="greenApiChatIdInput" placeholder="Ej. 120363...@g.us" onchange="saveWorkContactSyncConfig()" class="w-full px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 font-mono text-[11px] outline-none">
+                  </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                  <div>
+                    <label class="text-[9px] font-bold uppercase text-slate-400 block mb-0.5">CallMeBot API Key (Envío rápido opcional)</label>
+                    <input type="password" id="callMeBotKeyInput" placeholder="Ej. 1234567" onchange="saveWorkContactSyncConfig()" class="w-full px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 font-mono text-[11px] outline-none">
+                  </div>
+                  <div>
+                    <label class="text-[9px] font-bold uppercase text-slate-400 block mb-0.5">📧 Mi Correo Laboral</label>
+                    <input type="email" id="workEmailConfigInput" placeholder="ejemplo@empresa.com" onchange="saveWorkContactSyncConfig()" class="w-full px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-[11px] outline-none">
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            <!-- Botones de Acción Directa por API -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+              <button onclick="syncIncomingWhatsAppMessagesViaAPI()" id="btnPullWhatsApi" class="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-sm transition flex items-center justify-center gap-1.5">
+                <i class="fi fi-rr-refresh"></i>
+                <span>Leer Grupo/Contactos por API y Filtrar Mis Tareas</span>
+              </button>
+              <button onclick="sendWhatsAppDirectViaAPI()" id="btnSendWhatsApi" class="py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs shadow-sm transition flex items-center justify-center gap-1.5">
+                <i class="fi fi-rr-paper-plane"></i>
+                <span>Enviarme Pendientes y Tickets por API a mi Whats</span>
+              </button>
             </div>
           </div>
 
@@ -908,7 +1023,12 @@
                 <span>Pegar Correos / Mensajes de WhatsApp o Subir Captura</span>
               </span>
               <div class="flex items-center gap-2">
-                <label class="cursor-pointer px-3 py-1.5 rounded-xl bg-blue-500/15 text-blue-400 border border-blue-500/30 text-[10px] font-extrabold flex items-center gap-1">
+                <label class="cursor-pointer px-2.5 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px] font-extrabold flex items-center gap-1" title="Subir archivo .txt de chat exportado de WhatsApp">
+                  <i class="fi fi-rr-document"></i>
+                  <span>Chat .TXT</span>
+                  <input type="file" id="workInboxTxtInput" accept=".txt" class="hidden" onchange="handleWhatsAppTxtFileUpload(event)">
+                </label>
+                <label class="cursor-pointer px-2.5 py-1.5 rounded-xl bg-blue-500/15 text-blue-400 border border-blue-500/30 text-[10px] font-extrabold flex items-center gap-1">
                   <i class="fi fi-rr-camera"></i>
                   <span>Foto de Correo/Whats</span>
                   <input type="file" id="workInboxImageInput" accept="image/*" class="hidden" onchange="handleWorkInboxImageUpload(event)">
@@ -1105,8 +1225,8 @@
         </div>
       </div>
 
-      <!-- BARRA ESTÁTICA DE SUB-SECCIONES FINANCIERAS -->
-      <div class="grid grid-cols-3 gap-1.5 bg-white dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs font-extrabold shadow-sm">
+      <!-- BARRA FIJA INFERIOR DE FINANZAS -->
+      <div class="fixed-bottom-dock grid grid-cols-3 gap-1.5 bg-white/95 dark:bg-slate-900/95 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs font-extrabold shadow-sm">
         <button onclick="switchFinanceSubTab('cashflow')" id="finsub-cashflow" class="py-2 px-2 rounded-xl bg-terra-500 text-white shadow-sm transition flex items-center justify-center gap-1.5">
           <i class="fi fi-rr-coins text-xs"></i>
           <span class="truncate">Cobros & Gastos</span>
@@ -1311,7 +1431,7 @@
       </div>
 
       <!-- 2. BARRA MULTITAREA ESTÁTICA ARRIBA (COMO EN HÁBITOS, FIJA EN EL FLUJO SUPERIOR Y SIN IRSE HASTA ABAJO) -->
-      <div id="tutorBottomMultitaskDock" class="bg-white dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm grid grid-cols-4 gap-1 text-[11px] font-extrabold">
+      <div id="tutorBottomMultitaskDock" class="fixed-bottom-dock bg-white/95 dark:bg-slate-900/95 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm grid grid-cols-4 gap-1 text-[11px] font-extrabold">
         <button onclick="switchTutorSubTab('map')" id="tbottom-map" class="py-2 px-1.5 rounded-xl flex items-center justify-center gap-1.5 bg-terra-500 text-white shadow-sm transition">
           <i class="fi fi-sr-map-marker-home text-xs"></i>
           <span class="truncate">Mapa</span>
@@ -1407,9 +1527,9 @@
     </section>
 
     <!-- ==================== PESTAÑA 4: HÁBITOS, RACHAS & ESTADÍSTICAS ==================== -->
-    <section id="tab-habits" class="space-y-4 hidden">
+    <section id="tab-habits" class="space-y-4 pb-14 hidden">
 
-      <div class="grid grid-cols-3 gap-1.5 bg-white dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs font-bold">
+      <div class="fixed-bottom-dock grid grid-cols-3 gap-1.5 bg-white/95 dark:bg-slate-900/95 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs font-bold">
         <button onclick="switchHabitSubView('today')" id="hsub-today" class="py-2 rounded-xl bg-terra-500 text-white">Hábitos Hoy</button>
         <button onclick="switchHabitSubView('stats')" id="hsub-stats" class="py-2 rounded-xl text-slate-400">Racha y Mapa</button>
         <button onclick="switchHabitSubView('sos')" id="hsub-sos" class="py-2 rounded-xl text-slate-400">SOS Impulsos</button>
@@ -1828,9 +1948,33 @@
 
   </main>
 
-  <!-- CONTENEDOR OCULTO DE RENDERIZADO PDF OFICIAL -->
-  <div class="fixed left-[-9999px] top-0">
-    <div id="pdfPrintWrapper" class="w-[760px] bg-white text-black p-6 font-sans"></div>
+  <!-- MODAL EJECUTIVO DE VISTA PREVIA Y DESCARGA DE PDF OFICIAL -->
+  <div id="pdfPreviewModal" class="fixed inset-0 z-[130] bg-slate-950/90 backdrop-blur-md hidden flex flex-col items-center justify-start p-3 sm:p-6 overflow-y-auto">
+    <div class="w-full max-w-[800px] bg-slate-900 border border-slate-700 rounded-2xl p-3.5 mb-3 flex flex-wrap items-center justify-between gap-2 sticky top-0 z-10 shadow-2xl">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black">
+          <i class="fi fi-rr-file-pdf"></i>
+        </div>
+        <div>
+          <h3 class="text-xs sm:text-sm font-black text-white">Vista Previa del Reporte Ejecutivo PDF</h3>
+          <p id="pdfPreviewStatusSub" class="text-[10px] text-slate-400">Diseño corporativo limpio con evidencias e historial.</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="triggerDirectHtml2PdfDownload()" id="btnConfirmPdfDownload" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black flex items-center gap-1.5 shadow">
+          <i class="fi fi-rr-download"></i> <span>Descargar Archivo .PDF</span>
+        </button>
+        <button onclick="printExecutivePdfWindow()" class="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5">
+          <i class="fi fi-rr-print"></i> <span>Imprimir / Guardar PDF</span>
+        </button>
+        <button onclick="closePdfPreviewModal()" class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-rose-600 text-slate-300 hover:text-white text-xs font-bold">
+          ✕
+        </button>
+      </div>
+    </div>
+    <div class="w-full max-w-[800px] overflow-x-auto rounded-2xl shadow-2xl border border-slate-300 bg-white">
+      <div id="pdfPrintWrapper" class="w-[760px] mx-auto bg-white text-slate-900 p-6 font-sans"></div>
+    </div>
   </div>
 
   <!-- SDK DE FIREBASE -->
@@ -1986,12 +2130,15 @@
         mealPlanStructured: [],
         lastFridgePlan: null,
         tutorData: {
-          subject: 'Inglés y Programación',
+          subject: '',
           level: 'Desde Cero (Principiante Absoluto)',
-          goal: 'Dominar los fundamentos paso a paso',
+          goal: '',
           lessonsCompleted: 0,
-          streak: 1,
+          streak: 0,
           lastLesson: null,
+          subjectsMap: {},
+          studyDaysHistory: [],
+          totalXp: 0,
           deletedSubjectsRegistry: [],
           subjectsModifiedAt: 0
         },
@@ -2001,29 +2148,20 @@
           workEndHour: '18:00',
           workEmail: '',
           workPhone: '',
-          workKeywords: 'Ticket, Jira, Sesión, Junta, Lucia, PLS, Entrega, Urgente',
+          workAliasFilter: '',
+          workKeywords: '',
+          greenApiId: '',
+          greenApiToken: '',
+          greenApiChatId: '',
+          callMeBotKey: '',
           inboxFilter: 'all',
-          scheduleBlocks: [
-            { id: 301, startTime: '09:00', endTime: '09:30', type: 'session', code: 'DAILY', title: 'Revisión de correos, tickets y prioridades del día', done: false, notified: false },
-            { id: 302, startTime: '10:00', endTime: '11:30', type: 'ticket', code: 'TK-101', title: 'Atención de tickets prioritarios y evidencias PDF', done: false, notified: false },
-            { id: 303, startTime: '14:00', endTime: '15:00', type: 'break', code: 'COMIDA', title: 'Hora de comida y descanso', done: false, notified: false }
-          ],
-          inboxItems: [
-            { id: 401, category: 'ticket', code: 'TK-101', title: 'Validar entregables pendientes y adjuntar captura en plantilla PDF', time: '10:00', sender: 'Lucia', source: 'Correo', priority: 'Alta', done: false, scheduled: true, notified: false },
-            { id: 402, category: 'session', code: 'SES-12H', title: 'Sesión de seguimiento de avances semanales', time: '12:00', sender: 'Equipo / PLS', source: 'WhatsApp', priority: 'Alta', done: false, scheduled: false, notified: false }
-          ]
+          scheduleBlocks: [],
+          inboxItems: []
         },
         finance: {
-          incomes: [
-            { id: 501, name: 'Quincena Nómina', amount: 12000, frequency: 'Quincenal', nextDate: defaultDay }
-          ],
-          expenses: [
-            { id: 601, name: 'Servicios Fijos / Internet', amount: 850, category: 'Fijo Necesario', date: defaultDay },
-            { id: 602, name: 'Despensa y Comida Semanal', amount: 1400, category: 'Comida/Súper', date: defaultDay }
-          ],
-          debts: [
-            { id: 701, name: 'Tarjeta de Crédito Principal', priority: 'Alta (Interés Alto)', totalBalance: 8500, minPayment: 2100, cutDay: 15, dueDate: defaultDay, paidThisMonth: false, notified: '' }
-          ],
+          incomes: [],
+          expenses: [],
+          debts: [],
           aiPeacePlanHtml: ''
         },
         updatedAt: 0
@@ -2034,8 +2172,66 @@
       return state;
     }
 
+    function purgePreloadedDemoData(st) {
+      if (!st || typeof st !== 'object') return;
+      const demoBlockIds = new Set([301, 302, 303]);
+      const demoBlockTitles = new Set([
+        'revisión de correos, tickets y prioridades del día',
+        'atención de tickets prioritarios y evidencias pdf',
+        'hora de comida y descanso',
+        'daily standup / revisión de tickets del día',
+        'resolver ticket prioritario y documentar avance',
+        'hora de comida y desconexión'
+      ]);
+      if (st.workHub && Array.isArray(st.workHub.scheduleBlocks)) {
+        st.workHub.scheduleBlocks = st.workHub.scheduleBlocks.filter(b =>
+          !demoBlockIds.has(Number(b.id)) && !demoBlockTitles.has(String(b.title || '').trim().toLowerCase())
+        );
+      }
+      const demoInboxIds = new Set([401, 402]);
+      const demoInboxTitles = new Set([
+        'validar entregables pendientes y adjuntar captura en plantilla pdf',
+        'sesión de seguimiento de avances semanales',
+        'revisar validación de módulo y subir evidencia'
+      ]);
+      if (st.workHub && Array.isArray(st.workHub.inboxItems)) {
+        st.workHub.inboxItems = st.workHub.inboxItems.filter(i =>
+          !demoInboxIds.has(Number(i.id)) && !demoInboxTitles.has(String(i.title || '').trim().toLowerCase())
+        );
+      }
+      if (st.workHub && st.workHub.workKeywords === 'Ticket, Jira, Sesión, Junta, Lucia, PLS, Entrega, Urgente') {
+        st.workHub.workKeywords = '';
+      }
+      if (st.finance) {
+        if (Array.isArray(st.finance.incomes)) {
+          st.finance.incomes = st.finance.incomes.filter(inc =>
+            !(Number(inc.id) === 501 && inc.name === 'Quincena Nómina' && (Number(inc.amount) === 12000 || Number(inc.amount) === 12500))
+          );
+        }
+        if (Array.isArray(st.finance.expenses)) {
+          st.finance.expenses = st.finance.expenses.filter(ex =>
+            !((Number(ex.id) === 601 && ex.name.includes('Servicios')) || (Number(ex.id) === 602 && ex.name.includes('Despensa y Comida Semanal')))
+          );
+        }
+        if (Array.isArray(st.finance.debts)) {
+          st.finance.debts = st.finance.debts.filter(d =>
+            !(Number(d.id) === 701 && d.name === 'Tarjeta de Crédito Principal' && Number(d.totalBalance) === 8500)
+          );
+        }
+      }
+      if (st.tutorData && st.tutorData.subjectsMap) {
+        ['ingles_y_programacion', 'inglés_y_programación', 'ingles'].forEach(k => {
+          const s = st.tutorData.subjectsMap[k];
+          if (s && (!Array.isArray(s.lessons) || s.lessons.length === 0)) {
+            delete st.tutorData.subjectsMap[k];
+          }
+        });
+      }
+    }
+
     function normalizeHabitsStructure(st) {
       if (!st || typeof st !== 'object') return;
+      purgePreloadedDemoData(st);
       if (!Array.isArray(st.deletedHabitsRegistry)) st.deletedHabitsRegistry = [];
       const deletedSet = new Set(st.deletedHabitsRegistry.map(x => String(x || '').trim().toLowerCase()).filter(Boolean));
       if (!Array.isArray(st.habitsList)) st.habitsList = [];
@@ -2469,6 +2665,32 @@
       el.classList.remove(animClass);
       void el.offsetWidth;
       el.classList.add(animClass);
+      setTimeout(() => {
+        if (el) el.classList.remove(animClass);
+      }, 320);
+    }
+
+    function switchNutritionSubTab(sub) {
+      const macrosEl = document.getElementById('nutSubView-macros');
+      const mealsWrap = document.getElementById('nutSubView-mealsWrap');
+      const scannerEl = document.getElementById('nutSubView-scanner');
+      const waterWrap = document.getElementById('nutSubView-waterWrap');
+      const chefEl = document.getElementById('nutSubView-chef');
+
+      if (macrosEl) macrosEl.classList.toggle('hidden', sub !== 'macros');
+      if (mealsWrap) mealsWrap.classList.toggle('hidden', sub !== 'macros');
+      if (scannerEl) scannerEl.classList.toggle('hidden', sub !== 'scanner');
+      if (waterWrap) waterWrap.classList.toggle('hidden', sub !== 'scanner');
+      if (chefEl) chefEl.classList.toggle('hidden', sub !== 'chef');
+
+      ['macros', 'scanner', 'chef'].forEach(k => {
+        const btn = document.getElementById(`nsub-${k}`);
+        if (btn) {
+          btn.className = k === sub
+            ? 'py-2 px-2 rounded-xl bg-terra-500 text-white shadow-sm transition flex items-center justify-center gap-1.5'
+            : 'py-2 px-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-center gap-1.5';
+        }
+      });
     }
 
     let celebrationTimeoutId = null;
@@ -4406,7 +4628,7 @@
       const nowHHMM = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
       document.getElementById('wfTaskNumber').value = wf.taskNumber || t.project || String(idx + 1);
-      document.getElementById('wfSolicita').value = wf.solicita || t.solicita || 'Lucia';
+      document.getElementById('wfSolicita').value = wf.solicita || t.solicita || 'Por definir';
       document.getElementById('wfAssignDate').value = wf.assignDate || appState.currentDay;
       document.getElementById('wfDueDate').value = wf.dueDate || appState.currentDay;
       document.getElementById('wfStartTime').value = wf.startTime || t.time || '';
@@ -4433,7 +4655,7 @@
       const t = appState.tasks[activeFormatTaskIndex];
 
       t.project = document.getElementById('wfTaskNumber').value.trim() || '1';
-      t.solicita = document.getElementById('wfSolicita').value.trim() || 'Lucia';
+      t.solicita = document.getElementById('wfSolicita').value.trim() || 'Por definir';
       t.text = document.getElementById('wfActivityDesc').value.trim() || t.text;
 
       t.workFormat = {
@@ -4478,116 +4700,249 @@
       return `${parts[2]}-${parts[1]}-${parts[0].slice(-2)}`;
     }
 
-    async function generateOfficialPDFDocument(tasksToExport) {
-      if (!tasksToExport || tasksToExport.length === 0) {
-        showToast("Selecciona o agrega al menos una tarea para generar el PDF", "warning");
-        return;
-      }
+    let currentPdfTasksBuffer = [];
 
-      showToast("Generando PDF Oficial con tus evidencias...", "info");
-      const responsibleName = appState.profile.name || 'Usuario';
-      const wrapper = document.getElementById('pdfPrintWrapper');
+    function getUnifiedTasksForPDF() {
+      const selectedTasks = (appState.tasks || []).filter(t => t.selectedForPdf !== false);
+      if (selectedTasks.length > 0) return selectedTasks;
+      if ((appState.tasks || []).length > 0) return appState.tasks;
 
-      wrapper.innerHTML = tasksToExport.map((t, index) => {
+      // Si el usuario tiene actividades en su Agenda o Bandeja de Correo/Whats pero aún no las pasaba a Tareas PDF, las incluimos automáticamente:
+      const autoList = [];
+      (appState.workHub?.inboxItems || []).forEach((it, idx) => {
+        autoList.push({
+          id: it.id || (Date.now() + idx),
+          text: it.title,
+          time: it.time || '',
+          solicita: it.sender || 'Área Solicitante',
+          project: it.code || String(idx + 1),
+          done: !!it.done,
+          workFormat: {
+            taskNumber: it.code || String(idx + 1),
+            solicita: it.sender || 'Área Solicitante',
+            assignDate: appState.currentDay,
+            dueDate: appState.currentDay,
+            status: it.done ? 'Completado' : 'En Progreso',
+            startTime: it.time || '',
+            endTime: '',
+            activityDesc: it.title,
+            notes: `Origen: ${it.source || 'WhatsApp / Correo'}`,
+            deliverable: it.done ? 'Actividad completada y verificada.' : 'En seguimiento.',
+            evidenceImages: []
+          }
+        });
+      });
+      (appState.workHub?.scheduleBlocks || []).forEach((b, idx) => {
+        if (b.type === 'break') return;
+        autoList.push({
+          id: b.id || (Date.now() + 100 + idx),
+          text: b.title,
+          time: b.startTime || '',
+          solicita: 'Agenda Diaria',
+          project: b.code || String(autoList.length + 1),
+          done: !!b.done,
+          workFormat: {
+            taskNumber: b.code || String(autoList.length + 1),
+            solicita: 'Agenda Diaria',
+            assignDate: appState.currentDay,
+            dueDate: appState.currentDay,
+            status: b.done ? 'Completado' : 'En Progreso',
+            startTime: b.startTime || '',
+            endTime: b.endTime || '',
+            activityDesc: b.title,
+            notes: `Horario programado: ${b.startTime || '--:--'} a ${b.endTime || '--:--'}`,
+            deliverable: '',
+            evidenceImages: []
+          }
+        });
+      });
+      return autoList;
+    }
+
+    function buildExecutivePdfHtml(tasksToExport) {
+      const responsibleName = escapeHtmlSafe(appState.profile?.name || 'Responsable');
+      return tasksToExport.map((t, index) => {
         const wf = t.workFormat || {};
-        const numTarea = wf.taskNumber || t.project || String(index + 1);
-        const fAsig = formatShortDateDDMMYY(wf.assignDate || appState.currentDay);
-        const fLim = formatShortDateDDMMYY(wf.dueDate || appState.currentDay);
-        const solicita = wf.solicita || t.solicita || 'Lucia';
-        const actividadHtml = (wf.activityDesc || t.text || '').replace(/\n/g, '<br>');
-        const obsHtml = (wf.notes || '').replace(/\n/g, '<br>');
-        const evidTextHtml = (wf.deliverable || '').replace(/\n/g, '<br>');
-        const images = wf.evidenceImages || [];
+        const numTarea = escapeHtmlSafe(wf.taskNumber || t.project || String(index + 1));
+        const fAsig = escapeHtmlSafe(formatShortDateDDMMYY(wf.assignDate || appState.currentDay));
+        const fLim = escapeHtmlSafe(formatShortDateDDMMYY(wf.dueDate || appState.currentDay));
+        const solicita = escapeHtmlSafe(wf.solicita || t.solicita || 'Por especificar');
+        const statusStr = wf.status || (t.done ? 'Completado' : 'En Progreso');
+        const horarioStr = (wf.startTime || t.time) ? `${escapeHtmlSafe(wf.startTime || t.time)}${wf.endTime ? ' - ' + escapeHtmlSafe(wf.endTime) : ''}` : 'Jornada laboral';
+        const actividadHtml = escapeHtmlSafe(wf.activityDesc || t.text || '').replace(/\n/g, '<br>');
+        const obsHtml = escapeHtmlSafe(wf.notes || 'Sin observaciones adicionales.').replace(/\n/g, '<br>');
+        const evidTextHtml = escapeHtmlSafe(wf.deliverable || '').replace(/\n/g, '<br>');
+        const images = Array.isArray(wf.evidenceImages) ? wf.evidenceImages : [];
 
-        const imagesHtml = images.map((imgSrc, imgI) => `
-          <div style="margin-top: 10px; margin-bottom: 12px;">
-            <p style="font-size: 11px; font-weight: bold; margin-bottom: 4px;">Evidencia fotográfica ${imgI + 1}:</p>
-            <img src="${imgSrc}" style="max-width: 100%; max-height: 360px; border: 1px solid #333; display: block;" />
+        const statusBadgeBg = statusStr === 'Completado' ? '#dcfce7' : (statusStr === 'Pendiente' ? '#fef3c7' : '#dbeafe');
+        const statusBadgeColor = statusStr === 'Completado' ? '#166534' : (statusStr === 'Pendiente' ? '#92400e' : '#1e40af');
+
+        const imagesHtml = images.length > 0 ? `
+          <div style="margin-top: 14px; display: grid; grid-template-columns: repeat(${images.length === 1 ? 1 : 2}, 1fr); gap: 12px;">
+            ${images.map((imgSrc, imgI) => `
+              <div style="border: 1px solid #cbd5e1; border-radius: 10px; padding: 8px; background: #f8fafc;">
+                <div style="font-size: 10px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
+                  📸 Evidencia Fotográfica #${imgI + 1}
+                </div>
+                <img src="${imgSrc}" style="width: 100%; max-height: 290px; object-fit: contain; border-radius: 6px; display: block; background: #0f172a;" />
+              </div>
+            `).join('')}
           </div>
-        `).join('');
+        ` : '';
 
         return `
-          <div style="${index > 0 ? 'page-break-before: always;' : ''} padding: 10px; color: #000; background: #fff; font-family: Arial, sans-serif;">
-            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 12px;">
-              <thead>
-                <tr>
-                  <th colspan="4" style="background-color: #d9d9d9; border: 1px solid #000; padding: 8px; text-align: center; font-size: 14px; font-weight: bold;">
-                    Reporte individual de tarea
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="border: 1px solid #000; padding: 6px 8px; font-weight: bold; width: 22%; background-color: #f2f2f2;">Número de tarea</td>
-                  <td style="border: 1px solid #000; padding: 6px 8px; width: 28%;">${numTarea}</td>
-                  <td style="border: 1px solid #000; padding: 6px 8px; font-weight: bold; width: 25%; background-color: #f2f2f2;">Fecha de asignación</td>
-                  <td style="border: 1px solid #000; padding: 6px 8px; width: 25%;">${fAsig}</td>
-                </tr>
-                <tr>
-                  <td style="border: 1px solid #000; padding: 6px 8px; font-weight: bold; background-color: #f2f2f2;">Responsable</td>
-                  <td style="border: 1px solid #000; padding: 6px 8px;">${responsibleName}</td>
-                  <td style="border: 1px solid #000; padding: 6px 8px; font-weight: bold; background-color: #f2f2f2;">Solicita</td>
-                  <td style="border: 1px solid #000; padding: 6px 8px;">${solicita}</td>
-                </tr>
-                <tr>
-                  <td style="border: 1px solid #000; padding: 6px 8px; font-weight: bold; background-color: #f2f2f2;">Fecha límite</td>
-                  <td colspan="3" style="border: 1px solid #000; padding: 6px 8px;">${fLim}</td>
-                </tr>
-                <tr>
-                  <td colspan="4" style="border: 1px solid #000; padding: 6px 8px; font-weight: bold; background-color: #d9d9d9; text-align: center;">
-                    Tarea o actividad
-                  </td>
-                </tr>
-                <tr>
-                  <td colspan="4" style="border: 1px solid #000; padding: 10px; min-height: 50px; line-height: 1.45;">
-                    ${actividadHtml || '&nbsp;'}
-                  </td>
-                </tr>
-                <tr>
-                  <td colspan="4" style="border: 1px solid #000; padding: 6px 8px; font-weight: bold; background-color: #d9d9d9; text-align: center;">
-                    Observaciones
-                  </td>
-                </tr>
-                <tr>
-                  <td colspan="4" style="border: 1px solid #000; padding: 10px; min-height: 36px; line-height: 1.45;">
-                    ${obsHtml || '&nbsp;'}
-                  </td>
-                </tr>
-                <tr>
-                  <td colspan="4" style="border: 1px solid #000; padding: 6px 8px; font-weight: bold; background-color: #d9d9d9; text-align: center;">
-                    Evidencia
-                  </td>
-                </tr>
-                <tr>
-                  <td colspan="4" style="border: 1px solid #000; padding: 12px; min-height: 120px; line-height: 1.5;">
-                    <div>${evidTextHtml || ''}</div>
-                    ${imagesHtml}
-                  </td>
-                </tr>
-              </tbody>
+          <div style="${index > 0 ? 'page-break-before: always;' : ''} padding: 18px; color: #0f172a; background: #ffffff; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;">
+            <!-- Encabezado Corporativo Ejecutivo -->
+            <div style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); color: #ffffff; padding: 18px 22px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <div>
+                <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: #93c5fd; font-weight: 800;">
+                  REPORTE OFICIAL DE ACTIVIDAD Y EVIDENCIA DOCUMENTAL
+                </div>
+                <div style="font-size: 18px; font-weight: 900; margin-top: 3px;">
+                  Reporte Individual de Tarea • Folio #${numTarea}
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <span style="background: ${statusBadgeBg}; color: ${statusBadgeColor}; padding: 5px 12px; border-radius: 999px; font-size: 11px; font-weight: 800; text-transform: uppercase; display: inline-block;">
+                  ${escapeHtmlSafe(statusStr)}
+                </span>
+                <div style="font-size: 10px; color: #cbd5e1; margin-top: 5px;">
+                  Fecha de corte: ${fAsig}
+                </div>
+              </div>
+            </div>
+
+            <!-- Ficha Técnica de Metadatos (4 columnas) -->
+            <table style="width: 100%; border-collapse: separate; border-spacing: 8px; margin-bottom: 14px;">
+              <tr>
+                <td style="width: 25%; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px;">
+                  <div style="font-size: 9px; font-weight: 800; text-transform: uppercase; color: #64748b;">Número / Folio</div>
+                  <div style="font-size: 13px; font-weight: 900; color: #0f172a; margin-top: 2px;">#${numTarea}</div>
+                </td>
+                <td style="width: 25%; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px;">
+                  <div style="font-size: 9px; font-weight: 800; text-transform: uppercase; color: #64748b;">Responsable</div>
+                  <div style="font-size: 13px; font-weight: 800; color: #0f172a; margin-top: 2px;">${responsibleName}</div>
+                </td>
+                <td style="width: 25%; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px;">
+                  <div style="font-size: 9px; font-weight: 800; text-transform: uppercase; color: #64748b;">Solicita / Área</div>
+                  <div style="font-size: 13px; font-weight: 800; color: #1e40af; margin-top: 2px;">${solicita}</div>
+                </td>
+                <td style="width: 25%; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px;">
+                  <div style="font-size: 9px; font-weight: 800; text-transform: uppercase; color: #64748b;">Asignación / Límite</div>
+                  <div style="font-size: 11px; font-weight: 800; color: #0f172a; margin-top: 2px;">${fAsig} → ${fLim} (${horarioStr})</div>
+                </td>
+              </tr>
             </table>
+
+            <!-- Bloque 1: Tarea o Actividad -->
+            <div style="border: 1px solid #cbd5e1; border-left: 5px solid #2563eb; border-radius: 10px; background: #ffffff; padding: 12px 16px; margin-bottom: 12px;">
+              <div style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.8px; color: #2563eb; margin-bottom: 5px;">
+                1. Tarea o Actividad Realizada
+              </div>
+              <div style="font-size: 13px; line-height: 1.5; color: #0f172a; font-weight: 600;">
+                ${actividadHtml || 'Actividad registrada.'}
+              </div>
+            </div>
+
+            <!-- Bloque 2: Observaciones -->
+            <div style="border: 1px solid #cbd5e1; border-left: 5px solid #ea580c; border-radius: 10px; background: #fffaf5; padding: 12px 16px; margin-bottom: 12px;">
+              <div style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.8px; color: #ea580c; margin-bottom: 5px;">
+                2. Observaciones y Seguimiento
+              </div>
+              <div style="font-size: 12px; line-height: 1.5; color: #334155;">
+                ${obsHtml}
+              </div>
+            </div>
+
+            <!-- Bloque 3: Evidencia Documental y Capturas -->
+            <div style="border: 1px solid #cbd5e1; border-left: 5px solid #059669; border-radius: 10px; background: #ffffff; padding: 14px 16px; min-height: 110px;">
+              <div style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.8px; color: #059669; margin-bottom: 6px;">
+                3. Evidencia, Entregables y Anexos Fotográficos
+              </div>
+              <div style="font-size: 12px; line-height: 1.55; color: #1e293b;">
+                ${evidTextHtml || (images.length > 0 ? 'Se adjunta evidencia gráfica a continuación.' : 'Actividad verificada en sistema.')}
+              </div>
+              ${imagesHtml}
+            </div>
+
+            <!-- Pie de Página Ejecutivo -->
+            <div style="margin-top: 16px; padding-top: 10px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; font-size: 10px; color: #64748b;">
+              <span>Generado por <strong>Control TCC Master Cloud</strong></span>
+              <span>Responsable: <strong>${responsibleName}</strong> • Fecha: ${fAsig}</span>
+            </div>
           </div>
         `;
       }).join('');
+    }
 
+    async function generateOfficialPDFDocument(tasksToExport) {
+      const list = (tasksToExport && tasksToExport.length > 0) ? tasksToExport : getUnifiedTasksForPDF();
+      if (!list || list.length === 0) {
+        showToast("Agrega primero al menos una tarea, ticket o bloque de agenda para generar tu PDF", "warning");
+        return;
+      }
+      currentPdfTasksBuffer = list;
+      const wrapper = document.getElementById('pdfPrintWrapper');
+      const modal = document.getElementById('pdfPreviewModal');
+      if (wrapper) {
+        wrapper.innerHTML = buildExecutivePdfHtml(list);
+      }
+      if (modal) {
+        modal.classList.remove('hidden');
+      }
+      // Iniciar descarga directa del archivo PDF con html2pdf mientras el modal es visible (evita que html2canvas capture un lienzo en blanco)
+      await triggerDirectHtml2PdfDownload();
+    }
+
+    async function triggerDirectHtml2PdfDownload() {
+      const wrapper = document.getElementById('pdfPrintWrapper');
+      if (!wrapper || !wrapper.innerHTML.trim()) return;
+      const btn = document.getElementById('btnConfirmPdfDownload');
+      const orig = btn ? btn.innerHTML : '';
+      if (btn) { btn.disabled = true; btn.innerHTML = `<span>Generando PDF...</span>`; }
       try {
-        const opt = {
-          margin: 10,
-          filename: `Reporte_Tareas_${responsibleName}_${appState.currentDay}.pdf`,
-          image: { type: 'jpeg', quality: 0.95 },
-          html2canvas: { scale: 2, useCORS: true },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-        await html2pdf().set(opt).from(wrapper).save();
-        showToast("PDF Oficial descargado con éxito", "success");
+        const responsibleName = (appState.profile?.name || 'Reporte').replace(/\s+/g, '_');
+        if (typeof html2pdf === 'function') {
+          const opt = {
+            margin: [8, 8, 8, 8],
+            filename: `Reporte_Ejecutivo_${responsibleName}_${appState.currentDay}.pdf`,
+            image: { type: 'jpeg', quality: 0.96 },
+            html2canvas: { scale: 2, useCORS: true, logging: false, scrollY: 0 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+          };
+          await html2pdf().set(opt).from(wrapper).save();
+          showToast("PDF Ejecutivo descargado correctamente", "success");
+        } else {
+          printExecutivePdfWindow();
+        }
       } catch (e) {
-        showToast("Error generando PDF: " + e.message, "error");
+        console.warn("Fallback impresión nativa:", e);
+        printExecutivePdfWindow();
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = orig; }
       }
     }
 
+    function printExecutivePdfWindow() {
+      const wrapper = document.getElementById('pdfPrintWrapper');
+      if (!wrapper) return;
+      const win = window.open('', '_blank');
+      if (!win) {
+        window.print();
+        return;
+      }
+      win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte Ejecutivo Control TCC</title><style>@page { size: A4 portrait; margin: 10mm; } body { margin: 0; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }</style></head><body>${wrapper.innerHTML}<script>window.onload=function(){setTimeout(function(){window.print();},350);};<\/script></body></html>`);
+      win.document.close();
+    }
+
+    function closePdfPreviewModal() {
+      const modal = document.getElementById('pdfPreviewModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
     function downloadOfficialTasksPDF() {
-      const selected = appState.tasks.filter(t => t.selectedForPdf !== false);
-      generateOfficialPDFDocument(selected.length > 0 ? selected : appState.tasks);
+      const list = getUnifiedTasksForPDF();
+      generateOfficialPDFDocument(list);
     }
 
     function renderTasks() {
@@ -4614,7 +4969,7 @@
                 <div class="flex-1">
                   <p class="${t.done ? 'line-through text-slate-400' : 'font-bold text-slate-800 dark:text-slate-100'}">${escapeHtmlSafe(t.text)}</p>
                   <div class="flex flex-wrap items-center gap-1.5 mt-1">
-                    <span class="text-[10px] px-2 py-0.5 rounded-md bg-blue-500/15 text-blue-400 font-bold">Solicita: ${escapeHtmlSafe(wf.solicita || t.solicita || 'Lucia')}</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-md bg-blue-500/15 text-blue-400 font-bold">Solicita: ${escapeHtmlSafe(wf.solicita || t.solicita || 'Por definir')}</span>
                     ${t.project ? `<span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-200 dark:bg-slate-700 font-bold">#${escapeHtmlSafe(t.project)}</span>` : ''}
                     ${t.time ? `<span class="text-[10px] text-amber-400 font-bold flex items-center gap-1"><i class="fi fi-rr-clock"></i> ${t.time}</span>` : ''}
                     ${imgCount > 0 ? `<span class="text-[10px] text-emerald-400 font-bold flex items-center gap-1"><i class="fi fi-rr-picture"></i> ${imgCount}</span>` : ''}
@@ -4649,7 +5004,7 @@
     function addTask() {
       const input = document.getElementById('newTaskInput');
       const timeInput = document.getElementById('newTaskTime').value;
-      const solicitaInput = document.getElementById('newTaskSolicita').value.trim() || 'Lucia';
+      const solicitaInput = document.getElementById('newTaskSolicita').value.trim() || 'Por definir';
       const projInput = document.getElementById('newTaskProject').value.trim() || String(appState.tasks.length + 1);
       if (!input.value.trim()) { showToast("Escribe la tarea o actividad", "warning"); return; }
 
@@ -4697,7 +5052,7 @@
       const user = appState.profile.name || 'Usuario';
       return appState.tasks.map((t, idx) => {
         const wf = t.workFormat || {};
-        return `TAREA #${wf.taskNumber || idx + 1} | Fecha: ${appState.currentDay}\nResponsable: ${user} | Solicita: ${wf.solicita || t.solicita || 'Lucia'}\nActividad: ${wf.activityDesc || t.text}\nObservaciones: ${wf.notes || '---'}\nEvidencia: ${wf.deliverable || '---'}\n`;
+        return `TAREA #${wf.taskNumber || idx + 1} | Fecha: ${appState.currentDay}\nResponsable: ${user} | Solicita: ${wf.solicita || t.solicita || 'Por definir'}\nActividad: ${wf.activityDesc || t.text}\nObservaciones: ${wf.notes || '---'}\nEvidencia: ${wf.deliverable || '---'}\n`;
       }).join('\n-----------------------------------\n');
     }
 
@@ -4736,7 +5091,7 @@
         const wf = t.workFormat || {};
         const cols = [
           wf.taskNumber || idx + 1, wf.assignDate || appState.currentDay, appState.profile.name || 'Usuario',
-          wf.solicita || t.solicita || 'Lucia', wf.dueDate || appState.currentDay, wf.activityDesc || t.text,
+          wf.solicita || t.solicita || 'Por definir', wf.dueDate || appState.currentDay, wf.activityDesc || t.text,
           wf.notes || '', wf.deliverable || ''
         ];
         return cols.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',');
@@ -4800,26 +5155,22 @@
         td.streakReminderTime = '20:00';
       }
 
-      const initialSubjName = (td.subject || 'Inglés').trim();
-      const initKey = normalizeSubjectKey(initialSubjName);
-      if (Object.keys(td.subjectsMap).length === 0) {
-        const migratedLessons = [];
-        if (td.lastLesson && td.lastLesson.lessonTitle) {
-          migratedLessons.push({
-            ...td.lastLesson,
-            lessonNumber: 1,
-            createdAt: appState.currentDay || '2026-10-22',
-            stars: 3,
-            completedQuiz: true
-          });
-        }
+      if (Object.keys(td.subjectsMap).length === 0 && td.lastLesson && td.lastLesson.lessonTitle && td.subject) {
+        const initialSubjName = td.subject.trim();
+        const initKey = normalizeSubjectKey(initialSubjName);
         td.subjectsMap[initKey] = {
           key: initKey,
           name: initialSubjName,
           level: td.level || 'Desde Cero (Principiante Absoluto)',
           goal: td.goal || 'Dominar los fundamentos paso a paso',
-          lessons: migratedLessons,
-          selectedLessonIndex: migratedLessons.length > 0 ? 0 : -1
+          lessons: [{
+            ...td.lastLesson,
+            lessonNumber: 1,
+            createdAt: appState.currentDay || getLocalTodayIso(),
+            stars: 3,
+            completedQuiz: true
+          }],
+          selectedLessonIndex: 0
         };
         td.activeSubjectKey = initKey;
       }
@@ -4864,6 +5215,13 @@
 
     function getActiveSubjectObj() {
       const td = ensureTutorMultiSubjectStructure();
+      if (!td.activeSubjectKey || !td.subjectsMap[td.activeSubjectKey]) {
+        const keys = Object.keys(td.subjectsMap || {});
+        if (keys.length === 0) {
+          return { key: '', name: '', level: 'Desde Cero (Principiante Absoluto)', goal: '', lessons: [], selectedLessonIndex: -1 };
+        }
+        td.activeSubjectKey = keys[0];
+      }
       return td.subjectsMap[td.activeSubjectKey];
     }
 
@@ -5098,7 +5456,8 @@
 
     function saveTutorConfig() {
       const td = ensureTutorMultiSubjectStructure();
-      const typedName = (document.getElementById('tutorSubjectInput')?.value || '').trim() || 'Inglés';
+      const typedName = (document.getElementById('tutorSubjectInput')?.value || '').trim();
+      if (!typedName) return;
       const levelVal = document.getElementById('tutorLevelSelect')?.value || 'Desde Cero (Principiante Absoluto)';
       const goalVal = (document.getElementById('tutorGoalInput')?.value || '').trim();
 
@@ -5174,7 +5533,18 @@
       saveTutorConfig();
 
       const td = ensureTutorMultiSubjectStructure();
-      const subj = getActiveSubjectObj();
+      let subj = getActiveSubjectObj();
+      if (!subj || !subj.name) {
+        const typedNew = (document.getElementById('newSubjectNameInput')?.value || document.getElementById('tutorSubjectInput')?.value || '').trim();
+        if (!typedNew) {
+          toggleNewSubjectBox();
+          showToast("Primero escribe el nombre de tu materia (ej. Matemáticas, Python, Inglés)", "warning");
+          return;
+        }
+        document.getElementById('tutorSubjectInput').value = typedNew;
+        saveTutorConfig();
+        subj = getActiveSubjectObj();
+      }
 
       // CANDADO DE PASO DE NIVEL: Si hay una lección sin aprobar el examen, no puede desbloquear el siguiente nivel
       const unpassed = getUnpassedCurrentLesson(subj);
@@ -6934,11 +7304,169 @@
 
     function saveWorkContactSyncConfig() {
       if (!appState.workHub) appState.workHub = createDefaultState().workHub;
-      appState.workHub.workEmail = (document.getElementById('workEmailConfigInput')?.value || '').trim();
-      appState.workHub.workPhone = (document.getElementById('workPhoneConfigInput')?.value || '').trim();
-      appState.workHub.workKeywords = (document.getElementById('workKeywordsConfigInput')?.value || '').trim();
+      const wh = appState.workHub;
+      wh.workEmail = (document.getElementById('workEmailConfigInput')?.value || '').trim();
+      wh.workPhone = (document.getElementById('workPhoneConfigInput')?.value || '').trim();
+      wh.workAliasFilter = (document.getElementById('workAliasFilterInput')?.value || '').trim();
+      wh.workKeywords = (document.getElementById('workKeywordsConfigInput')?.value || '').trim();
+      wh.greenApiId = (document.getElementById('greenApiIdInput')?.value || '').trim();
+      wh.greenApiToken = (document.getElementById('greenApiTokenInput')?.value || '').trim();
+      wh.greenApiChatId = (document.getElementById('greenApiChatIdInput')?.value || '').trim();
+      wh.callMeBotKey = (document.getElementById('callMeBotKeyInput')?.value || '').trim();
       saveState();
-      showToast("Conexión de correo y WhatsApp laboral guardada", "success");
+      showToast("Configuración de API WhatsApp y filtros guardada", "success");
+    }
+
+    function selectGreenApiChat(chatIdVal) {
+      if (!appState.workHub) return;
+      appState.workHub.greenApiChatId = chatIdVal || '';
+      const inp = document.getElementById('greenApiChatIdInput');
+      if (inp) inp.value = chatIdVal || '';
+      saveState();
+    }
+
+    async function fetchWhatsAppChatsListViaAPI() {
+      saveWorkContactSyncConfig();
+      const wh = appState.workHub || {};
+      if (!wh.greenApiId || !wh.greenApiToken) {
+        showToast("Ingresa primero tu idInstance y apiTokenInstance de Green-API en el desplegable", "warning");
+        return;
+      }
+      try {
+        showToast("Consultando tus grupos y contactos de WhatsApp vía Green-API...", "info");
+        const url = `https://api.green-api.com/waInstance${encodeURIComponent(wh.greenApiId)}/getChats/${encodeURIComponent(wh.greenApiToken)}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const chats = await res.json();
+        const dropdown = document.getElementById('greenApiChatsDropdown');
+        if (dropdown && Array.isArray(chats)) {
+          const groups = chats.filter(c => String(c.id || '').endsWith('@g.us'));
+          const contacts = chats.filter(c => String(c.id || '').endsWith('@c.us')).slice(0, 30);
+          dropdown.innerHTML = `<option value="">Todos mis mensajes entrantes recientes</option>` +
+            groups.map(g => `<option value="${escapeHtmlSafe(g.id)}">👥 Grupo: ${escapeHtmlSafe(g.name || g.id)}</option>`).join('') +
+            contacts.map(c => `<option value="${escapeHtmlSafe(c.id)}">👤 Contacto: ${escapeHtmlSafe(c.name || c.id)}</option>`).join('');
+          if (wh.greenApiChatId) dropdown.value = wh.greenApiChatId;
+        }
+        showToast("Grupos y contactos de WhatsApp cargados con éxito", "success");
+      } catch (e) {
+        showToast("No se pudo listar los chats de Green-API: verifica idInstance y apiTokenInstance", "error");
+      }
+    }
+
+    // Lee mensajes entrantes reales desde Green-API (del Grupo de Trabajo o de tus contactos) y filtra con IA tus actividades y tickets
+    async function syncIncomingWhatsAppMessagesViaAPI() {
+      saveWorkContactSyncConfig();
+      const wh = appState.workHub || {};
+      if (!wh.greenApiId || !wh.greenApiToken) {
+        showToast("Configura tu idInstance y apiTokenInstance de Green-API (o pega el texto abajo)", "warning");
+        return;
+      }
+      const btn = document.getElementById('btnPullWhatsApi');
+      const orig = btn ? btn.innerHTML : '';
+      if (btn) { btn.disabled = true; btn.innerHTML = `<span>Leyendo WhatsApp por API...</span>`; }
+      try {
+        let messagesList = [];
+        if (wh.greenApiChatId) {
+          const url = `https://api.green-api.com/waInstance${encodeURIComponent(wh.greenApiId)}/getChatHistory/${encodeURIComponent(wh.greenApiToken)}`;
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chatId: wh.greenApiChatId, count: 40 })
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          messagesList = await res.json();
+        } else {
+          const url = `https://api.green-api.com/waInstance${encodeURIComponent(wh.greenApiId)}/lastIncomingMessages/${encodeURIComponent(wh.greenApiToken)}?minutes=1440`;
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          messagesList = await res.json();
+        }
+
+        const textLines = (Array.isArray(messagesList) ? messagesList : [])
+          .map(m => {
+            const txt = m.textMessage || m.extendedTextMessageData?.text || m.caption || '';
+            const sender = m.senderName || m.senderContactName || m.chatId || 'WhatsApp';
+            return txt ? `[${sender}]: ${txt}` : '';
+          })
+          .filter(Boolean);
+
+        if (textLines.length === 0) {
+          showToast("No se encontraron mensajes de texto recientes en ese chat/grupo", "info");
+          return;
+        }
+
+        const box = document.getElementById('rawWorkInboxPaste');
+        if (box) box.value = textLines.join('\n');
+        await extractWorkItemsWithAI(true);
+      } catch (e) {
+        showToast("Error conectando con Green-API: " + e.message, "error");
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+      }
+    }
+
+    // Envía resumen y tickets pendientes DIRECTO por API al número de WhatsApp del usuario (sin abrir ventana si tiene Green-API o CallMeBot)
+    async function sendWhatsAppDirectViaAPI() {
+      saveWorkContactSyncConfig();
+      const wh = appState.workHub || {};
+      const cleanPhone = (wh.workPhone || '').replace(/\D/g, '');
+      const textBody = buildDailyWorkBriefText();
+
+      if (!cleanPhone) {
+        showToast("Escribe primero tu número de WhatsApp con código de país (ej. 52155...)", "warning");
+        return;
+      }
+
+      const btn = document.getElementById('btnSendWhatsApi');
+      const orig = btn ? btn.innerHTML : '';
+      if (btn) { btn.disabled = true; btn.innerHTML = `<span>Enviando WhatsApp...</span>`; }
+
+      try {
+        // 1. Intentar envío silencioso directo por Green-API
+        if (wh.greenApiId && wh.greenApiToken) {
+          const targetChat = wh.greenApiChatId || `${cleanPhone}@c.us`;
+          const url = `https://api.green-api.com/waInstance${encodeURIComponent(wh.greenApiId)}/sendMessage/${encodeURIComponent(wh.greenApiToken)}`;
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chatId: targetChat, message: textBody })
+          });
+          if (res.ok) {
+            showToast("📲 ¡Mensaje enviado directamente a tu WhatsApp vía Green-API!", "success");
+            return;
+          }
+        }
+
+        // 2. Intentar envío silencioso directo por CallMeBot API
+        if (wh.callMeBotKey) {
+          const url = `https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(cleanPhone)}&text=${encodeURIComponent(textBody)}&apikey=${encodeURIComponent(wh.callMeBotKey)}`;
+          await fetch(url, { mode: 'no-cors' });
+          showToast("📲 ¡Mensaje enviado directamente a tu WhatsApp vía CallMeBot API!", "success");
+          return;
+        }
+
+        // 3. Fallback universal si aún no llena credenciales API
+        sendDailyWorkBriefToWhatsApp();
+      } catch (e) {
+        sendDailyWorkBriefToWhatsApp();
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+      }
+    }
+
+    function handleWhatsAppTxtFileUpload(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const content = String(e.target.result || '');
+        const lines = content.split(/\r?\n/).slice(-120).join('\n');
+        const box = document.getElementById('rawWorkInboxPaste');
+        if (box) box.value = lines;
+        showToast("Archivo .TXT de chat de WhatsApp cargado (últimos 120 mensajes). Analizando con IA...", "success");
+        extractWorkItemsWithAI(true);
+      };
+      reader.readAsText(file);
     }
 
     function renderWorkHubAll() {
@@ -6952,10 +7480,35 @@
 
       const emInp = document.getElementById('workEmailConfigInput');
       const phInp = document.getElementById('workPhoneConfigInput');
+      const alInp = document.getElementById('workAliasFilterInput');
       const kwInp = document.getElementById('workKeywordsConfigInput');
+      const gIdInp = document.getElementById('greenApiIdInput');
+      const gTkInp = document.getElementById('greenApiTokenInput');
+      const gChInp = document.getElementById('greenApiChatIdInput');
+      const cmbInp = document.getElementById('callMeBotKeyInput');
+
       if (emInp && document.activeElement !== emInp) emInp.value = wh.workEmail || '';
       if (phInp && document.activeElement !== phInp) phInp.value = wh.workPhone || '';
+      if (alInp && document.activeElement !== alInp) alInp.value = wh.workAliasFilter || appState.profile?.name || '';
       if (kwInp && document.activeElement !== kwInp) kwInp.value = wh.workKeywords || '';
+      if (gIdInp && document.activeElement !== gIdInp) gIdInp.value = wh.greenApiId || '';
+      if (gTkInp && document.activeElement !== gTkInp) gTkInp.value = wh.greenApiToken || '';
+      if (gChInp && document.activeElement !== gChInp) gChInp.value = wh.greenApiChatId || '';
+      if (cmbInp && document.activeElement !== cmbInp) cmbInp.value = wh.callMeBotKey || '';
+
+      const apiBadge = document.getElementById('waApiStatusBadge');
+      if (apiBadge) {
+        if (wh.greenApiId && wh.greenApiToken) {
+          apiBadge.textContent = '🟢 Green-API Conectada';
+          apiBadge.className = 'text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400';
+        } else if (wh.callMeBotKey) {
+          apiBadge.textContent = '🟢 CallMeBot Activo';
+          apiBadge.className = 'text-[10px] font-black px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-400';
+        } else {
+          apiBadge.textContent = 'Modo Directo / Sin Token API';
+          apiBadge.className = 'text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-400';
+        }
+      }
 
       const shiftBadge = document.getElementById('workShiftStatusBadge');
       if (shiftBadge) shiftBadge.textContent = `${wh.workStartHour || '09:00'} - ${wh.workEndHour || '18:00'}`;
@@ -7390,14 +7943,17 @@ Correo de Coordinación: "Favor de mandar el reporte PDF firmado antes de las 17
       if (btn) { btn.disabled = true; btn.innerHTML = `<span>Filtrando solo trabajo con IA...</span>`; }
 
       try {
-        const keywords = appState.workHub?.workKeywords || 'Ticket, Jira, Sesión, Lucia, PLS, Entrega';
-        const prompt = `Actúa como un asistente ejecutivo conectado al correo y WhatsApp laboral del usuario.
-        Analiza el texto y/o imagen adjunta. IGNORA por completo conversaciones personales o ajenas al trabajo.
-        Extrae ÚNICAMENTE elementos del trabajo divididos en:
-        - "ticket": tickets de soporte, folios, bugs, incidencias
-        - "session": sesiones, juntas, llamadas, reuniones con hora
-        - "task": tareas o entregables laborales solicitados (ej. reportes PDF, escaneos, trámites)
-        Palabras clave prioritarias: ${keywords}
+        const myAlias = (appState.workHub?.workAliasFilter || appState.profile?.name || '').trim();
+        const keywords = (appState.workHub?.workKeywords || 'Ticket, Folio, Incidencia, Sesión, Junta, Urgente, Apoyo').trim();
+        const prompt = `Actúa como un asistente ejecutivo conectado al grupo de trabajo de WhatsApp y correo del usuario.
+        REGLA DE FILTRADO ESTRICTO PARA GRUPOS DE TRABAJO:
+        1. Nombre / Alias del usuario: "${myAlias || 'El usuario actual'}".
+        2. Palabras clave y tickets que le interesan: "${keywords}".
+        3. Analiza la conversación del grupo o contactos. IGNORA pláticas casuales y también IGNORA tareas que le hayan dejado explícitamente a OTRA persona distinta a "${myAlias || 'el usuario'}".
+        4. Extrae ÚNICAMENTE:
+           - Actividades o pendientes que le pidan explícitamente a "${myAlias || 'el usuario'}" o a todo el equipo.
+           - Tickets ("ticket") que lleguen por WhatsApp o correo para que se vayan juntando y ordenando.
+           - Sesiones o juntas ("session") con su hora.
 
         MENSAJES / CORREOS A ANALIZAR:
         ---
@@ -7444,6 +8000,32 @@ Correo de Coordinación: "Favor de mandar el reporte PDF firmado antes de las 17
               notified: false
             };
             appState.workHub.inboxItems.unshift(itemObj);
+
+            // Sincronizar también en la lista de Tareas Oficiales PDF para que el usuario pueda generar su PDF directo sin pasos extra
+            appState.tasks.unshift({
+              id: newId + 900,
+              text: itemObj.title,
+              time: timeStr,
+              solicita: itemObj.sender || 'Grupo Trabajo',
+              project: itemObj.code,
+              tag: 'Trabajo',
+              done: false,
+              notified: false,
+              selectedForPdf: true,
+              workFormat: {
+                taskNumber: itemObj.code,
+                solicita: itemObj.sender || 'Grupo Trabajo',
+                assignDate: appState.currentDay,
+                dueDate: appState.currentDay,
+                status: 'En Progreso',
+                startTime: timeStr,
+                endTime: '',
+                activityDesc: itemObj.title,
+                notes: `Recibido vía ${itemObj.source} (${itemObj.sender})`,
+                deliverable: '',
+                evidenceImages: []
+              }
+            });
 
             if (autoAddToSchedule) {
               const [hh, mm] = timeStr.split(':').map(Number);
