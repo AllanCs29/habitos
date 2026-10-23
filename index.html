@@ -175,6 +175,11 @@
           <span>Trabajo, Tareas & PDF Oficial</span>
         </button>
 
+        <button onclick="switchTab('finance'); toggleSidebar()" id="side-finance" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-left">
+          <i class="fi fi-rr-wallet text-sm"></i>
+          <span>Finanzas, Cobros & Deudas</span>
+        </button>
+
         <button onclick="switchTab('tutor'); toggleSidebar()" id="side-tutor" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-left">
           <i class="fi fi-rr-graduation-cap text-sm"></i>
           <span>Tu Profe IA (Idiomas/Código)</span>
@@ -636,15 +641,46 @@
         </div>
       </div>
 
-      <!-- COMIDAS DE HOY -->
+      <!-- COMIDAS DE HOY (CON OPCIÓN DE REGISTRO Y EDICIÓN MANUAL SIN GASTAR TOKENS) -->
       <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3">
-        <div class="flex justify-between items-center">
+        <div class="flex justify-between items-center gap-2">
           <div>
             <h2 class="font-extrabold text-sm">Comidas registradas hoy</h2>
             <p id="loggedMealTypesStatus" class="text-[10px] text-slate-400">Sin comidas registradas</p>
           </div>
-          <button onclick="clearTodayMeals()" class="text-[10px] text-rose-500 font-bold">Limpiar Día</button>
+          <div class="flex items-center gap-2">
+            <button onclick="toggleManualMealBox()" class="px-2.5 py-1 rounded-xl bg-terra-500/15 text-terra-500 text-[10px] font-extrabold">+ Manual</button>
+            <button onclick="clearTodayMeals()" class="text-[10px] text-rose-500 font-bold">Limpiar Día</button>
+          </div>
         </div>
+
+        <div id="manualMealFormBox" class="hidden p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-terra-500/30 space-y-2 text-xs subview-anim-enter">
+          <div class="flex items-center justify-between">
+            <span id="manualMealFormTitle" class="text-[10px] font-extrabold uppercase text-terra-500">Registro / Edición Rápida de Comida</span>
+            <button onclick="cancelManualMealEdit()" class="text-[10px] text-slate-400 hover:text-rose-500 font-bold">Cerrar</button>
+          </div>
+          <input id="manualMealNameInput" type="text" placeholder="Ej. Desayuno: 2 scoops proteína + avena" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none">
+          <div class="grid grid-cols-4 gap-1.5">
+            <div>
+              <label class="text-[9px] text-slate-400 font-bold block text-center mb-0.5">Kcal</label>
+              <input id="manualMealKcalInput" type="number" placeholder="350" class="w-full px-2 py-1.5 rounded-xl bg-white dark:bg-slate-900 font-bold text-center outline-none">
+            </div>
+            <div>
+              <label class="text-[9px] text-rose-400 font-bold block text-center mb-0.5">Prot (g)</label>
+              <input id="manualMealProtInput" type="number" placeholder="45" class="w-full px-2 py-1.5 rounded-xl bg-white dark:bg-slate-900 font-bold text-center outline-none">
+            </div>
+            <div>
+              <label class="text-[9px] text-amber-400 font-bold block text-center mb-0.5">Carbs (g)</label>
+              <input id="manualMealCarbInput" type="number" placeholder="30" class="w-full px-2 py-1.5 rounded-xl bg-white dark:bg-slate-900 font-bold text-center outline-none">
+            </div>
+            <div>
+              <label class="text-[9px] text-emerald-400 font-bold block text-center mb-0.5">Grasa (g)</label>
+              <input id="manualMealFatInput" type="number" placeholder="6" class="w-full px-2 py-1.5 rounded-xl bg-white dark:bg-slate-900 font-bold text-center outline-none">
+            </div>
+          </div>
+          <button onclick="saveManualMealEntry()" class="w-full py-2 bg-terra-500 hover:bg-terra-600 text-white font-extrabold rounded-xl shadow-sm">Guardar Platillo</button>
+        </div>
+
         <div id="mealsList" class="space-y-2"></div>
       </div>
 
@@ -724,9 +760,213 @@
       </div>
     </section>
 
-    <!-- ==================== PESTAÑA 2: TRABAJO, TAREAS & GENERADOR PDF OFICIAL ==================== -->
+    <!-- ==================== PESTAÑA 2: HUB DE TRABAJO (AGENDA DIARIA + CORREO/WHATS TICKETS & SESIONES + TAREAS & PDF OFICIAL) ==================== -->
     <section id="tab-focus" class="space-y-4 hidden">
 
+      <!-- TARJETA RESUMEN EJECUTIVO DEL DÍA LABORAL -->
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3 card-minimal-anim">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-10 h-10 rounded-2xl bg-blue-500/15 text-blue-400 flex items-center justify-center text-base shrink-0">
+              <i class="fi fi-rr-briefcase"></i>
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-blue-400">Hub Laboral Anti-Olvidos</span>
+                <span id="workShiftStatusBadge" class="text-[9px] font-black px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400">09:00 - 18:00</span>
+              </div>
+              <h2 class="text-sm sm:text-base font-black truncate">Agenda, Correo/Whats (Tickets & Sesiones) y PDF</h2>
+            </div>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button onclick="sendDailyWorkBriefToWhatsApp()" class="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-extrabold flex items-center gap-1 shadow-sm" title="Enviar resumen del trabajo a mi WhatsApp">
+              <i class="fi fi-rr-paper-plane"></i> <span>A mi Whats</span>
+            </button>
+            <button onclick="downloadMasterNativeAlarmsICS()" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[10px] font-extrabold flex items-center gap-1" title="Sincronizar alarmas en el calendario/reloj del celular">
+              <i class="fi fi-rr-calendar-clock"></i> <span>Alarmas 24/7</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div onclick="switchFocusSubTab('inbox'); filterWorkInbox('ticket')" class="cursor-pointer p-2 rounded-2xl bg-rose-500/10 border border-rose-500/25">
+            <span class="text-[9px] font-extrabold uppercase text-rose-400 block">🎫 Tickets Abiertos</span>
+            <span id="summaryOpenTicketsCount" class="text-sm font-black text-rose-400">0</span>
+          </div>
+          <div onclick="switchFocusSubTab('inbox'); filterWorkInbox('session')" class="cursor-pointer p-2 rounded-2xl bg-sky-500/10 border border-sky-500/25">
+            <span class="text-[9px] font-extrabold uppercase text-sky-400 block">📹 Sesiones Hoy</span>
+            <span id="summaryTodaySessionsCount" class="text-sm font-black text-sky-400">0</span>
+          </div>
+          <div onclick="switchFocusSubTab('tasks')" class="cursor-pointer p-2 rounded-2xl bg-amber-500/10 border border-amber-500/25">
+            <span class="text-[9px] font-extrabold uppercase text-amber-400 block">📋 Tareas PDF</span>
+            <span id="summaryPendingTasksCount" class="text-sm font-black text-amber-400">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- BARRA ESTÁTICA DE SUB-SECCIONES DE TRABAJO (ESTILO SEGMENTADO FIJO ARRIBA) -->
+      <div class="grid grid-cols-3 gap-1.5 bg-white dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs font-extrabold shadow-sm">
+        <button onclick="switchFocusSubTab('agenda')" id="fsub-agenda" class="py-2 px-2 rounded-xl bg-terra-500 text-white shadow-sm transition flex items-center justify-center gap-1.5">
+          <i class="fi fi-rr-calendar-clock text-xs"></i>
+          <span class="truncate">Agenda & Horario</span>
+        </button>
+        <button onclick="switchFocusSubTab('inbox')" id="fsub-inbox" class="py-2 px-2 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-center gap-1.5">
+          <i class="fi fi-rr-envelope text-xs"></i>
+          <span class="truncate">Correo & Whats</span>
+          <span id="focusInboxBadgeCount" class="hidden px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black">0</span>
+        </button>
+        <button onclick="switchFocusSubTab('tasks')" id="fsub-tasks" class="py-2 px-2 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-center gap-1.5">
+          <i class="fi fi-rr-file-pdf text-xs"></i>
+          <span class="truncate">Tareas & PDF</span>
+        </button>
+      </div>
+
+      <!-- SUB-SECCIÓN 1: AGENDA DIARIA POR HORARIOS Y BLOQUES DE TRABAJO -->
+      <div id="focusSubView-agenda" class="space-y-4 subview-anim-enter">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3.5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <span class="text-[10px] font-extrabold uppercase text-sky-400 block">Planificador Diario por Bloques</span>
+              <h3 class="font-extrabold text-sm">Mi Horario de Trabajo y Agenda del Día</h3>
+              <p class="text-[11px] text-slate-400">Mete tu horario laboral, agrega tareas manuales por hora o deja que la IA acomode tus tickets, sesiones y pendientes.</p>
+            </div>
+            <button onclick="autoOrganizeDayScheduleWithAI()" id="btnAutoScheduleAI" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-black shadow transition flex items-center gap-1.5">
+              <i class="fi fi-rr-magic-wand"></i> <span>Auto-Agendar Día con IA</span>
+            </button>
+          </div>
+
+          <!-- Configuración de Horario de Trabajo -->
+          <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 grid grid-cols-2 sm:grid-cols-4 gap-2 items-end text-xs">
+            <div>
+              <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Entrada Trabajo</label>
+              <input type="time" id="workStartHourInput" value="09:00" onchange="saveWorkHoursConfig()" class="w-full px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none">
+            </div>
+            <div>
+              <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Salida Trabajo</label>
+              <input type="time" id="workEndHourInput" value="18:00" onchange="saveWorkHoursConfig()" class="w-full px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none">
+            </div>
+            <button onclick="importPendingTasksAndTicketsToSchedule()" class="py-2 px-2.5 rounded-xl bg-blue-500/15 text-blue-400 border border-blue-500/30 font-extrabold text-[11px] hover:bg-blue-500/25 transition">
+              📥 Traer Tickets y Tareas
+            </button>
+            <button onclick="clearCompletedScheduleBlocks()" class="py-2 px-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-[11px] transition">
+              Limpiar Terminados
+            </button>
+          </div>
+
+          <!-- Agregar Bloque Manual a la Agenda -->
+          <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 space-y-2">
+            <span class="text-[10px] font-extrabold uppercase text-slate-400 block">+ Agregar Bloque o Tarea Manual a tu Agenda de Hoy</span>
+            <div class="grid grid-cols-2 sm:grid-cols-6 gap-2 text-xs">
+              <input type="time" id="schedBlockStart" value="09:00" class="px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none" title="Hora inicio">
+              <input type="time" id="schedBlockEnd" value="10:00" class="px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none" title="Hora fin">
+              <select id="schedBlockType" class="px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none">
+                <option value="ticket">🎫 Ticket / Bug</option>
+                <option value="session">📹 Sesión / Junta</option>
+                <option value="task">📌 Tarea / Formato</option>
+                <option value="break">☕ Comida / Pausa</option>
+              </select>
+              <input type="text" id="schedBlockTitle" onkeydown="if(event.key==='Enter') addManualScheduleBlock()" placeholder="Descripción de la actividad, sesión o ticket..." class="col-span-2 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-semibold outline-none">
+              <button onclick="addManualScheduleBlock()" class="py-2 px-3 rounded-xl bg-terra-500 hover:bg-terra-600 text-white font-black text-xs shadow-sm transition">+ Agendar</button>
+            </div>
+          </div>
+
+          <!-- Línea de Tiempo del Día -->
+          <div id="dailyScheduleTimeline" class="space-y-2.5 pt-1"></div>
+        </div>
+      </div>
+
+      <!-- SUB-SECCIÓN 2: CONEXIÓN DE CORREO & WHATSAPP LABORAL (SOLO TRABAJO: TICKETS, SESIONES Y PENDIENTES) -->
+      <div id="focusSubView-inbox" class="space-y-4 hidden subview-anim-enter">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-4">
+          <div>
+            <span class="text-[10px] font-extrabold uppercase text-emerald-400 block">Sincronizador Inteligente de Correo y WhatsApp</span>
+            <h3 class="font-extrabold text-sm">Detector de Tickets, Sesiones y Pendientes (Solo Trabajo)</h3>
+            <p class="text-[11px] text-slate-400">Conecta tu correo y número o pega cualquier correo/mensaje de WhatsApp o captura: la IA ignora pláticas personales y ordena únicamente tus Tickets, Sesiones y Tareas del trabajo.</p>
+          </div>
+
+          <!-- Configuración de Correo y Número de WhatsApp -->
+          <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+            <div>
+              <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">📧 Mi Correo Laboral</label>
+              <input type="email" id="workEmailConfigInput" placeholder="ejemplo@empresa.com" onchange="saveWorkContactSyncConfig()" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-semibold outline-none">
+            </div>
+            <div>
+              <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">📱 Mi WhatsApp (código país + núm)</label>
+              <input type="tel" id="workPhoneConfigInput" placeholder="Ej. 525512345678" onchange="saveWorkContactSyncConfig()" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-semibold outline-none">
+            </div>
+            <div>
+              <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">🔍 Palabras Clave del Trabajo</label>
+              <input type="text" id="workKeywordsConfigInput" placeholder="Ticket, Jira, Sesión, PLS, Lucia, Urgente..." onchange="saveWorkContactSyncConfig()" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-semibold outline-none">
+            </div>
+          </div>
+
+          <!-- Escáner IA de Correos, Mensajes de WhatsApp y Capturas -->
+          <div class="p-4 rounded-2xl bg-blue-500/5 border border-blue-500/30 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-xs font-black text-blue-400 flex items-center gap-1.5">
+                <i class="fi fi-rr-sparkles"></i>
+                <span>Pegar Correos / Mensajes de WhatsApp o Subir Captura</span>
+              </span>
+              <div class="flex items-center gap-2">
+                <label class="cursor-pointer px-3 py-1.5 rounded-xl bg-blue-500/15 text-blue-400 border border-blue-500/30 text-[10px] font-extrabold flex items-center gap-1">
+                  <i class="fi fi-rr-camera"></i>
+                  <span>Foto de Correo/Whats</span>
+                  <input type="file" id="workInboxImageInput" accept="image/*" class="hidden" onchange="handleWorkInboxImageUpload(event)">
+                </label>
+                <span id="workInboxImageBadge" class="hidden text-[10px] font-extrabold text-emerald-400">✓ Captura lista</span>
+              </div>
+            </div>
+
+            <textarea id="rawWorkInboxPaste" rows="3" placeholder="Pega aquí correos del trabajo, mensajes de WhatsApp de tu jefa/equipo o alertas de tickets. La IA filtrará solo lo laboral y lo separará en Tickets, Sesiones y Pendientes con hora..." class="w-full p-3 rounded-xl bg-white dark:bg-slate-900 text-xs outline-none border border-slate-200 dark:border-slate-700"></textarea>
+
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <button onclick="loadSampleWorkEmailsAndWhats()" class="text-[11px] font-bold text-slate-400 hover:text-blue-400 underline">
+                Cargar ejemplo de Correo + WhatsApp laboral
+              </button>
+              <button onclick="extractWorkItemsWithAI(true)" id="btnScanWorkInboxAI" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-md transition flex items-center gap-1.5">
+                <i class="fi fi-rr-bolt"></i>
+                <span>Extraer Tickets/Sesiones y Sincronizar Agenda</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Registro Manual Rápido de Ticket / Sesión / Pendiente -->
+          <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-2">
+            <span class="text-[10px] font-extrabold uppercase text-slate-400 block">+ Agregar Ticket, Sesión o Pendiente Manualmente</span>
+            <div class="grid grid-cols-2 sm:grid-cols-6 gap-2 text-xs">
+              <select id="manualWorkItemCategory" class="px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none">
+                <option value="ticket">🎫 Ticket</option>
+                <option value="session">📹 Sesión / Junta</option>
+                <option value="task">📌 Pendiente</option>
+              </select>
+              <input type="text" id="manualWorkItemCode" placeholder="Folio (ej. TK-104)" class="px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-semibold outline-none">
+              <input type="text" id="manualWorkItemTitle" onkeydown="if(event.key==='Enter') addManualWorkInboxItem()" placeholder="Asunto del ticket, sesión o correo..." class="col-span-2 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-semibold outline-none">
+              <input type="time" id="manualWorkItemTime" value="11:00" class="px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none">
+              <button onclick="addManualWorkInboxItem()" class="py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs transition">+ Guardar</button>
+            </div>
+          </div>
+
+          <!-- Filtros por Categoría + Envío a WhatsApp y Correo -->
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex flex-wrap gap-1.5">
+              <button onclick="filterWorkInbox('all')" id="winbox-filter-all" class="px-3 py-1.5 rounded-xl text-[11px] font-black bg-terra-500 text-white">Todos</button>
+              <button onclick="filterWorkInbox('ticket')" id="winbox-filter-ticket" class="px-3 py-1.5 rounded-xl text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-400">🎫 Tickets</button>
+              <button onclick="filterWorkInbox('session')" id="winbox-filter-session" class="px-3 py-1.5 rounded-xl text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-400">📹 Sesiones</button>
+              <button onclick="filterWorkInbox('task')" id="winbox-filter-task" class="px-3 py-1.5 rounded-xl text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-400">📌 Pendientes</button>
+            </div>
+            <div class="flex gap-1.5">
+              <button onclick="sendDailyWorkBriefToWhatsApp()" class="px-2.5 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px] font-extrabold">📲 Mandar a mi Whats</button>
+              <button onclick="sendDailyWorkBriefToEmail()" class="px-2.5 py-1.5 rounded-xl bg-blue-500/15 text-blue-400 border border-blue-500/30 text-[10px] font-extrabold">📧 Mandar a mi Correo</button>
+            </div>
+          </div>
+
+          <!-- Lista de Elementos Laborales Extraídos -->
+          <div id="workInboxItemsList" class="space-y-2.5"></div>
+        </div>
+      </div>
+
+      <!-- SUB-SECCIÓN 3: TAREAS OFICIALES, POMODORO Y GENERADOR PDF (100% PRESERVADO) -->
+      <div id="focusSubView-tasks" class="space-y-4 hidden subview-anim-enter">
       <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
         <div>
           <span id="pomoStatusBadge" class="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-full font-bold">Deep Focus 25m</span>
@@ -802,6 +1042,198 @@
             <button onclick="downloadWorkFormatCSV()" class="py-2 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5">
               <i class="fi fi-rr-file-excel"></i> <span>Bajar Excel (CSV)</span>
             </button>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+
+    <!-- ==================== PESTAÑA NUEVA: GESTIÓN DE GASTOS, COBROS, DEUDAS Y PLAN ANTI-PRESIÓN ==================== -->
+    <section id="tab-finance" class="space-y-4 hidden">
+
+      <!-- TABLERO DE PAZ FINANCIERA (SIEMPRE VISIBLE ARRIBA) -->
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border-2 border-emerald-500/35 space-y-4 card-minimal-anim">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-400">🛡️ Escudo Anti-Presión Financiera</span>
+              <span id="financePeaceSemaphoreBadge" class="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400">En Control</span>
+            </div>
+            <h2 class="text-base sm:text-lg font-black mt-0.5">Mis Cobros, Deudas y Gasto Diario Seguro</h2>
+            <p id="nextPaydayCountdownText" class="text-[11px] text-slate-400">Calcula cuánto apartar para tus pagos y cuánto puedes gastar por día con total tranquilidad.</p>
+          </div>
+          <button onclick="downloadMasterNativeAlarmsICS()" class="px-3 py-2 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px] font-extrabold flex items-center gap-1.5 shrink-0">
+            <i class="fi fi-rr-calendar-clock"></i> <span>Alarmas de Pago (.ICS)</span>
+          </button>
+        </div>
+
+        <!-- 4 KPIs Financieros -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-emerald-500/25">
+            <span class="text-[10px] font-bold uppercase text-slate-400 block">Ingresos del Mes</span>
+            <span id="finKpiTotalIncome" class="text-base sm:text-lg font-black text-emerald-400">$0</span>
+            <span id="finKpiNextIncomeSub" class="text-[10px] text-slate-400 block truncate">Próximo cobro: --</span>
+          </div>
+          <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-rose-500/25">
+            <span class="text-[10px] font-bold uppercase text-slate-400 block">Deudas + Gastos</span>
+            <span id="finKpiTotalObligations" class="text-base sm:text-lg font-black text-rose-400">$0</span>
+            <span id="finKpiDebtCountSub" class="text-[10px] text-slate-400 block truncate">0 pagos pendientes</span>
+          </div>
+          <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-sky-500/25">
+            <span class="text-[10px] font-bold uppercase text-slate-400 block">Liquidez Libre Real</span>
+            <span id="finKpiFreeCash" class="text-base sm:text-lg font-black text-sky-400">$0</span>
+            <span class="text-[10px] text-slate-400 block truncate">Después de pagos</span>
+          </div>
+          <div class="p-3 rounded-2xl bg-indigo-500/15 border border-indigo-500/35">
+            <span class="text-[10px] font-extrabold uppercase text-indigo-300 block">✨ Gasto Diario Seguro</span>
+            <span id="finKpiSafeDailySpend" class="text-base sm:text-lg font-black text-indigo-300">$0 / día</span>
+            <span id="finKpiDaysUntilPaySub" class="text-[10px] text-indigo-300/80 block truncate">Sin tocar tus deudas</span>
+          </div>
+        </div>
+
+        <!-- Barra de Distribución del Dinero -->
+        <div class="space-y-1">
+          <div class="flex justify-between text-[10px] font-bold text-slate-400">
+            <span id="finBarLabelUsed">Comprometido: 0%</span>
+            <span id="finBarLabelFree">Libre: 100%</span>
+          </div>
+          <div class="w-full bg-slate-200 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden flex">
+            <div id="finBarDebtsSeg" class="bg-rose-500 h-full transition-all duration-500" style="width:0%"></div>
+            <div id="finBarExpensesSeg" class="bg-amber-400 h-full transition-all duration-500" style="width:0%"></div>
+            <div id="finBarFreeSeg" class="bg-emerald-500 h-full transition-all duration-500" style="width:100%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BARRA ESTÁTICA DE SUB-SECCIONES FINANCIERAS -->
+      <div class="grid grid-cols-3 gap-1.5 bg-white dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs font-extrabold shadow-sm">
+        <button onclick="switchFinanceSubTab('cashflow')" id="finsub-cashflow" class="py-2 px-2 rounded-xl bg-terra-500 text-white shadow-sm transition flex items-center justify-center gap-1.5">
+          <i class="fi fi-rr-coins text-xs"></i>
+          <span class="truncate">Cobros & Gastos</span>
+        </button>
+        <button onclick="switchFinanceSubTab('debts')" id="finsub-debts" class="py-2 px-2 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-center gap-1.5">
+          <i class="fi fi-rr-credit-card text-xs"></i>
+          <span class="truncate">Deudas & Fechas</span>
+          <span id="financeUrgentDebtsBadge" class="hidden px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black">0</span>
+        </button>
+        <button onclick="switchFinanceSubTab('peaceplan')" id="finsub-peaceplan" class="py-2 px-2 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-center gap-1.5">
+          <i class="fi fi-rr-shield-check text-xs"></i>
+          <span class="truncate">Plan Anti-Presión</span>
+        </button>
+      </div>
+
+      <!-- SUB-VISTA FINANZAS 1: CUÁNDO Y CUÁNTO COBRO + GASTOS -->
+      <div id="financeSubView-cashflow" class="space-y-4 subview-anim-enter">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3.5">
+          <div>
+            <span class="text-[10px] font-extrabold uppercase text-emerald-400 block">💰 Calendario de Entradas de Dinero</span>
+            <h3 class="font-extrabold text-sm">¿Cuándo y cuánto cobras?</h3>
+            <p class="text-[11px] text-slate-400">Registra tus quincenas, pagos o bonos. Con un clic en "¡Ya cobré!" se actualiza automáticamente a tu siguiente fecha de pago.</p>
+          </div>
+
+          <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
+            <input type="text" id="finIncomeNameInput" placeholder="Concepto (ej. Quincena Nómina)" class="col-span-2 sm:col-span-1 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-semibold outline-none">
+            <input type="number" id="finIncomeAmountInput" placeholder="Monto ($)" class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold text-emerald-400 outline-none">
+            <select id="finIncomeFreqSelect" class="px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none">
+              <option value="Quincenal">Quincenal (15 días)</option>
+              <option value="Mensual">Mensual</option>
+              <option value="Semanal">Semanal</option>
+              <option value="Único">Cobro Único</option>
+            </select>
+            <input type="date" id="finIncomeDateInput" class="px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none" title="Próxima fecha de cobro">
+            <button onclick="addFinanceIncome()" class="col-span-2 sm:col-span-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs transition shadow-sm">+ Guardar Cobro</button>
+          </div>
+
+          <div id="financeIncomesList" class="space-y-2"></div>
+        </div>
+
+        <!-- Gastos Fijos y Variables -->
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-[10px] font-extrabold uppercase text-amber-400 block">🧾 Registro de Salidas</span>
+              <h3 class="font-extrabold text-sm">Gastos Fijos y del Día a Día</h3>
+            </div>
+            <span id="financeExpensesTotalBadge" class="text-xs font-black text-amber-400 bg-amber-500/15 px-3 py-1 rounded-xl">Total: $0</span>
+          </div>
+
+          <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
+            <input type="text" id="finExpenseNameInput" onkeydown="if(event.key==='Enter') addFinanceExpense()" placeholder="Gasto (ej. Renta, Internet, Súper, Uber...)" class="col-span-2 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-semibold outline-none">
+            <input type="number" id="finExpenseAmountInput" onkeydown="if(event.key==='Enter') addFinanceExpense()" placeholder="Monto ($)" class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold text-amber-400 outline-none">
+            <select id="finExpenseCategorySelect" class="px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none">
+              <option value="Fijo Necesario">🏠 Fijo Necesario</option>
+              <option value="Comida/Súper">🛒 Comida / Súper</option>
+              <option value="Transporte">🚗 Transporte</option>
+              <option value="Gustos/Hormiga">☕ Gusto / Hormiga</option>
+            </select>
+            <button onclick="addFinanceExpense()" class="col-span-2 sm:col-span-1 py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition shadow-sm">+ Gasto</button>
+          </div>
+
+          <div id="financeExpensesList" class="space-y-2 max-h-80 overflow-y-auto"></div>
+        </div>
+      </div>
+
+      <!-- SUB-VISTA FINANZAS 2: MIS DEUDAS Y FECHAS LÍMITE DE PAGO -->
+      <div id="financeSubView-debts" class="space-y-4 hidden subview-anim-enter">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3.5">
+          <div>
+            <span class="text-[10px] font-extrabold uppercase text-rose-400 block">💳 Control de Tarjetas, Préstamos y Fechas de Pago</span>
+            <h3 class="font-extrabold text-sm">Mis Deudas y Fechas Límite (Cero Intereses)</h3>
+            <p class="text-[11px] text-slate-400">Ordenadas por urgencia de vencimiento. Al marcar una deuda como pagada este mes, se descuenta automáticamente de tu saldo total.</p>
+          </div>
+
+          <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2.5 text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <input type="text" id="finDebtNameInput" placeholder="Nombre deuda (ej. Tarjeta Nu, BBVA, Crédito...)" class="sm:col-span-2 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-semibold outline-none">
+              <select id="finDebtPrioritySelect" class="px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none">
+                <option value="Alta (Interés Alto)">🔥 Prioridad Alta (Interés Caro)</option>
+                <option value="Media (Meses sin Intereses)">⚡ Media (MSI / Fijo)</option>
+                <option value="Baja (Sin interés)">🌱 Baja (Sin interés)</option>
+              </select>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 items-end">
+              <div>
+                <label class="text-[9px] font-bold uppercase text-slate-400 block mb-0.5">Deuda Total ($)</label>
+                <input type="number" id="finDebtTotalInput" placeholder="Ej. 12000" class="w-full px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none">
+              </div>
+              <div>
+                <label class="text-[9px] font-bold uppercase text-slate-400 block mb-0.5">Pago del Mes ($)</label>
+                <input type="number" id="finDebtMinPayInput" placeholder="Ej. 1800" class="w-full px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold text-rose-400 outline-none">
+              </div>
+              <div>
+                <label class="text-[9px] font-bold uppercase text-slate-400 block mb-0.5">Día Corte (opc)</label>
+                <input type="number" id="finDebtCutDayInput" min="1" max="31" placeholder="Ej. 15" class="w-full px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none">
+              </div>
+              <div>
+                <label class="text-[9px] font-bold uppercase text-slate-400 block mb-0.5">Fecha Límite Pago</label>
+                <input type="date" id="finDebtDueDateInput" class="w-full px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold text-amber-400 outline-none">
+              </div>
+              <button onclick="addFinanceDebt()" class="col-span-2 sm:col-span-1 py-2 px-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs transition shadow-sm">+ Guardar Deuda</button>
+            </div>
+          </div>
+
+          <div id="financeDebtsList" class="space-y-2.5"></div>
+        </div>
+      </div>
+
+      <!-- SUB-VISTA FINANZAS 3: PLANIFICADOR ANTI-PRESIÓN (QUÉ PAGAR CON CADA QUINCENA + ASESOR IA) -->
+      <div id="financeSubView-peaceplan" class="space-y-4 hidden subview-anim-enter">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <span class="text-[10px] font-extrabold uppercase text-indigo-400 block">🧘 Estratega Anti-Estrés Financiero</span>
+              <h3 class="font-extrabold text-sm">¿Qué deuda pagar con cada cobro para no sentir presión?</h3>
+              <p class="text-[11px] text-slate-400">Cruza tus fechas de cobro con tus fechas límite de pago y genera tu plan paso a paso con IA.</p>
+            </div>
+            <button onclick="generateFinancePeacePlanWithAI()" id="btnGeneratePeacePlanAI" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs shadow-md transition flex items-center gap-1.5">
+              <i class="fi fi-rr-sparkles"></i> <span>Generar Plan Anti-Presión con IA</span>
+            </button>
+          </div>
+
+          <div id="financePaycheckAllocationBox" class="space-y-2.5"></div>
+
+          <div id="financeAiPeacePlanOutput" class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-indigo-500/25 text-xs leading-relaxed space-y-2">
+            <p class="text-slate-400">Presiona <strong>"Generar Plan Anti-Presión con IA"</strong> para que el asesor analice tus cobros, deudas y gastos y te diga exactamente cómo organizar tu quincena sin quedarte corto.</p>
           </div>
         </div>
       </div>
@@ -1142,8 +1574,15 @@
           Generar Semana (3 Comidas con Macros) y Lista del Súper
         </button>
 
-        <div class="pt-3">
-          <h3 class="font-extrabold text-xs uppercase text-slate-400 mb-2">Lista del Súper</h3>
+        <div class="pt-3 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <h3 class="font-extrabold text-xs uppercase text-slate-400">Lista del Súper</h3>
+            <button onclick="clearCheckedGroceries()" class="text-[10px] font-bold text-rose-400 hover:text-rose-500">Limpiar comprados</button>
+          </div>
+          <div class="flex gap-2">
+            <input id="manualGroceryInput" type="text" onkeydown="if(event.key==='Enter') addManualGrocery()" placeholder="Agregar artículo manual al súper (ej. 1kg Pechuga, Café)..." class="flex-1 px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 outline-none">
+            <button onclick="addManualGrocery()" class="px-3.5 py-2 bg-terra-500 text-white rounded-xl font-black text-xs">+</button>
+          </div>
           <div id="groceryList" class="space-y-2"></div>
         </div>
 
@@ -1304,19 +1743,38 @@
           <input id="streakReminderTimeInput" type="time" value="20:00" onchange="saveStreakReminderTime(this.value)" class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 font-black text-center text-terra-500 outline-none border border-terra-500/30">
         </div>
 
-        <div class="grid grid-cols-2 gap-2">
-          <button onclick="enableBrowserNotifications()" class="py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm">
+        <!-- CAPA 1: CANAL PUSH EN LA NUBE CON PROGRAMACIÓN REMOTA (LLEGA CON LA APP/NAVEGADOR 100% CERRADO) -->
+        <div class="p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800/90 border border-indigo-500/35 space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[10px] font-black uppercase text-indigo-400">☁️ Push Cloud Programado (Funciona con Navegador Cerrado)</span>
+            <button onclick="autoGenerateNtfyTopic()" class="text-[10px] font-extrabold text-blue-400 underline">Generar canal único</button>
+          </div>
+          <p class="text-[10px] text-slate-400 leading-relaxed">
+            Los navegadores móviles suspenden las páginas al cerrarlas. Para que te lleguen avisos con el navegador cerrado, instala la app gratuita <strong>ntfy</strong> (iOS/Android), suscríbete a tu canal de abajo y cada tarea, bloque de agenda o pago se programará en el servidor nube (<code>At:</code>) para sonar a la hora exacta:
+          </p>
+          <div class="flex flex-wrap gap-1.5">
+            <input id="ntfyTopicInput" type="text" placeholder="Ej. allan_tcc_alertas_2026" onchange="saveNtfyTopicConfig(this.value)" class="flex-1 min-w-[160px] px-3 py-2 rounded-xl bg-white dark:bg-slate-900 text-xs font-mono font-bold outline-none border border-slate-300 dark:border-slate-700">
+            <button onclick="scheduleCloudPushTestIn10Sec()" class="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black shrink-0 shadow-sm">
+              Probar en 10s (Sal de la App)
+            </button>
+          </div>
+        </div>
+
+        <!-- CAPA 2 Y 3: MODO SEGUNDO PLANO ACTIVO + SINCRONIZADOR MAESTRO .ICS -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <button onclick="enableBrowserNotifications()" class="py-2.5 px-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm">
             <i class="fi fi-rr-bell"></i>
             <span>Permiso Push Web</span>
           </button>
-          <button onclick="downloadStreakNativePhoneAlarm()" class="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm">
+          <button onclick="toggleBackgroundKeepAliveMode()" id="btnKeepAliveToggle" class="py-2.5 px-3 bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm">
+            <i class="fi fi-rr-volume"></i>
+            <span>2. Segundo Plano: OFF</span>
+          </button>
+          <button onclick="downloadMasterNativeAlarmsICS()" class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm">
             <i class="fi fi-rr-calendar-clock"></i>
             <span>Alarma Nativa Celular</span>
           </button>
         </div>
-        <p class="text-[10px] text-slate-400 leading-relaxed">
-          Activa aquí el <strong>Permiso Push Web</strong> (Service Worker) y descarga la <strong>Alarma Nativa Celular</strong> para que tu teléfono te avise puntualmente de tus tareas y antes de que se corte tu racha de estudio, incluso cuando el navegador esté cerrado.
-        </p>
       </div>
 
       <!-- Calculadora IA de Calorías -->
@@ -1428,19 +1886,73 @@
       } catch (e) {}
     })();
 
-    // ==================== CONFIGURACIÓN DEL CALENDARIO ====================
-    const DAYS_CONFIG = [
-      { id: '2026-10-19', label: 'Lun 19', dayName: 'Lunes', short: 'L' },
-      { id: '2026-10-20', label: 'Mar 20', dayName: 'Martes', short: 'M' },
-      { id: '2026-10-21', label: 'Mié 21', dayName: 'Miércoles', short: 'M' },
-      { id: '2026-10-22', label: 'Jue 22', dayName: 'Jueves', short: 'J' },
-      { id: '2026-10-23', label: 'Vie 23', dayName: 'Viernes', short: 'V' },
-      { id: '2026-10-24', label: 'Sáb 24', dayName: 'Sábado', short: 'S' },
-      { id: '2026-10-25', label: 'Dom 25', dayName: 'Domingo', short: 'D' },
-      { id: '2026-10-26', label: 'Lun 26', dayName: 'Lunes', short: 'L' },
-      { id: '2026-10-27', label: 'Mar 27', dayName: 'Martes', short: 'M' },
-      { id: '2026-10-28', label: 'Mié 28', dayName: 'Miércoles', short: 'M' }
-    ];
+    // ==================== CONFIGURACIÓN DINÁMICA DEL CALENDARIO ====================
+    const DAY_NAMES_ES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const DAY_LABELS_SHORT_ES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    const DAY_SINGLE_SHORT_ES = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
+
+    function formatIsoDateLocal(dObj) {
+      const yyyy = dObj.getFullYear();
+      const mm = String(dObj.getMonth() + 1).padStart(2, '0');
+      const dd = String(dObj.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function getLocalTodayIso() {
+      return formatIsoDateLocal(new Date());
+    }
+
+    function buildDynamicDaysConfig() {
+      const seedDays = [
+        { id: '2026-10-19', label: 'Lun 19', dayName: 'Lunes', short: 'L' },
+        { id: '2026-10-20', label: 'Mar 20', dayName: 'Martes', short: 'M' },
+        { id: '2026-10-21', label: 'Mié 21', dayName: 'Miércoles', short: 'M' },
+        { id: '2026-10-22', label: 'Jue 22', dayName: 'Jueves', short: 'J' },
+        { id: '2026-10-23', label: 'Vie 23', dayName: 'Viernes', short: 'V' },
+        { id: '2026-10-24', label: 'Sáb 24', dayName: 'Sábado', short: 'S' },
+        { id: '2026-10-25', label: 'Dom 25', dayName: 'Domingo', short: 'D' },
+        { id: '2026-10-26', label: 'Lun 26', dayName: 'Lunes', short: 'L' },
+        { id: '2026-10-27', label: 'Mar 27', dayName: 'Martes', short: 'M' },
+        { id: '2026-10-28', label: 'Mié 28', dayName: 'Miércoles', short: 'M' }
+      ];
+      const existingIds = new Set(seedDays.map(d => d.id));
+      const list = [...seedDays];
+
+      const now = new Date();
+      const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const futureLimit = new Date(Math.max(todayMidnight.getTime(), new Date(2026, 9, 28).getTime()));
+      futureLimit.setDate(futureLimit.getDate() + 10);
+
+      const cur = new Date(2026, 9, 29);
+      while (cur <= futureLimit || list.length % 7 !== 0) {
+        const iso = formatIsoDateLocal(cur);
+        if (!existingIds.has(iso)) {
+          const wIdx = cur.getDay();
+          const ddNum = cur.getDate();
+          list.push({
+            id: iso,
+            label: `${DAY_LABELS_SHORT_ES[wIdx]} ${ddNum}`,
+            dayName: DAY_NAMES_ES[wIdx],
+            short: DAY_SINGLE_SHORT_ES[wIdx]
+          });
+          existingIds.add(iso);
+        }
+        cur.setDate(cur.getDate() + 1);
+        if (list.length > 90) break;
+      }
+      return list;
+    }
+
+    const DAYS_CONFIG = buildDynamicDaysConfig();
+
+    // Devuelve los 7 días (Lunes a Domingo) de la semana a la que pertenece currentDay
+    function getActiveWeekDays(currentDayId) {
+      const idx = DAYS_CONFIG.findIndex(d => d.id === currentDayId);
+      if (idx === -1) return DAYS_CONFIG.slice(0, 7);
+      const weekStartIdx = Math.floor(idx / 7) * 7;
+      const slice = DAYS_CONFIG.slice(weekStartIdx, weekStartIdx + 7);
+      return slice.length === 7 ? slice : DAYS_CONFIG.slice(0, 7);
+    }
 
     const GOAL_LABELS = {
       deficit: 'Pérdida de grasa corporal y definición (Déficit)',
@@ -1450,9 +1962,11 @@
     };
 
     function createDefaultState() {
+      const todayIso = getLocalTodayIso();
+      const defaultDay = DAYS_CONFIG.some(d => d.id === todayIso) ? todayIso : '2026-10-23';
       const state = {
         theme: 'dark',
-        currentDay: '2026-10-22',
+        currentDay: defaultDay,
         apiKey: '',
         selectedModel: 'gemini-3.8-live-extended-thinking',
         thinkingLevel: 'HIGH',
@@ -1477,7 +1991,40 @@
           goal: 'Dominar los fundamentos paso a paso',
           lessonsCompleted: 0,
           streak: 1,
-          lastLesson: null
+          lastLesson: null,
+          deletedSubjectsRegistry: [],
+          subjectsModifiedAt: 0
+        },
+        ntfyTopic: '',
+        workHub: {
+          workStartHour: '09:00',
+          workEndHour: '18:00',
+          workEmail: '',
+          workPhone: '',
+          workKeywords: 'Ticket, Jira, Sesión, Junta, Lucia, PLS, Entrega, Urgente',
+          inboxFilter: 'all',
+          scheduleBlocks: [
+            { id: 301, startTime: '09:00', endTime: '09:30', type: 'session', code: 'DAILY', title: 'Revisión de correos, tickets y prioridades del día', done: false, notified: false },
+            { id: 302, startTime: '10:00', endTime: '11:30', type: 'ticket', code: 'TK-101', title: 'Atención de tickets prioritarios y evidencias PDF', done: false, notified: false },
+            { id: 303, startTime: '14:00', endTime: '15:00', type: 'break', code: 'COMIDA', title: 'Hora de comida y descanso', done: false, notified: false }
+          ],
+          inboxItems: [
+            { id: 401, category: 'ticket', code: 'TK-101', title: 'Validar entregables pendientes y adjuntar captura en plantilla PDF', time: '10:00', sender: 'Lucia', source: 'Correo', priority: 'Alta', done: false, scheduled: true, notified: false },
+            { id: 402, category: 'session', code: 'SES-12H', title: 'Sesión de seguimiento de avances semanales', time: '12:00', sender: 'Equipo / PLS', source: 'WhatsApp', priority: 'Alta', done: false, scheduled: false, notified: false }
+          ]
+        },
+        finance: {
+          incomes: [
+            { id: 501, name: 'Quincena Nómina', amount: 12000, frequency: 'Quincenal', nextDate: defaultDay }
+          ],
+          expenses: [
+            { id: 601, name: 'Servicios Fijos / Internet', amount: 850, category: 'Fijo Necesario', date: defaultDay },
+            { id: 602, name: 'Despensa y Comida Semanal', amount: 1400, category: 'Comida/Súper', date: defaultDay }
+          ],
+          debts: [
+            { id: 701, name: 'Tarjeta de Crédito Principal', priority: 'Alta (Interés Alto)', totalBalance: 8500, minPayment: 2100, cutDay: 15, dueDate: defaultDay, paidThisMonth: false, notified: '' }
+          ],
+          aiPeacePlanHtml: ''
         },
         updatedAt: 0
       };
@@ -1554,7 +2101,7 @@
       return score;
     }
 
-    // Fusión inteligente que respeta borrados explícitos (tombstones) y timestamps (updatedAt / habitsModifiedAt)
+    // Fusión inteligente que respeta borrados explícitos (tombstones) y timestamps (updatedAt / habitsModifiedAt / subjectsModifiedAt)
     function mergeStatesNonDestructively(baseSt, incomingSt) {
       if (!incomingSt) return baseSt;
       if (!baseSt) return incomingSt;
@@ -1585,22 +2132,16 @@
 
       const baseTime = Number(baseSt.updatedAt || 0);
       const incTime = Number(incomingSt.updatedAt || 0);
+      const incomingIsNewer = incTime > baseTime;
       const baseHabitsTime = Number(baseSt.habitsModifiedAt || baseSt.updatedAt || 0);
       const incHabitsTime = Number(incomingSt.habitsModifiedAt || incomingSt.updatedAt || 0);
       const incomingHabitsNewer = incHabitsTime > baseHabitsTime;
 
-      // Unir tareas solo si el estado base estaba vacío o rescatando sin duplicar
-      if (!merged.tasks || merged.tasks.length === 0) {
+      // Tareas: el estado con updatedAt más reciente manda (para respetar eliminaciones de tareas)
+      if (incomingIsNewer && Array.isArray(incomingSt.tasks)) {
+        merged.tasks = JSON.parse(JSON.stringify(incomingSt.tasks));
+      } else if ((!merged.tasks || merged.tasks.length === 0) && baseTime === 0) {
         merged.tasks = JSON.parse(JSON.stringify(incomingSt.tasks || []));
-      } else if (baseTime === 0 && (incomingSt.tasks || []).length > 0) {
-        const existingTaskKeys = new Set((merged.tasks || []).map(t => `${t.text}_${t.project || ''}`));
-        (incomingSt.tasks || []).forEach(t => {
-          const key = `${t.text}_${t.project || ''}`;
-          if (!existingTaskKeys.has(key)) {
-            merged.tasks.push(t);
-            existingTaskKeys.add(key);
-          }
-        });
       }
 
       // Unir hábitos respetando estrictamente deletedHabitsRegistry y quién es más reciente
@@ -1615,7 +2156,6 @@
           habitMapByName.set(ln, h);
         }
       });
-      // Solo agregar hábitos secundarios si el estado más reciente no fue una modificación explícita de hábitos
       if (baseHabitsTime === 0 || incHabitsTime === 0) {
         secondaryHabits.forEach(h => {
           if (!h || !h.name) return;
@@ -1630,7 +2170,7 @@
       merged.habitsModifiedAt = Math.max(baseHabitsTime, incHabitsTime);
       merged.updatedAt = Math.max(baseTime, incTime);
 
-      // Unir días (comidas, agua, impulsos, checks de hábitos respetando desmarcados recientes)
+      // Unir días respetando quién tiene el timestamp más reciente para agua (-250 ml), comidas borradas y checks de hábitos
       if (incomingSt.days) {
         if (!merged.days) merged.days = {};
         Object.keys(incomingSt.days).forEach(dayId => {
@@ -1640,54 +2180,103 @@
             merged.days[dayId] = JSON.parse(JSON.stringify(incDay));
           } else {
             const mDay = merged.days[dayId];
-            mDay.water = Math.max(mDay.water || 0, incDay.water || 0);
-            if ((!mDay.meals || mDay.meals.length === 0) && (incDay.meals || []).length > 0 && baseTime === 0) {
-              mDay.meals = JSON.parse(JSON.stringify(incDay.meals));
+            if (incomingIsNewer) {
+              mDay.water = incDay.water || 0;
+              mDay.meals = JSON.parse(JSON.stringify(incDay.meals || []));
+              mDay.impulses = JSON.parse(JSON.stringify(incDay.impulses || []));
+            } else if (baseTime === 0) {
+              mDay.water = Math.max(mDay.water || 0, incDay.water || 0);
+              if ((!mDay.meals || mDay.meals.length === 0) && (incDay.meals || []).length > 0) {
+                mDay.meals = JSON.parse(JSON.stringify(incDay.meals));
+              }
+              if ((incDay.impulses || []).length > (mDay.impulses || []).length) {
+                mDay.impulses = incDay.impulses;
+              }
             }
-            // Para habitsState: el estado con habitsModifiedAt más reciente tiene la última palabra (permite quitar checks)
+
             if (incomingHabitsNewer) {
               mDay.habitsState = { ...(mDay.habitsState || {}), ...(incDay.habitsState || {}) };
-              // Si en incDay una llave no está o es false, asegurar que quede false
               Object.keys(mDay.habitsState).forEach(hk => {
                 if (!incDay.habitsState || incDay.habitsState[hk] === false || incDay.habitsState[hk] === undefined) {
                   mDay.habitsState[hk] = Boolean(incDay.habitsState && incDay.habitsState[hk]);
                 }
               });
             } else if (baseHabitsTime > 0) {
-              // baseSt (merged) es el más reciente: mantener exactamente los checks/unchecks de merged
               mDay.habitsState = { ...(mDay.habitsState || {}) };
             } else {
               mDay.habitsState = { ...(incDay.habitsState || {}), ...(mDay.habitsState || {}) };
-            }
-
-            if ((incDay.impulses || []).length > (mDay.impulses || []).length && baseTime === 0) {
-              mDay.impulses = incDay.impulses;
             }
           }
         });
       }
 
-      if ((incomingSt.groceries || []).length > (merged.groceries || []).length && baseTime === 0) merged.groceries = incomingSt.groceries;
+      if (incomingIsNewer && Array.isArray(incomingSt.groceries)) {
+        merged.groceries = JSON.parse(JSON.stringify(incomingSt.groceries));
+      } else if ((incomingSt.groceries || []).length > (merged.groceries || []).length && baseTime === 0) {
+        merged.groceries = incomingSt.groceries;
+      }
+
       if ((incomingSt.mealPlanStructured || []).length > (merged.mealPlanStructured || []).length) merged.mealPlanStructured = incomingSt.mealPlanStructured;
       if (!merged.lastFridgePlan && incomingSt.lastFridgePlan) merged.lastFridgePlan = incomingSt.lastFridgePlan;
+
+      // Sincronizar Profe IA respetando materias eliminadas (deletedSubjectsRegistry) y reinicios de nivel
       if (incomingSt.tutorData) {
         if (!merged.tutorData) merged.tutorData = JSON.parse(JSON.stringify(incomingSt.tutorData));
         else {
+          const deletedSubjSet = new Set([
+            ...(merged.tutorData.deletedSubjectsRegistry || []),
+            ...(incomingSt.tutorData.deletedSubjectsRegistry || [])
+          ].map(x => String(x || '').trim().toLowerCase()).filter(Boolean));
+          merged.tutorData.deletedSubjectsRegistry = Array.from(deletedSubjSet);
+
+          const baseSubjTime = Number(merged.tutorData.subjectsModifiedAt || baseTime || 0);
+          const incSubjTime = Number(incomingSt.tutorData.subjectsModifiedAt || incTime || 0);
+          const incSubjNewer = incSubjTime > baseSubjTime;
+          merged.tutorData.subjectsModifiedAt = Math.max(baseSubjTime, incSubjTime);
+
+          if (!merged.tutorData.subjectsMap) merged.tutorData.subjectsMap = {};
           if (incomingSt.tutorData.subjectsMap) {
-            if (!merged.tutorData.subjectsMap) merged.tutorData.subjectsMap = {};
             Object.keys(incomingSt.tutorData.subjectsMap).forEach(sk => {
+              if (deletedSubjSet.has(sk.toLowerCase())) return;
               const incSub = incomingSt.tutorData.subjectsMap[sk];
               const curSub = merged.tutorData.subjectsMap[sk];
-              if (!curSub || (incSub.lessons || []).length > (curSub.lessons || []).length) {
+              if (!curSub) {
+                if (baseSubjTime === 0 || incSubjNewer) {
+                  merged.tutorData.subjectsMap[sk] = JSON.parse(JSON.stringify(incSub));
+                }
+              } else if (incSubjNewer) {
+                merged.tutorData.subjectsMap[sk] = JSON.parse(JSON.stringify(incSub));
+              } else if (baseSubjTime === 0 && (incSub.lessons || []).length > (curSub.lessons || []).length) {
                 merged.tutorData.subjectsMap[sk] = JSON.parse(JSON.stringify(incSub));
               }
             });
           }
+          // Eliminar cualquier materia que esté en deletedSubjectsRegistry
+          Object.keys(merged.tutorData.subjectsMap).forEach(sk => {
+            if (deletedSubjSet.has(sk.toLowerCase())) {
+              delete merged.tutorData.subjectsMap[sk];
+            }
+          });
+
           const combinedDays = new Set([...(merged.tutorData.studyDaysHistory || []), ...(incomingSt.tutorData.studyDaysHistory || [])]);
           merged.tutorData.studyDaysHistory = Array.from(combinedDays);
           merged.tutorData.totalXp = Math.max(merged.tutorData.totalXp || 0, incomingSt.tutorData.totalXp || 0);
         }
       }
+      if (incomingIsNewer && incomingSt.workHub) {
+        merged.workHub = JSON.parse(JSON.stringify(incomingSt.workHub));
+      } else if (!merged.workHub && incomingSt.workHub) {
+        merged.workHub = JSON.parse(JSON.stringify(incomingSt.workHub));
+      }
+      if (incomingIsNewer && incomingSt.finance) {
+        merged.finance = JSON.parse(JSON.stringify(incomingSt.finance));
+      } else if (!merged.finance && incomingSt.finance) {
+        merged.finance = JSON.parse(JSON.stringify(incomingSt.finance));
+      }
+      if (!merged.ntfyTopic && incomingSt.ntfyTopic) {
+        merged.ntfyTopic = incomingSt.ntfyTopic;
+      }
+
       normalizeHabitsStructure(merged);
       if (getStateRichnessScore(merged) > 0) merged.onboardingComplete = true;
 
@@ -1810,6 +2399,13 @@
     if (!appState.thinkingLevel) appState.thinkingLevel = 'HIGH';
     if (!appState.tutorData) appState.tutorData = createDefaultState().tutorData;
     if (!Array.isArray(appState.deletedHabitsRegistry)) appState.deletedHabitsRegistry = [];
+    if (!appState.workHub || typeof appState.workHub !== 'object') appState.workHub = createDefaultState().workHub;
+    if (!Array.isArray(appState.workHub.scheduleBlocks)) appState.workHub.scheduleBlocks = [];
+    if (!Array.isArray(appState.workHub.inboxItems)) appState.workHub.inboxItems = [];
+    if (!appState.finance || typeof appState.finance !== 'object') appState.finance = createDefaultState().finance;
+    if (!Array.isArray(appState.finance.incomes)) appState.finance.incomes = [];
+    if (!Array.isArray(appState.finance.expenses)) appState.finance.expenses = [];
+    if (!Array.isArray(appState.finance.debts)) appState.finance.debts = [];
     DAYS_CONFIG.forEach(d => {
       if (!appState.days[d.id]) appState.days[d.id] = { water: 0, meals: [], habitsState: {}, impulses: [] };
       if (!appState.days[d.id].impulses) appState.days[d.id].impulses = [];
@@ -2439,7 +3035,8 @@
 
     const TAB_TITLES = {
       nutrition: 'Nutrición',
-      focus: 'Trabajo & PDF',
+      focus: 'Trabajo & Agenda',
+      finance: 'Finanzas & Deudas',
       tutor: 'Profe IA',
       habits: 'Hábitos',
       gym: 'Gimnasio',
@@ -2448,7 +3045,7 @@
     };
 
     function switchTab(tabName) {
-      ['nutrition', 'focus', 'tutor', 'habits', 'gym', 'grocery', 'settings'].forEach(t => {
+      ['nutrition', 'focus', 'finance', 'tutor', 'habits', 'gym', 'grocery', 'settings'].forEach(t => {
         const sec = document.getElementById(`tab-${t}`);
         if (sec) sec.classList.add('hidden');
         const sideBtn = document.getElementById(`side-${t}`);
@@ -2472,15 +3069,24 @@
 
     function renderCalendar() {
       const bar = document.getElementById('calendarBar');
+      const todayIso = getLocalTodayIso();
       bar.innerHTML = DAYS_CONFIG.map(d => {
+        if (!appState.days[d.id]) {
+          appState.days[d.id] = { water: 0, meals: [], habitsState: {}, impulses: [] };
+        }
         const isSelected = d.id === appState.currentDay;
+        const isToday = d.id === todayIso;
         const dData = appState.days[d.id] || { meals: [], water: 0 };
-        const hasData = dData.meals.length > 0 || dData.water > 0;
+        const hasData = (dData.meals && dData.meals.length > 0) || (dData.water > 0);
         return `
-          <button onclick="selectDay('${d.id}')" class="px-3 py-1.5 rounded-2xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
-            isSelected ? 'bg-terra-500 text-white shadow-sm' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300'
+          <button onclick="selectDay('${d.id}')" id="cal-btn-${d.id}" class="px-3 py-1.5 rounded-2xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
+            isSelected
+              ? 'bg-terra-500 text-white shadow-sm'
+              : (isToday
+                  ? 'bg-amber-500/15 border border-amber-500/50 text-amber-500 dark:text-amber-300'
+                  : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300')
           }">
-            <span>${d.label}</span>
+            <span>${d.label}${isToday ? ' • Hoy' : ''}</span>
             ${hasData ? `<span class="w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-emerald-500'}"></span>` : ''}
           </button>
         `;
@@ -3158,14 +3764,19 @@
         mealsEl.innerHTML = `<p class="text-xs text-slate-400 italic">Aún no has registrado comidas hoy.</p>`;
       } else {
         mealsEl.innerHTML = dayData.meals.map((m, i) => `
-          <div class="flex justify-between items-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-800 text-xs">
-            <div>
-              <p class="font-bold text-slate-800 dark:text-slate-100">${m.name}</p>
-              <p class="text-[11px] text-slate-400 mt-0.5"><strong class="text-terra-500">${m.kcal} kcal</strong> • ${m.p}g P • ${m.c}g C • ${m.f}g G</p>
+          <div class="flex justify-between items-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-800 text-xs gap-2">
+            <div class="min-w-0 flex-1">
+              <p class="font-bold text-slate-800 dark:text-slate-100 truncate">${escapeHtmlSafe(m.name)}</p>
+              <p class="text-[11px] text-slate-400 mt-0.5"><strong class="text-terra-500">${Number(m.kcal) || 0} kcal</strong> • ${Number(m.p) || 0}g P • ${Number(m.c) || 0}g C • ${Number(m.f) || 0}g G</p>
             </div>
-            <button onclick="removeMeal(${i})" class="text-slate-400 hover:text-rose-500 font-bold px-2">
-              <i class="fi fi-rr-trash"></i>
-            </button>
+            <div class="flex items-center gap-1 shrink-0">
+              <button onclick="openEditMealByIndex(${i})" title="Editar calorías o macros" class="w-7 h-7 rounded-xl bg-slate-200/70 dark:bg-slate-700/70 hover:bg-blue-500/20 text-slate-500 dark:text-slate-300 hover:text-blue-400 flex items-center justify-center">
+                <i class="fi fi-rr-edit text-[11px]"></i>
+              </button>
+              <button onclick="removeMeal(${i})" title="Eliminar comida" class="w-7 h-7 rounded-xl bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white flex items-center justify-center">
+                <i class="fi fi-rr-trash text-[11px]"></i>
+              </button>
+            </div>
           </div>
         `).join('');
       }
@@ -3297,12 +3908,12 @@
         .map(m => `${m.name} (${m.kcal} kcal, ${m.p}g P, ${m.c}g C, ${m.f}g G)`)
         .join('; ') || 'Ninguna comida registrada hoy todavía';
 
-      // Si el usuario pide las 3 comidas completas y aún no ha comido hoy (o quiere el plan completo de 3 comidas para cuadrar su meta diaria total)
+      // Presupuesto exacto sin forzar gramos extra cuando un macro ya llegó a 0g
       const isFullDayThreeMeals = (mealsRequested.length === 3 && totKcal === 0);
-      const budgetKcal = isFullDayThreeMeals ? maxKcal : Math.max(250, remKcal);
-      const budgetP = isFullDayThreeMeals ? maxP : Math.max(15, remP);
-      const budgetC = isFullDayThreeMeals ? maxC : Math.max(10, remC);
-      const budgetF = isFullDayThreeMeals ? maxF : Math.max(8, remF);
+      const budgetKcal = isFullDayThreeMeals ? maxKcal : remKcal;
+      const budgetP = isFullDayThreeMeals ? maxP : remP;
+      const budgetC = isFullDayThreeMeals ? maxC : remC;
+      const budgetF = isFullDayThreeMeals ? maxF : remF;
 
       const policy = getNutritionalGoalPolicy();
       const userWeight = appState.profile.weight ? `${appState.profile.weight}kg` : 'peso estándar';
@@ -3409,6 +4020,75 @@
       });
       saveState();
       showToast(`Registrado en tu día: ${p.title}`, "success");
+    }
+
+    let editingMealIndex = null;
+
+    function toggleManualMealBox() {
+      const box = document.getElementById('manualMealFormBox');
+      if (!box) return;
+      if (!box.classList.contains('hidden') && editingMealIndex === null) {
+        box.classList.add('hidden');
+        return;
+      }
+      editingMealIndex = null;
+      document.getElementById('manualMealFormTitle').textContent = 'Agregar Platillo Manual';
+      document.getElementById('manualMealNameInput').value = '';
+      document.getElementById('manualMealKcalInput').value = '';
+      document.getElementById('manualMealProtInput').value = '';
+      document.getElementById('manualMealCarbInput').value = '';
+      document.getElementById('manualMealFatInput').value = '';
+      box.classList.remove('hidden');
+    }
+
+    function openEditMealByIndex(idx) {
+      const dayData = appState.days[appState.currentDay];
+      if (!dayData || !dayData.meals || !dayData.meals[idx]) return;
+      const m = dayData.meals[idx];
+      editingMealIndex = idx;
+      document.getElementById('manualMealFormTitle').textContent = `Editar Platillo #${idx + 1}`;
+      document.getElementById('manualMealNameInput').value = m.name || '';
+      document.getElementById('manualMealKcalInput').value = m.kcal ?? 0;
+      document.getElementById('manualMealProtInput').value = m.p ?? 0;
+      document.getElementById('manualMealCarbInput').value = m.c ?? 0;
+      document.getElementById('manualMealFatInput').value = m.f ?? 0;
+      document.getElementById('manualMealFormBox').classList.remove('hidden');
+    }
+
+    function cancelManualMealEdit() {
+      editingMealIndex = null;
+      const box = document.getElementById('manualMealFormBox');
+      if (box) box.classList.add('hidden');
+    }
+
+    function saveManualMealEntry() {
+      const nameVal = (document.getElementById('manualMealNameInput').value || '').trim();
+      if (!nameVal) {
+        showToast("Escribe el nombre del platillo o alimento", "warning");
+        return;
+      }
+      const pVal = Math.max(0, Math.round(Number(document.getElementById('manualMealProtInput').value) || 0));
+      const cVal = Math.max(0, Math.round(Number(document.getElementById('manualMealCarbInput').value) || 0));
+      const fVal = Math.max(0, Math.round(Number(document.getElementById('manualMealFatInput').value) || 0));
+      let kcalVal = Math.max(0, Math.round(Number(document.getElementById('manualMealKcalInput').value) || 0));
+      if (kcalVal === 0 && (pVal > 0 || cVal > 0 || fVal > 0)) {
+        kcalVal = (pVal * 4) + (cVal * 4) + (fVal * 9);
+      }
+
+      const mealObj = { name: nameVal, kcal: kcalVal, p: pVal, c: cVal, f: fVal };
+      if (!appState.days[appState.currentDay]) {
+        appState.days[appState.currentDay] = { water: 0, meals: [], habitsState: {}, impulses: [] };
+      }
+
+      if (editingMealIndex !== null && appState.days[appState.currentDay].meals[editingMealIndex]) {
+        appState.days[appState.currentDay].meals[editingMealIndex] = mealObj;
+        showToast("Platillo actualizado", "success");
+      } else {
+        appState.days[appState.currentDay].meals.push(mealObj);
+        showToast("Platillo registrado manualmente", "success");
+      }
+      cancelManualMealEdit();
+      saveState();
     }
 
     function removeMeal(index) { appState.days[appState.currentDay].meals.splice(index, 1); saveState(); }
@@ -3564,20 +4244,66 @@
       showToast("Alarma diaria nativa descargada: ábrela para que tu celular te avise aunque cierres el navegador", "success");
     }
 
+    function isTimeReachedWithinWindow(targetHHMM, windowMinutes = 15) {
+      if (!targetHHMM || !/^\d{2}:\d{2}$/.test(targetHHMM)) return false;
+      const now = new Date();
+      const [th, tm] = targetHHMM.split(':').map(Number);
+      const nowMins = now.getHours() * 60 + now.getMinutes();
+      const targetMins = th * 60 + tm;
+      return nowMins >= targetMins && (nowMins - targetMins) <= windowMinutes;
+    }
+
     function checkAlarmsAndStreakRisk() {
       const now = new Date();
       const currentHHMM = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      const todayIso = getLocalTodayIso();
       let changed = false;
 
-      // 1. Verificar tareas laborales con hora programada (incluyendo si la hora pasó hace pocos minutos mientras estaba en segundo plano)
+      // 1. Verificar tareas laborales con ventana de recuperación de 15 min (si el celular estaba bloqueado y despierta, dispara al instante)
       (appState.tasks || []).forEach((t, idx) => {
         if (!t.done && t.time && !t.notified) {
-          if (t.time === currentHHMM) {
+          if (isTimeReachedWithinWindow(t.time, 15)) {
             t.notified = true; changed = true;
             startAlarmSound();
             sendPhoneNotification(`⏰ Actividad: ${t.text}`, "Es hora de llenar tu formato y subir evidencia.", `task-${t.id || idx}`);
             showToast(`Alarma de actividad: ${t.text}`, "warning");
             openTaskFormatModal(idx, true);
+          }
+        }
+      });
+
+      // 1B. Verificar bloques de la Agenda Diaria de Trabajo
+      (appState.workHub?.scheduleBlocks || []).forEach(b => {
+        if (!b.done && b.startTime && !b.notified && isTimeReachedWithinWindow(b.startTime, 15)) {
+          b.notified = true; changed = true;
+          playBeep();
+          sendPhoneNotification(`📅 Agenda (${b.startTime}): ${b.title}`, `Bloque ${b.startTime} - ${b.endTime || ''}`, `sched-${b.id}`);
+          showToast(`📅 Hora de tu bloque de agenda: ${b.title}`, "info");
+        }
+      });
+
+      // 1C. Verificar Tickets y Sesiones de Correo / WhatsApp
+      (appState.workHub?.inboxItems || []).forEach(item => {
+        if (!item.done && item.time && !item.notified && isTimeReachedWithinWindow(item.time, 15)) {
+          item.notified = true; changed = true;
+          playBeep();
+          sendPhoneNotification(`${item.category === 'session' ? '📹 Sesión' : '🎫 Ticket'} (${item.time}): ${item.title}`, `Folio: ${item.code || 'Trabajo'} • Vía ${item.source || 'Sincronización'}`, `inbox-${item.id}`);
+          showToast(`🔔 Alerta laboral (${item.time}): ${item.title}`, "warning");
+        }
+      });
+
+      // 1D. Verificar Fechas Límite de Pago de Deudas (hoy o mañana)
+      (appState.finance?.debts || []).forEach(d => {
+        if (!d.paidThisMonth && d.dueDate && d.notified !== todayIso) {
+          const diff = daysBetweenTodayAndISO(d.dueDate);
+          if ((diff === 0 || diff === 1) && now.getHours() >= 9) {
+            d.notified = todayIso; changed = true;
+            const msg = diff === 0
+              ? `¡Hoy vence el pago de ${d.name} (${formatMoneyMXN(d.minPayment)})! Evita intereses.`
+              : `Mañana vence el pago de ${d.name} (${formatMoneyMXN(d.minPayment)}).`;
+            playBeep();
+            sendPhoneNotification(`💳 Alerta de Pago: ${d.name}`, msg, `debt-${d.id}-${todayIso}`);
+            showToast(`💳 ${msg}`, "warning");
           }
         }
       });
@@ -3886,10 +4612,10 @@
               <div class="flex items-start gap-2.5 flex-1">
                 <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${i})" class="w-4 h-4 mt-0.5 accent-emerald-500 rounded cursor-pointer">
                 <div class="flex-1">
-                  <p class="${t.done ? 'line-through text-slate-400' : 'font-bold text-slate-800 dark:text-slate-100'}">${t.text}</p>
+                  <p class="${t.done ? 'line-through text-slate-400' : 'font-bold text-slate-800 dark:text-slate-100'}">${escapeHtmlSafe(t.text)}</p>
                   <div class="flex flex-wrap items-center gap-1.5 mt-1">
-                    <span class="text-[10px] px-2 py-0.5 rounded-md bg-blue-500/15 text-blue-400 font-bold">Solicita: ${wf.solicita || t.solicita || 'Lucia'}</span>
-                    ${t.project ? `<span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-200 dark:bg-slate-700 font-bold">#${t.project}</span>` : ''}
+                    <span class="text-[10px] px-2 py-0.5 rounded-md bg-blue-500/15 text-blue-400 font-bold">Solicita: ${escapeHtmlSafe(wf.solicita || t.solicita || 'Lucia')}</span>
+                    ${t.project ? `<span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-200 dark:bg-slate-700 font-bold">#${escapeHtmlSafe(t.project)}</span>` : ''}
                     ${t.time ? `<span class="text-[10px] text-amber-400 font-bold flex items-center gap-1"><i class="fi fi-rr-clock"></i> ${t.time}</span>` : ''}
                     ${imgCount > 0 ? `<span class="text-[10px] text-emerald-400 font-bold flex items-center gap-1"><i class="fi fi-rr-picture"></i> ${imgCount}</span>` : ''}
                   </div>
@@ -3953,7 +4679,10 @@
       document.getElementById('newTaskTime').value = '';
       document.getElementById('newTaskProject').value = '';
       saveState();
-      showToast("Actividad agregada.", "success");
+      if (timeInput) {
+        scheduleCloudPushViaNtfy(`⏰ Actividad Laboral: ${appState.tasks[0].text}`, timeInput, `Solicita: ${solicitaInput} • Folio #${projInput}`);
+      }
+      showToast("Actividad agregada y alerta programada.", "success");
     }
 
     function toggleTask(i) {
@@ -4299,6 +5028,12 @@
       }
       const td = ensureTutorMultiSubjectStructure();
       const key = normalizeSubjectKey(rawName);
+      if (Array.isArray(td.deletedSubjectsRegistry)) {
+        td.deletedSubjectsRegistry = td.deletedSubjectsRegistry.filter(x => x !== key.toLowerCase());
+      } else {
+        td.deletedSubjectsRegistry = [];
+      }
+      td.subjectsModifiedAt = Date.now();
 
       if (!td.subjectsMap[key]) {
         td.subjectsMap[key] = {
@@ -4341,6 +5076,7 @@
     function deleteTutorSubject(subjKey, ev) {
       if (ev) ev.stopPropagation();
       const td = ensureTutorMultiSubjectStructure();
+      td.subjectsModifiedAt = Date.now();
       const keys = Object.keys(td.subjectsMap);
       if (keys.length <= 1) {
         td.subjectsMap[subjKey].lessons = [];
@@ -4350,6 +5086,10 @@
         return;
       }
       const deletedName = td.subjectsMap[subjKey]?.name || 'Materia';
+      if (!Array.isArray(td.deletedSubjectsRegistry)) td.deletedSubjectsRegistry = [];
+      if (!td.deletedSubjectsRegistry.includes(subjKey.toLowerCase())) {
+        td.deletedSubjectsRegistry.push(subjKey.toLowerCase());
+      }
       delete td.subjectsMap[subjKey];
       td.activeSubjectKey = Object.keys(td.subjectsMap)[0];
       saveState();
@@ -4363,6 +5103,10 @@
       const goalVal = (document.getElementById('tutorGoalInput')?.value || '').trim();
 
       const newKey = normalizeSubjectKey(typedName);
+      if (Array.isArray(td.deletedSubjectsRegistry)) {
+        td.deletedSubjectsRegistry = td.deletedSubjectsRegistry.filter(x => x !== newKey.toLowerCase());
+      }
+      td.subjectsModifiedAt = Date.now();
       if (!td.subjectsMap[newKey]) {
         td.subjectsMap[newKey] = {
           key: newKey,
@@ -4537,23 +5281,48 @@
           lastSelectedQuizOption: null
         };
 
-        if (forceRegenerateSameLevel && unpassed) {
-          subj.lessons[unpassed.index] = newLessonObj;
-          subj.selectedLessonIndex = unpassed.index;
+        td.subjectsModifiedAt = Date.now();
+        if (mode === 'review' && subj.lessons.length > 0) {
+          const targetIdx = (subj.selectedLessonIndex >= 0 && subj.selectedLessonIndex < subj.lessons.length)
+            ? subj.selectedLessonIndex
+            : (subj.lessons.length - 1);
+          const existingLesson = subj.lessons[targetIdx];
+          existingLesson.homeworkFeedback = parsed.homeworkFeedback || parsed.explanation || 'Revisión completada.';
+          if (currentTutorImageBase64) existingLesson.referenceImage = currentTutorImageBase64;
+          if (parsed.codeBlock && isStrictCodeLesson(parsed, subj.name)) {
+            existingLesson.codeLanguage = parsed.codeLanguage || existingLesson.codeLanguage;
+            existingLesson.codeBlock = parsed.codeBlock;
+            existingLesson.codeOutput = parsed.codeOutput || existingLesson.codeOutput;
+          }
+          if (Array.isArray(parsed.formulas) && parsed.formulas.length > 0) {
+            existingLesson.formulas = parsed.formulas;
+          }
+          subj.selectedLessonIndex = targetIdx;
+          registerTutorStudyDayToday();
+          td.totalXp = (td.totalXp || 0) + 30;
+          if (currentTutorImageBase64) clearTutorPhoto();
+          saveState();
+          switchTutorSubTab('lesson');
+          showToast(`Revisión de tarea/código integrada en el Nivel #${targetIdx + 1} (sin alterar tus niveles)`, "success");
         } else {
-          subj.lessons.push(newLessonObj);
-          subj.selectedLessonIndex = subj.lessons.length - 1;
+          if (forceRegenerateSameLevel && unpassed) {
+            subj.lessons[unpassed.index] = newLessonObj;
+            subj.selectedLessonIndex = unpassed.index;
+          } else {
+            subj.lessons.push(newLessonObj);
+            subj.selectedLessonIndex = subj.lessons.length - 1;
+          }
+
+          registerTutorStudyDayToday();
+          td.totalXp = (td.totalXp || 0) + 40;
+          td.lessonsCompleted = Object.values(td.subjectsMap).reduce((acc, sObj) => acc + (sObj.lessons?.length || 0), 0);
+          td.lastLesson = newLessonObj;
+
+          if (currentTutorImageBase64) clearTutorPhoto();
+          saveState();
+          switchTutorSubTab('lesson');
+          showToast(`¡Nivel #${targetLessonNum} creado! Lee la clase y aprueba el Examen Jefe al final para abrir el candado del Nivel #${targetLessonNum + 1}`, "success");
         }
-
-        registerTutorStudyDayToday();
-        td.totalXp = (td.totalXp || 0) + 40;
-        td.lessonsCompleted = Object.values(td.subjectsMap).reduce((acc, sObj) => acc + (sObj.lessons?.length || 0), 0);
-        td.lastLesson = newLessonObj;
-
-        if (currentTutorImageBase64) clearTutorPhoto();
-        saveState();
-        switchTutorSubTab('lesson');
-        showToast(`¡Nivel #${targetLessonNum} creado! Lee la clase y aprueba el Examen Jefe al final para abrir el candado del Nivel #${targetLessonNum + 1}`, "success");
       } catch (err) {
         showToast("Error Profe IA: " + err.message, "error");
       } finally {
@@ -5445,7 +6214,7 @@
       if (totalHabits === 0) {
         el.innerHTML = `<p class="text-xs text-slate-400 italic">Agrega tus hábitos arriba para ver tu progreso semanal.</p>`;
       } else {
-        const weekDays = DAYS_CONFIG.slice(0, 7);
+        const weekDays = getActiveWeekDays(appState.currentDay);
         el.innerHTML = appState.habitsList.map((h, i) => {
           const checked = isHabitCheckedOnDay(appState.currentDay, h);
           const streak = calculateHabitStreak(h);
@@ -5536,9 +6305,9 @@
       impulsesEl.innerHTML = impulses.length === 0 ? `<p class="text-xs text-slate-400 italic">Sin impulsos registrados hoy.</p>` :
         impulses.map((imp, idx) => `
           <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs space-y-1">
-            <div class="flex justify-between"><span class="text-[10px] font-bold text-amber-400 uppercase">${imp.category} • ${imp.time}</span><button onclick="deleteImpulseLog(${idx})"><i class="fi fi-rr-trash"></i></button></div>
-            <p><strong>Gatillo:</strong> ${imp.trigger}</p>
-            <p class="text-emerald-400"><strong>Acción:</strong> ${imp.action}</p>
+            <div class="flex justify-between"><span class="text-[10px] font-bold text-amber-400 uppercase">${escapeHtmlSafe(imp.category)} • ${escapeHtmlSafe(imp.time)}</span><button onclick="deleteImpulseLog(${idx})"><i class="fi fi-rr-trash"></i></button></div>
+            <p><strong>Gatillo:</strong> ${escapeHtmlSafe(imp.trigger)}</p>
+            <p class="text-emerald-400"><strong>Acción:</strong> ${escapeHtmlSafe(imp.action)}</p>
           </div>
         `).join('');
     }
@@ -5693,6 +6462,14 @@
       saveState();
     }
 
+    function normalizeDayNameClean(str) {
+      return String(str || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim();
+    }
+
     async function generateGymRoutineWithGemini() {
       if (!appState.apiKey) { showToast("Configura tu API Key en Ajustes", "warning"); switchTab('settings'); return; }
       const weight = document.getElementById('gymWeight').value || appState.profile.weight || 75;
@@ -5710,7 +6487,11 @@
         const parsedDays = JSON.parse(textResult);
         appState.gymStructured = {};
         parsedDays.forEach(d => {
-          const matchedDays = DAYS_CONFIG.filter(dc => dc.dayName.toLowerCase() === (d.dayName || '').toLowerCase());
+          const targetDayNorm = normalizeDayNameClean(d.dayName);
+          const matchedDays = DAYS_CONFIG.filter(dc => {
+            const dcNorm = normalizeDayNameClean(dc.dayName);
+            return targetDayNorm === dcNorm || targetDayNorm.includes(dcNorm) || dcNorm.includes(targetDayNorm);
+          });
           matchedDays.forEach(matchedDay => {
             appState.gymStructured[matchedDay.id] = {
               focus: d.focus,
@@ -5725,7 +6506,7 @@
     }
 
     function getBiomechanicalAnimationSVG(exerciseName) {
-      const q = exerciseName.toLowerCase();
+      const q = String(exerciseName || '').toLowerCase();
       let type = 'press', muscleLabel = 'Pectoral, Deltoides y Tríceps', cue = 'Inhala al bajar en 2s • Exhala al empujar';
       if (q.includes('sentadilla') || q.includes('squat') || q.includes('prensa') || q.includes('pierna')) {
         type = 'squat'; muscleLabel = 'Cuádriceps, Glúteo y Core'; cue = 'Espalda neutra al bajar • Exhala al subir';
@@ -5757,6 +6538,12 @@
       modal.classList.remove('hidden');
     }
 
+    function showExerciseDemoByIndex(idx) {
+      const currentDayId = appState.currentDay;
+      const ex = appState.gymStructured?.[currentDayId]?.exercises?.[idx];
+      if (ex) showExerciseDemo(ex.name);
+    }
+
     function closeDemoModal() { document.getElementById('demoModal').classList.add('hidden'); }
 
     function updateGymWeight(i, val) {
@@ -5765,6 +6552,7 @@
       if (appState.gymStructured?.[currentDayId]) {
         const ex = appState.gymStructured[currentDayId].exercises[i];
         ex.weight = newWeight;
+        if (!appState.exerciseHistory) appState.exerciseHistory = {};
         if (!appState.exerciseHistory[ex.name]) appState.exerciseHistory[ex.name] = [];
         if (newWeight) appState.exerciseHistory[ex.name].push({ day: currentDayId, weight: newWeight });
         saveState();
@@ -5782,29 +6570,79 @@
         return;
       }
       focusBadge.textContent = `Enfoque: ${dayGymData.focus}`;
-      el.innerHTML = dayGymData.exercises.map((ex, i) => `
+      el.innerHTML = dayGymData.exercises.map((ex, i) => {
+        const hist = (appState.exerciseHistory && Array.isArray(appState.exerciseHistory[ex.name])) ? appState.exerciseHistory[ex.name] : [];
+        const maxPr = hist.reduce((m, entry) => Math.max(m, Number(entry.weight) || 0), 0);
+        const lastEntry = hist.length > 0 ? hist[hist.length - 1] : null;
+        return `
         <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 text-xs space-y-2">
-          <div class="flex items-center justify-between">
-            <label class="flex items-center gap-2 font-bold cursor-pointer">
-              <input type="checkbox" ${ex.done ? 'checked' : ''} onchange="toggleGymEx(${i})" class="w-4 h-4 accent-blue-500">
-              <span class="${ex.done ? 'line-through text-slate-400' : ''}">${ex.name}</span>
+          <div class="flex items-center justify-between gap-2">
+            <label class="flex items-center gap-2 font-bold cursor-pointer flex-1 min-w-0">
+              <input type="checkbox" ${ex.done ? 'checked' : ''} onchange="toggleGymEx(${i})" class="w-4 h-4 accent-blue-500 shrink-0">
+              <span class="${ex.done ? 'line-through text-slate-400' : ''} truncate">${escapeHtmlSafe(ex.name)}</span>
             </label>
-            <div class="flex gap-1.5">
-              <button onclick="showExerciseDemo('${ex.name.replace(/'/g, "\\'")}')" class="text-[10px] bg-blue-500/15 text-blue-400 px-2 py-1 rounded-lg font-bold">Animación</button>
-              <button onclick="deleteGymEx(${i})" class="text-slate-400"><i class="fi fi-rr-trash"></i></button>
+            <div class="flex gap-1.5 shrink-0">
+              <button onclick="showExerciseDemoByIndex(${i})" class="text-[10px] bg-blue-500/15 text-blue-400 px-2 py-1 rounded-lg font-bold">Animación</button>
+              <button onclick="deleteGymEx(${i})" class="text-slate-400 hover:text-rose-500"><i class="fi fi-rr-trash"></i></button>
             </div>
           </div>
-          <div class="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-700">
-            <span class="text-[10px] text-slate-400">Peso usado (kg):</span>
+          <div class="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-700 gap-2">
+            <div class="flex items-center gap-2 text-[10px] text-slate-400">
+              <span>Peso usado (kg):</span>
+              ${maxPr > 0 ? `<span class="px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 font-extrabold">PR: ${maxPr}kg</span>` : ''}
+              ${lastEntry && lastEntry.weight ? `<span class="text-slate-500">Últ: ${lastEntry.weight}kg</span>` : ''}
+            </div>
             <input type="number" step="0.5" value="${ex.weight || ''}" placeholder="Kg" onchange="updateGymWeight(${i}, this.value)" class="w-16 px-2 py-1 text-center font-bold bg-white dark:bg-slate-900 rounded-lg outline-none">
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
     }
 
     function toggleGymEx(i) { appState.gymStructured[appState.currentDay].exercises[i].done = !appState.gymStructured[appState.currentDay].exercises[i].done; saveState(); }
     function deleteGymEx(i) { appState.gymStructured[appState.currentDay].exercises.splice(i, 1); saveState(); }
-    function exportToCalendar() { showToast("Archivo de calendario listo", "success"); }
+
+    function exportToCalendar() {
+      const gymMap = appState.gymStructured || {};
+      const dayIds = Object.keys(gymMap).filter(dId => gymMap[dId]?.exercises?.length > 0);
+      if (dayIds.length === 0) {
+        showToast("Primero genera o agrega ejercicios a tu rutina para descargar el calendario .ICS", "warning");
+        return;
+      }
+      const eventsBlocks = dayIds.map(dId => {
+        const cleanDate = dId.replace(/-/g, '');
+        const info = gymMap[dId];
+        const exList = (info.exercises || []).map(e => `- ${e.name}${e.weight ? ' (' + e.weight + 'kg)' : ''}`).join('\n');
+        return [
+          "BEGIN:VEVENT",
+          `SUMMARY:🏋️ Gym Control TCC: ${info.focus || 'Entrenamiento'}`,
+          `DESCRIPTION:${exList}`,
+          `DTSTART:${cleanDate}T080000`,
+          `DTEND:${cleanDate}T091500`,
+          "BEGIN:VALARM",
+          "TRIGGER:-PT15M",
+          "ACTION:DISPLAY",
+          "DESCRIPTION:Hora de entrenar en Control TCC",
+          "END:VALARM",
+          "END:VEVENT"
+        ].join("\n");
+      });
+
+      const icsContent = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Control TCC//Gym Routine//ES",
+        ...eventsBlocks,
+        "END:VCALENDAR"
+      ].join("\n");
+
+      const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `rutina_gym_tcc_${appState.currentDay}.ics`;
+      link.click();
+      showToast("Calendario .ICS de tu rutina descargado con éxito", "success");
+    }
 
     // ==================== 6. DESPENSA Y PLANIFICADOR DE 3 COMIDAS CON MACROS ====================
     async function generateGroceryWithGemini() {
@@ -5851,6 +6689,58 @@
       finally { btn.innerHTML = orig; btn.disabled = false; }
     }
 
+    function addManualGrocery() {
+      const input = document.getElementById('manualGroceryInput');
+      if (!input || !input.value.trim()) return;
+      if (!Array.isArray(appState.groceries)) appState.groceries = [];
+      appState.groceries.unshift({ id: Date.now(), text: input.value.trim(), checked: false });
+      input.value = '';
+      saveState();
+      showToast("Artículo agregado a la lista del súper", "success");
+    }
+
+    function clearCheckedGroceries() {
+      if (!Array.isArray(appState.groceries)) return;
+      const before = appState.groceries.length;
+      appState.groceries = appState.groceries.filter(g => !g.checked);
+      if (appState.groceries.length < before) {
+        saveState();
+        showToast("Artículos comprados eliminados de la lista", "info");
+      } else {
+        showToast("No hay artículos marcados como comprados", "info");
+      }
+    }
+
+    function logWeeklyPlanMealToToday(dayIdx, mealTypeKey, mealLabelEs) {
+      const dayPlan = (appState.mealPlanStructured || [])[dayIdx];
+      if (!dayPlan || !dayPlan[mealTypeKey]) return;
+      const rawText = String(dayPlan[mealTypeKey]);
+
+      const kcalMatch = rawText.match(/(\d+)\s*kcal/i);
+      const pMatch = rawText.match(/(\d+)\s*g\s*(?:de\s*)?(?:P|Prot)/i);
+      const cMatch = rawText.match(/(\d+)\s*g\s*(?:de\s*)?(?:C|Carb)/i);
+      const fMatch = rawText.match(/(\d+)\s*g\s*(?:de\s*)?(?:G|F|Grasa)/i);
+
+      const defaultKcal = Math.round((Number(appState.targetKcal) || 2100) / 3);
+      const defaultP = Math.round((Number(appState.targetProt) || 170) / 3);
+      const defaultC = Math.round((Number(appState.targetCarb) || 160) / 3);
+      const defaultF = Math.round((Number(appState.targetFat) || 75) / 3);
+
+      const mealObj = {
+        name: `${mealLabelEs}: ${rawText.split('->')[0].trim()}`,
+        kcal: kcalMatch ? parseInt(kcalMatch[1], 10) : defaultKcal,
+        p: pMatch ? parseInt(pMatch[1], 10) : defaultP,
+        c: cMatch ? parseInt(cMatch[1], 10) : defaultC,
+        f: fMatch ? parseInt(fMatch[1], 10) : defaultF
+      };
+      if (!appState.days[appState.currentDay]) {
+        appState.days[appState.currentDay] = { water: 0, meals: [], habitsState: {}, impulses: [] };
+      }
+      appState.days[appState.currentDay].meals.push(mealObj);
+      saveState();
+      showToast(`${mealLabelEs} registrado en tu contador de hoy (${mealObj.kcal} kcal | ${mealObj.p}g P)`, "success");
+    }
+
     function renderGroceries() {
       const el = document.getElementById('groceryList');
       el.innerHTML = appState.groceries.length === 0 ? `<p class="text-xs text-slate-400 italic">Lista vacía.</p>` :
@@ -5858,19 +6748,28 @@
           <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 text-xs">
             <label class="flex items-center gap-2.5 flex-1 cursor-pointer">
               <input type="checkbox" ${g.checked ? 'checked' : ''} onchange="toggleGrocery(${i})" class="w-4 h-4 accent-terra-500">
-              <span class="${g.checked ? 'line-through text-slate-400' : 'font-medium'}">${g.text}</span>
+              <span class="${g.checked ? 'line-through text-slate-400' : 'font-medium'}">${escapeHtmlSafe(g.text)}</span>
             </label>
-            <button onclick="deleteGrocery(${i})" class="text-slate-400"><i class="fi fi-rr-trash"></i></button>
+            <button onclick="deleteGrocery(${i})" class="text-slate-400 hover:text-rose-500"><i class="fi fi-rr-trash"></i></button>
           </div>
         `).join('');
 
       const planContainer = document.getElementById('mealPlanContainer');
-      planContainer.innerHTML = (appState.mealPlanStructured || []).map(day => `
-        <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs space-y-1.5">
-          <h4 class="font-black text-terra-500 uppercase">${day.day}</h4>
-          <p><strong>Desayuno:</strong> ${day.breakfast}</p>
-          <p><strong>Comida:</strong> ${day.lunch}</p>
-          <p><strong>Cena:</strong> ${day.dinner}</p>
+      planContainer.innerHTML = (appState.mealPlanStructured || []).map((day, dIdx) => `
+        <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs space-y-2">
+          <h4 class="font-black text-terra-500 uppercase">${escapeHtmlSafe(day.day)}</h4>
+          <div class="flex items-start justify-between gap-2">
+            <p class="flex-1"><strong>Desayuno:</strong> ${escapeHtmlSafe(day.breakfast)}</p>
+            <button onclick="logWeeklyPlanMealToToday(${dIdx}, 'breakfast', 'Desayuno')" class="px-2 py-0.5 rounded-lg bg-terra-500/15 text-terra-500 font-bold text-[10px] shrink-0">+ Hoy</button>
+          </div>
+          <div class="flex items-start justify-between gap-2">
+            <p class="flex-1"><strong>Comida:</strong> ${escapeHtmlSafe(day.lunch)}</p>
+            <button onclick="logWeeklyPlanMealToToday(${dIdx}, 'lunch', 'Comida')" class="px-2 py-0.5 rounded-lg bg-terra-500/15 text-terra-500 font-bold text-[10px] shrink-0">+ Hoy</button>
+          </div>
+          <div class="flex items-start justify-between gap-2">
+            <p class="flex-1"><strong>Cena:</strong> ${escapeHtmlSafe(day.dinner)}</p>
+            <button onclick="logWeeklyPlanMealToToday(${dIdx}, 'dinner', 'Cena')" class="px-2 py-0.5 rounded-lg bg-terra-500/15 text-terra-500 font-bold text-[10px] shrink-0">+ Hoy</button>
+          </div>
         </div>
       `).join('');
     }
@@ -5943,9 +6842,9 @@
       const summaryEl = document.getElementById('profileSummaryCard');
       if (summaryEl) {
         summaryEl.innerHTML = `
-          <p><strong>Responsable:</strong> ${p.name || 'Usuario'} ${p.age ? `(${p.age} años)` : ''}</p>
-          <p><strong>Físico:</strong> ${p.weight || '---'} kg | ${p.height || '---'} cm | <strong>Meta:</strong> ${p.goalText || 'Déficit'}</p>
-          <p><strong>Condición / Restricción:</strong> ${p.medicalCondition || 'Ninguna especificada'}</p>
+          <p><strong>Responsable:</strong> ${escapeHtmlSafe(p.name || 'Usuario')} ${p.age ? `(${escapeHtmlSafe(p.age)} años)` : ''}</p>
+          <p><strong>Físico:</strong> ${escapeHtmlSafe(p.weight || '---')} kg | ${escapeHtmlSafe(p.height || '---')} cm | <strong>Meta:</strong> ${escapeHtmlSafe(p.goalText || 'Déficit')}</p>
+          <p><strong>Condición / Restricción:</strong> ${escapeHtmlSafe(p.medicalCondition || 'Ninguna especificada')}</p>
           <p><strong>Metas:</strong> ${appState.targetKcal || 2100} kcal | ${appState.targetProt || 170}g P | ${appState.targetCarb || 160}g C | ${appState.targetFat || 75}g G</p>
         `;
       }
@@ -5953,12 +6852,22 @@
 
     function toggleFactoryResetConfirm() { document.getElementById('factoryResetConfirmBox').classList.toggle('hidden'); }
     function executeFactoryReset() {
-      try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      try {
+        const fbConfigBackup = localStorage.getItem('allan_tcc_firebase_config');
+        localStorage.clear();
+        if (fbConfigBackup) localStorage.setItem('allan_tcc_firebase_config', fbConfigBackup);
+      } catch (e) {}
+      try {
+        if (window.indexedDB) {
+          indexedDB.deleteDatabase(IDB_NAME);
+        }
+      } catch (e) {}
       appState = createDefaultState();
       document.getElementById('factoryResetConfirmBox').classList.add('hidden');
       renderAll();
       checkOnboarding();
       switchTab('nutrition');
+      showToast("Datos locales y bóveda IndexedDB reiniciados de cero", "info");
     }
 
     function exportBackupJSON() {
@@ -5994,16 +6903,1332 @@
       copyTextSafe(report, "Reporte diario copiado");
     }
 
+    // ==================== MÓDULO NUEVO A: HUB DE TRABAJO (AGENDA, CORREO/WHATSAPP, TICKETS Y SESIONES) ====================
+    let currentFocusSubTab = 'agenda';
+    let pendingWorkInboxImageBase64 = null;
+
+    function switchFocusSubTab(sub) {
+      currentFocusSubTab = sub;
+      ['agenda', 'inbox', 'tasks'].forEach(k => {
+        const viewEl = document.getElementById(`focusSubView-${k}`);
+        if (viewEl) viewEl.classList.toggle('hidden', k !== sub);
+        const btnEl = document.getElementById(`fsub-${k}`);
+        if (btnEl) {
+          btnEl.className = k === sub
+            ? 'py-2 px-2 rounded-xl bg-terra-500 text-white shadow-sm transition flex items-center justify-center gap-1.5'
+            : 'py-2 px-2 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-center gap-1.5';
+        }
+      });
+      const activeEl = document.getElementById(`focusSubView-${sub}`);
+      if (activeEl) triggerElementSlideAnim(activeEl, 'subview-anim-enter');
+      renderWorkHubAll();
+    }
+
+    function saveWorkHoursConfig() {
+      if (!appState.workHub) appState.workHub = createDefaultState().workHub;
+      appState.workHub.workStartHour = document.getElementById('workStartHourInput')?.value || '09:00';
+      appState.workHub.workEndHour = document.getElementById('workEndHourInput')?.value || '18:00';
+      saveState();
+      showToast("Horario laboral actualizado", "success");
+    }
+
+    function saveWorkContactSyncConfig() {
+      if (!appState.workHub) appState.workHub = createDefaultState().workHub;
+      appState.workHub.workEmail = (document.getElementById('workEmailConfigInput')?.value || '').trim();
+      appState.workHub.workPhone = (document.getElementById('workPhoneConfigInput')?.value || '').trim();
+      appState.workHub.workKeywords = (document.getElementById('workKeywordsConfigInput')?.value || '').trim();
+      saveState();
+      showToast("Conexión de correo y WhatsApp laboral guardada", "success");
+    }
+
+    function renderWorkHubAll() {
+      if (!appState.workHub) appState.workHub = createDefaultState().workHub;
+      const wh = appState.workHub;
+
+      const sInp = document.getElementById('workStartHourInput');
+      const eInp = document.getElementById('workEndHourInput');
+      if (sInp && document.activeElement !== sInp) sInp.value = wh.workStartHour || '09:00';
+      if (eInp && document.activeElement !== eInp) eInp.value = wh.workEndHour || '18:00';
+
+      const emInp = document.getElementById('workEmailConfigInput');
+      const phInp = document.getElementById('workPhoneConfigInput');
+      const kwInp = document.getElementById('workKeywordsConfigInput');
+      if (emInp && document.activeElement !== emInp) emInp.value = wh.workEmail || '';
+      if (phInp && document.activeElement !== phInp) phInp.value = wh.workPhone || '';
+      if (kwInp && document.activeElement !== kwInp) kwInp.value = wh.workKeywords || '';
+
+      const shiftBadge = document.getElementById('workShiftStatusBadge');
+      if (shiftBadge) shiftBadge.textContent = `${wh.workStartHour || '09:00'} - ${wh.workEndHour || '18:00'}`;
+
+      const items = wh.inboxItems || [];
+      const openTickets = items.filter(i => i.category === 'ticket' && !i.done).length;
+      const openSessions = items.filter(i => i.category === 'session' && !i.done).length;
+      const openTasks = (appState.tasks || []).filter(t => !t.done).length;
+      const totalOpenInbox = items.filter(i => !i.done).length;
+
+      const tkEl = document.getElementById('summaryOpenTicketsCount');
+      const sesEl = document.getElementById('summaryTodaySessionsCount');
+      const tskEl = document.getElementById('summaryPendingTasksCount');
+      const badgeEl = document.getElementById('focusInboxBadgeCount');
+
+      if (tkEl) tkEl.textContent = openTickets;
+      if (sesEl) sesEl.textContent = openSessions;
+      if (tskEl) tskEl.textContent = openTasks;
+      if (badgeEl) {
+        badgeEl.textContent = totalOpenInbox;
+        badgeEl.classList.toggle('hidden', totalOpenInbox === 0);
+      }
+
+      renderDailyScheduleTimeline();
+      renderWorkInboxItems();
+    }
+
+    function renderDailyScheduleTimeline() {
+      const container = document.getElementById('dailyScheduleTimeline');
+      if (!container || !appState.workHub) return;
+      const blocks = (appState.workHub.scheduleBlocks || []).slice().sort((a, b) => (a.startTime || '00:00').localeCompare(b.startTime || '00:00'));
+
+      if (blocks.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 italic p-3 text-center">No hay bloques en tu agenda hoy. Agrega uno arriba o presiona "Auto-Agendar Día con IA".</p>`;
+        return;
+      }
+
+      const nowHHMM = new Date().toTimeString().slice(0, 5);
+      const typeMeta = {
+        ticket: { icon: '🎫', label: 'Ticket', cls: 'bg-rose-500/15 text-rose-400 border-rose-500/30' },
+        session: { icon: '📹', label: 'Sesión', cls: 'bg-sky-500/15 text-sky-400 border-sky-500/30' },
+        task: { icon: '📌', label: 'Tarea', cls: 'bg-amber-500/15 text-amber-400 border-amber-500/30' },
+        break: { icon: '☕', label: 'Pausa', cls: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' }
+      };
+
+      container.innerHTML = blocks.map(b => {
+        const meta = typeMeta[b.type] || typeMeta.task;
+        const isCurrent = !b.done && (b.startTime || '') <= nowHHMM && (b.endTime || '23:59') >= nowHHMM;
+        return `
+          <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border ${isCurrent ? 'border-terra-500 ring-1 ring-terra-500/40' : 'border-slate-200 dark:border-slate-800'} flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div class="flex items-center gap-3 min-w-0 flex-1">
+              <input type="checkbox" ${b.done ? 'checked' : ''} onchange="toggleScheduleBlockDone(${Number(b.id)})" class="w-4 h-4 accent-emerald-500 rounded cursor-pointer shrink-0">
+              <div class="px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-center shrink-0">
+                <span class="font-black font-mono text-xs block">${escapeHtmlSafe(b.startTime || '--:--')}</span>
+                <span class="text-[9px] font-mono text-slate-400 block">${escapeHtmlSafe(b.endTime || '')}</span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-1.5 mb-0.5">
+                  <span class="px-2 py-0.5 rounded-md text-[9px] font-extrabold border ${meta.cls}">${meta.icon} ${meta.label}</span>
+                  ${b.code ? `<span class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[9px] font-mono font-bold">${escapeHtmlSafe(b.code)}</span>` : ''}
+                  ${isCurrent ? `<span class="px-2 py-0.5 rounded-full bg-terra-500 text-white text-[9px] font-black animate-pulse">EN CURSO</span>` : ''}
+                </div>
+                <p class="font-bold ${b.done ? 'line-through text-slate-400' : 'text-slate-800 dark:text-slate-100'} break-words">${escapeHtmlSafe(b.title)}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button onclick="promoteScheduleBlockToOfficialTask(${Number(b.id)})" class="px-2.5 py-1 rounded-lg bg-blue-500/15 text-blue-400 font-bold text-[10px] hover:bg-blue-500/25" title="Pasar a Tareas Oficiales para Reporte PDF">+ A PDF</button>
+              <button onclick="deleteScheduleBlock(${Number(b.id)})" class="text-slate-400 hover:text-rose-500 px-1"><i class="fi fi-rr-trash"></i></button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addManualScheduleBlock() {
+      const startTime = document.getElementById('schedBlockStart')?.value || '09:00';
+      const endTime = document.getElementById('schedBlockEnd')?.value || '10:00';
+      const type = document.getElementById('schedBlockType')?.value || 'task';
+      const titleInput = document.getElementById('schedBlockTitle');
+      const title = (titleInput?.value || '').trim();
+      if (!title) { showToast("Escribe la actividad o sesión para agendar", "warning"); return; }
+
+      appState.workHub.scheduleBlocks.push({
+        id: Date.now(),
+        startTime,
+        endTime,
+        type,
+        code: type === 'ticket' ? 'TICKET' : (type === 'session' ? 'SESIÓN' : 'AGENDA'),
+        title,
+        done: false,
+        notified: false
+      });
+      if (titleInput) titleInput.value = '';
+      saveState();
+      scheduleCloudPushViaNtfy(`📅 Agenda (${startTime}): ${title}`, startTime, `Horario asignado: ${startTime} a ${endTime}`);
+      showToast("Bloque agregado a tu agenda y alerta programada", "success");
+    }
+
+    function toggleScheduleBlockDone(id) {
+      const b = (appState.workHub?.scheduleBlocks || []).find(x => Number(x.id) === Number(id));
+      if (!b) return;
+      b.done = !b.done;
+      saveState();
+    }
+
+    function deleteScheduleBlock(id) {
+      if (!appState.workHub) return;
+      appState.workHub.scheduleBlocks = (appState.workHub.scheduleBlocks || []).filter(x => Number(x.id) !== Number(id));
+      saveState();
+    }
+
+    function clearCompletedScheduleBlocks() {
+      if (!appState.workHub) return;
+      appState.workHub.scheduleBlocks = (appState.workHub.scheduleBlocks || []).filter(x => !x.done);
+      saveState();
+      showToast("Bloques completados limpiados", "info");
+    }
+
+    function promoteScheduleBlockToOfficialTask(id) {
+      const b = (appState.workHub?.scheduleBlocks || []).find(x => Number(x.id) === Number(id));
+      if (!b) return;
+      const projNum = b.code || String((appState.tasks || []).length + 1);
+      appState.tasks.unshift({
+        id: Date.now(),
+        text: b.title,
+        time: b.startTime || '09:00',
+        solicita: 'Lucia',
+        project: projNum,
+        tag: 'Trabajo',
+        done: !!b.done,
+        notified: false,
+        selectedForPdf: true,
+        workFormat: {
+          taskNumber: projNum,
+          solicita: 'Lucia',
+          assignDate: appState.currentDay,
+          dueDate: appState.currentDay,
+          status: b.done ? 'Completado' : 'En Progreso',
+          startTime: b.startTime || '',
+          endTime: b.endTime || '',
+          activityDesc: b.title,
+          notes: `Agendado en bloque ${b.startTime} - ${b.endTime}`,
+          deliverable: '',
+          evidenceImages: []
+        }
+      });
+      saveState();
+      showToast("Enviado a Tareas Oficiales para tu Reporte PDF", "success");
+    }
+
+    function importPendingTasksAndTicketsToSchedule() {
+      if (!appState.workHub) return;
+      let added = 0;
+      const existing = new Set((appState.workHub.scheduleBlocks || []).map(b => (b.title || '').toLowerCase()));
+
+      (appState.workHub.inboxItems || []).filter(i => !i.done).forEach(item => {
+        if (!existing.has(item.title.toLowerCase())) {
+          const st = item.time || '10:00';
+          const [hh, mm] = st.split(':').map(Number);
+          const endHH = String(Math.min(23, (hh || 10) + 1)).padStart(2, '0');
+          appState.workHub.scheduleBlocks.push({
+            id: Date.now() + Math.floor(Math.random() * 1000) + added,
+            startTime: st,
+            endTime: `${endHH}:${String(mm || 0).padStart(2, '0')}`,
+            type: item.category || 'ticket',
+            code: item.code || 'TRABAJO',
+            title: item.title,
+            done: false,
+            notified: false
+          });
+          existing.add(item.title.toLowerCase());
+          added++;
+        }
+      });
+
+      (appState.tasks || []).filter(t => !t.done).forEach(task => {
+        if (!existing.has(task.text.toLowerCase())) {
+          const st = task.time || '12:00';
+          const [hh, mm] = st.split(':').map(Number);
+          const endHH = String(Math.min(23, (hh || 12) + 1)).padStart(2, '0');
+          appState.workHub.scheduleBlocks.push({
+            id: Date.now() + Math.floor(Math.random() * 1000) + added,
+            startTime: st,
+            endTime: `${endHH}:${String(mm || 0).padStart(2, '0')}`,
+            type: 'task',
+            code: task.project || 'PDF',
+            title: task.text,
+            done: false,
+            notified: false
+          });
+          existing.add(task.text.toLowerCase());
+          added++;
+        }
+      });
+
+      saveState();
+      showToast(added > 0 ? `${added} actividad(es) integradas a tu agenda de hoy` : "Tus tickets y tareas ya están en la agenda", "success");
+    }
+
+    async function autoOrganizeDayScheduleWithAI() {
+      if (!appState.apiKey) {
+        importPendingTasksAndTicketsToSchedule();
+        return;
+      }
+      const btn = document.getElementById('btnAutoScheduleAI');
+      const orig = btn ? btn.innerHTML : '';
+      if (btn) { btn.disabled = true; btn.innerHTML = `<span>Organizando horario...</span>`; }
+      try {
+        const startH = appState.workHub?.workStartHour || '09:00';
+        const endH = appState.workHub?.workEndHour || '18:00';
+        const openInbox = (appState.workHub?.inboxItems || []).filter(i => !i.done);
+        const openTasks = (appState.tasks || []).filter(t => !t.done);
+        const prompt = `Organiza una agenda laboral realista sin traslapes dentro del horario de trabajo (${startH} a ${endH}).
+        Respeta las horas de sesiones/juntas, asigna bloques productivos a los tickets urgentes y tareas de reporte PDF, e incluye 1 hora de comida.
+        TICKETS Y SESIONES PENDIENTES: ${JSON.stringify(openInbox)}
+        TAREAS PDF PENDIENTES: ${JSON.stringify(openTasks.map(t => ({ text: t.text, time: t.time, project: t.project })))}
+        Devuelve ÚNICAMENTE un JSON válido:
+        {
+          "blocks": [
+            { "startTime": "09:00", "endTime": "09:30", "type": "session", "code": "DAILY", "title": "..." }
+          ]
+        }
+        Donde "type" solo puede ser "ticket", "session", "task" o "break".`;
+
+        const res = await callGeminiAPI(prompt, null);
+        const parsed = JSON.parse(res);
+        if (parsed && Array.isArray(parsed.blocks) && parsed.blocks.length > 0) {
+          appState.workHub.scheduleBlocks = parsed.blocks.map((b, idx) => ({
+            id: Date.now() + idx,
+            startTime: b.startTime || '09:00',
+            endTime: b.endTime || '10:00',
+            type: ['ticket', 'session', 'task', 'break'].includes(b.type) ? b.type : 'task',
+            code: b.code || 'IA',
+            title: b.title || 'Actividad laboral',
+            done: false,
+            notified: false
+          }));
+          saveState();
+          showToast("Agenda diaria organizada por IA sin traslapes", "success");
+        } else {
+          importPendingTasksAndTicketsToSchedule();
+        }
+      } catch (e) {
+        importPendingTasksAndTicketsToSchedule();
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+      }
+    }
+
+    function filterWorkInbox(cat) {
+      if (!appState.workHub) return;
+      appState.workHub.inboxFilter = cat;
+      ['all', 'ticket', 'session', 'task'].forEach(c => {
+        const b = document.getElementById(`winbox-filter-${c}`);
+        if (b) {
+          b.className = c === cat
+            ? 'px-3 py-1.5 rounded-xl text-[11px] font-black bg-terra-500 text-white'
+            : 'px-3 py-1.5 rounded-xl text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-400';
+        }
+      });
+      renderWorkInboxItems();
+    }
+
+    function renderWorkInboxItems() {
+      const container = document.getElementById('workInboxItemsList');
+      if (!container || !appState.workHub) return;
+      const filter = appState.workHub.inboxFilter || 'all';
+      const items = (appState.workHub.inboxItems || []).filter(i => filter === 'all' || i.category === filter);
+
+      if (items.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 italic p-3 text-center">No hay elementos en esta vista. Pega arriba tus correos o mensajes de WhatsApp del trabajo para que la IA extraiga tickets, sesiones y pendientes.</p>`;
+        return;
+      }
+
+      const catBadge = {
+        ticket: { icon: '🎫', name: 'Ticket', cls: 'bg-rose-500/15 text-rose-400 border-rose-500/30' },
+        session: { icon: '📹', name: 'Sesión', cls: 'bg-sky-500/15 text-sky-400 border-sky-500/30' },
+        task: { icon: '📌', name: 'Pendiente', cls: 'bg-amber-500/15 text-amber-400 border-amber-500/30' }
+      };
+
+      container.innerHTML = items.map(item => {
+        const meta = catBadge[item.category] || catBadge.task;
+        return `
+          <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div class="flex items-start gap-2.5 min-w-0 flex-1">
+              <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleWorkInboxItemDone(${Number(item.id)})" class="w-4 h-4 mt-0.5 accent-emerald-500 rounded cursor-pointer shrink-0">
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                  <span class="px-2 py-0.5 rounded-md text-[9px] font-extrabold border ${meta.cls}">${meta.icon} ${meta.name}</span>
+                  ${item.code ? `<span class="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[9px] font-mono font-bold">${escapeHtmlSafe(item.code)}</span>` : ''}
+                  ${item.time ? `<span class="px-2 py-0.5 rounded bg-sky-500/15 text-sky-400 text-[9px] font-mono font-bold">⏰ ${escapeHtmlSafe(item.time)}</span>` : ''}
+                  ${item.source ? `<span class="text-[10px] text-slate-400 font-semibold">• ${escapeHtmlSafe(item.source)}${item.sender ? ' (' + escapeHtmlSafe(item.sender) + ')' : ''}</span>` : ''}
+                </div>
+                <p class="font-bold ${item.done ? 'line-through text-slate-400' : 'text-slate-800 dark:text-slate-100'} break-words">${escapeHtmlSafe(item.title)}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button onclick="sendWorkInboxItemToSchedule(${Number(item.id)})" class="px-2.5 py-1 rounded-lg bg-sky-500/15 text-sky-400 font-bold text-[10px] hover:bg-sky-500/25">+ Agenda</button>
+              <button onclick="promoteWorkInboxItemToPDFTask(${Number(item.id)})" class="px-2.5 py-1 rounded-lg bg-blue-500/15 text-blue-400 font-bold text-[10px] hover:bg-blue-500/25">+ Plantilla PDF</button>
+              <button onclick="deleteWorkInboxItem(${Number(item.id)})" class="text-slate-400 hover:text-rose-500 px-1"><i class="fi fi-rr-trash"></i></button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addManualWorkInboxItem() {
+      const category = document.getElementById('manualWorkItemCategory')?.value || 'ticket';
+      const code = (document.getElementById('manualWorkItemCode')?.value || '').trim() || (category === 'ticket' ? 'TK-' + Math.floor(100 + Math.random() * 900) : 'TRABAJO');
+      const titleInp = document.getElementById('manualWorkItemTitle');
+      const title = (titleInp?.value || '').trim();
+      const time = document.getElementById('manualWorkItemTime')?.value || '11:00';
+      if (!title) { showToast("Escribe el asunto del ticket, sesión o pendiente", "warning"); return; }
+
+      appState.workHub.inboxItems.unshift({
+        id: Date.now(),
+        category,
+        code,
+        title,
+        time,
+        sender: 'Registro Directo',
+        source: 'Manual',
+        priority: 'Alta',
+        done: false,
+        scheduled: false,
+        notified: false
+      });
+      if (titleInp) titleInp.value = '';
+      saveState();
+      scheduleCloudPushViaNtfy(`💼 ${code}: ${title}`, time, `Programado a las ${time}`);
+      showToast("Elemento laboral guardado y alerta programada", "success");
+    }
+
+    function toggleWorkInboxItemDone(id) {
+      const item = (appState.workHub?.inboxItems || []).find(x => Number(x.id) === Number(id));
+      if (!item) return;
+      item.done = !item.done;
+      saveState();
+    }
+
+    function deleteWorkInboxItem(id) {
+      if (!appState.workHub) return;
+      appState.workHub.inboxItems = (appState.workHub.inboxItems || []).filter(x => Number(x.id) !== Number(id));
+      saveState();
+    }
+
+    function sendWorkInboxItemToSchedule(id) {
+      const item = (appState.workHub?.inboxItems || []).find(x => Number(x.id) === Number(id));
+      if (!item) return;
+      const st = item.time || '11:00';
+      const [hh, mm] = st.split(':').map(Number);
+      const endHH = String(Math.min(23, (hh || 11) + 1)).padStart(2, '0');
+      appState.workHub.scheduleBlocks.push({
+        id: Date.now(),
+        startTime: st,
+        endTime: `${endHH}:${String(mm || 0).padStart(2, '0')}`,
+        type: item.category || 'ticket',
+        code: item.code || 'TRABAJO',
+        title: item.title,
+        done: false,
+        notified: false
+      });
+      item.scheduled = true;
+      saveState();
+      showToast("Agregado a tu Agenda Diaria", "success");
+    }
+
+    function promoteWorkInboxItemToPDFTask(id) {
+      const item = (appState.workHub?.inboxItems || []).find(x => Number(x.id) === Number(id));
+      if (!item) return;
+      const projNum = item.code || String((appState.tasks || []).length + 1);
+      appState.tasks.unshift({
+        id: Date.now(),
+        text: item.title,
+        time: item.time || '11:00',
+        solicita: item.sender || 'Lucia',
+        project: projNum,
+        tag: 'Trabajo',
+        done: !!item.done,
+        notified: false,
+        selectedForPdf: true,
+        workFormat: {
+          taskNumber: projNum,
+          solicita: item.sender || 'Lucia',
+          assignDate: appState.currentDay,
+          dueDate: appState.currentDay,
+          status: item.done ? 'Completado' : 'En Progreso',
+          startTime: item.time || '',
+          endTime: '',
+          activityDesc: item.title,
+          notes: `Extraído de ${item.source || 'Correo/Whats'} (${item.code || ''})`,
+          deliverable: '',
+          evidenceImages: []
+        }
+      });
+      saveState();
+      showToast("Copiado a Tareas Oficiales para tu Reporte PDF", "success");
+    }
+
+    async function handleWorkInboxImageUpload(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      pendingWorkInboxImageBase64 = await compressImageFile(file, 900, 0.8);
+      const badge = document.getElementById('workInboxImageBadge');
+      if (badge) badge.classList.remove('hidden');
+      showToast("Captura de Correo/WhatsApp lista para escanear", "success");
+    }
+
+    function loadSampleWorkEmailsAndWhats() {
+      const sample = `Correo de: mesa.ayuda@empresa.com - Asunto: [URGENTE] Ticket INC-4892 Revisar escaneo de documentos y subir evidencia antes de las 13:30.
+WhatsApp de Lucia: "Hola! Recuerda que hoy a las 11:00 tenemos la sesión con PLS por Meet para revisar los pendientes de la semana."
+WhatsApp de Amigo: "¿Vamos por unas alitas el viernes?" (mensaje personal, ignorar)
+Correo de Coordinación: "Favor de mandar el reporte PDF firmado antes de las 17:00 hrs."`;
+      const box = document.getElementById('rawWorkInboxPaste');
+      if (box) box.value = sample;
+      showToast("Ejemplo cargado. Presiona Extraer Tickets/Sesiones.", "info");
+    }
+
+    async function extractWorkItemsWithAI(autoAddToSchedule = true) {
+      const rawText = (document.getElementById('rawWorkInboxPaste')?.value || '').trim();
+      if (!rawText && !pendingWorkInboxImageBase64) {
+        showToast("Pega tus correos/mensajes de WhatsApp o sube una captura primero", "warning");
+        return;
+      }
+      if (!appState.apiKey) {
+        showToast("Configura tu API Key en Ajustes para usar el escáner IA", "warning");
+        switchTab('settings');
+        return;
+      }
+      const btn = document.getElementById('btnScanWorkInboxAI');
+      const orig = btn ? btn.innerHTML : '';
+      if (btn) { btn.disabled = true; btn.innerHTML = `<span>Filtrando solo trabajo con IA...</span>`; }
+
+      try {
+        const keywords = appState.workHub?.workKeywords || 'Ticket, Jira, Sesión, Lucia, PLS, Entrega';
+        const prompt = `Actúa como un asistente ejecutivo conectado al correo y WhatsApp laboral del usuario.
+        Analiza el texto y/o imagen adjunta. IGNORA por completo conversaciones personales o ajenas al trabajo.
+        Extrae ÚNICAMENTE elementos del trabajo divididos en:
+        - "ticket": tickets de soporte, folios, bugs, incidencias
+        - "session": sesiones, juntas, llamadas, reuniones con hora
+        - "task": tareas o entregables laborales solicitados (ej. reportes PDF, escaneos, trámites)
+        Palabras clave prioritarias: ${keywords}
+
+        MENSAJES / CORREOS A ANALIZAR:
+        ---
+        ${rawText}
+        ---
+
+        Devuelve ÚNICAMENTE un JSON válido con esta estructura:
+        {
+          "items": [
+            {
+              "category": "ticket",
+              "code": "INC-4892",
+              "title": "Descripción clara del ticket, sesión o tarea",
+              "time": "13:30",
+              "sender": "Lucia / Mesa de Ayuda",
+              "source": "Correo",
+              "priority": "Alta"
+            }
+          ]
+        }`;
+
+        const resText = await callGeminiAPI(prompt, pendingWorkInboxImageBase64);
+        const parsed = JSON.parse(resText);
+        const extracted = (parsed && Array.isArray(parsed.items)) ? parsed.items : [];
+
+        if (extracted.length === 0) {
+          showToast("No se detectaron tickets o sesiones laborales en el mensaje", "info");
+        } else {
+          extracted.forEach((it, idx) => {
+            const newId = Date.now() + idx;
+            const cat = ['ticket', 'session', 'task'].includes(it.category) ? it.category : 'task';
+            const timeStr = (/^\d{2}:\d{2}$/.test(it.time || '')) ? it.time : '11:00';
+            const itemObj = {
+              id: newId,
+              category: cat,
+              code: it.code || (cat === 'ticket' ? 'TK-IA' : 'SYNC'),
+              title: it.title || 'Pendiente laboral',
+              time: timeStr,
+              sender: it.sender || 'Trabajo',
+              source: it.source || 'IA Sync',
+              priority: it.priority || 'Alta',
+              done: false,
+              scheduled: autoAddToSchedule,
+              notified: false
+            };
+            appState.workHub.inboxItems.unshift(itemObj);
+
+            if (autoAddToSchedule) {
+              const [hh, mm] = timeStr.split(':').map(Number);
+              const endHH = String(Math.min(23, (hh || 11) + 1)).padStart(2, '0');
+              appState.workHub.scheduleBlocks.push({
+                id: newId + 500,
+                startTime: timeStr,
+                endTime: `${endHH}:${String(mm || 0).padStart(2, '0')}`,
+                type: cat,
+                code: itemObj.code,
+                title: itemObj.title,
+                done: false,
+                notified: false
+              });
+            }
+            scheduleCloudPushViaNtfy(`💼 [${itemObj.code}] ${itemObj.title}`, timeStr, `Vía ${itemObj.source} (${itemObj.sender})`);
+          });
+
+          pendingWorkInboxImageBase64 = null;
+          const badge = document.getElementById('workInboxImageBadge');
+          if (badge) badge.classList.add('hidden');
+          const box = document.getElementById('rawWorkInboxPaste');
+          if (box) box.value = '';
+          saveState();
+          showToast(`${extracted.length} elemento(s) del trabajo extraídos y agendados`, "success");
+        }
+      } catch (err) {
+        showToast("Error al escanear: " + err.message, "error");
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+      }
+    }
+
+    function buildDailyWorkBriefText() {
+      const today = appState.currentDay;
+      const openTickets = (appState.workHub?.inboxItems || []).filter(i => i.category === 'ticket' && !i.done);
+      const openSessions = (appState.workHub?.inboxItems || []).filter(i => i.category === 'session' && !i.done);
+      const blocks = (appState.workHub?.scheduleBlocks || []).filter(b => !b.done).sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+      const pdfTasks = (appState.tasks || []).filter(t => !t.done);
+
+      const lines = [`*💼 RESUMEN LABORAL CONTROL TCC (${today})*`, ''];
+      if (openSessions.length > 0) {
+        lines.push('*📹 SESIONES / JUNTAS HOY:*');
+        openSessions.forEach(s => lines.push(`• ${s.time || '--:--'} - [${s.code}] ${s.title}`));
+        lines.push('');
+      }
+      if (openTickets.length > 0) {
+        lines.push('*🎫 TICKETS ABIERTOS:*');
+        openTickets.forEach(t => lines.push(`• [${t.code}] ${t.title} (${t.time || 'Pendiente'})`));
+        lines.push('');
+      }
+      if (blocks.length > 0) {
+        lines.push('*📅 AGENDA DEL DÍA:*');
+        blocks.forEach(b => lines.push(`• ${b.startTime}-${b.endTime}: ${b.title}`));
+        lines.push('');
+      }
+      if (pdfTasks.length > 0) {
+        lines.push('*📋 ACTIVIDADES PARA REPORTE PDF:*');
+        pdfTasks.forEach(t => lines.push(`• #${t.project || '1'} ${t.text} (Solicita: ${t.solicita || 'Lucia'})`));
+      }
+      return lines.join('\n');
+    }
+
+    function sendDailyWorkBriefToWhatsApp() {
+      const phone = (appState.workHub?.workPhone || '').replace(/\D/g, '');
+      const text = encodeURIComponent(buildDailyWorkBriefText());
+      const url = phone ? `https://wa.me/${phone}?text=${text}` : `https://wa.me/?text=${text}`;
+      window.open(url, '_blank', 'noopener');
+    }
+
+    function sendDailyWorkBriefToEmail() {
+      const email = (appState.workHub?.workEmail || '').trim();
+      const subject = encodeURIComponent(`Resumen de Tickets, Sesiones y Agenda - ${appState.currentDay}`);
+      const body = encodeURIComponent(buildDailyWorkBriefText());
+      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+    }
+
+    // ==================== MÓDULO NUEVO B: GESTIÓN DE GASTOS, COBROS, DEUDAS Y PLAN ANTI-PRESIÓN ====================
+    let currentFinanceSubTab = 'cashflow';
+
+    function switchFinanceSubTab(sub) {
+      currentFinanceSubTab = sub;
+      ['cashflow', 'debts', 'peaceplan'].forEach(k => {
+        const viewEl = document.getElementById(`financeSubView-${k}`);
+        if (viewEl) viewEl.classList.toggle('hidden', k !== sub);
+        const btnEl = document.getElementById(`finsub-${k}`);
+        if (btnEl) {
+          btnEl.className = k === sub
+            ? 'py-2 px-2 rounded-xl bg-terra-500 text-white shadow-sm transition flex items-center justify-center gap-1.5'
+            : 'py-2 px-2 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-center gap-1.5';
+        }
+      });
+      const activeEl = document.getElementById(`financeSubView-${sub}`);
+      if (activeEl) triggerElementSlideAnim(activeEl, 'subview-anim-enter');
+      renderFinanceAll();
+    }
+
+    function formatMoneyMXN(n) {
+      const num = Number(n) || 0;
+      return '$' + num.toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+
+    function daysBetweenTodayAndISO(isoDateStr) {
+      if (!isoDateStr) return 999;
+      const today = new Date(getLocalTodayIso() + 'T00:00:00');
+      const target = new Date(isoDateStr + 'T00:00:00');
+      return Math.round((target - today) / 86400000);
+    }
+
+    function renderFinanceAll() {
+      if (!appState.finance) appState.finance = createDefaultState().finance;
+      const incDateInp = document.getElementById('finIncomeDateInput');
+      const debtDueInp = document.getElementById('finDebtDueDateInput');
+      if (incDateInp && !incDateInp.value) incDateInp.value = getLocalTodayIso();
+      if (debtDueInp && !debtDueInp.value) debtDueInp.value = getLocalTodayIso();
+
+      const incomes = appState.finance.incomes || [];
+      const expenses = appState.finance.expenses || [];
+      const debts = appState.finance.debts || [];
+
+      const monthlyIncome = incomes.reduce((acc, inc) => {
+        const amt = Number(inc.amount) || 0;
+        if (inc.frequency === 'Semanal') return acc + (amt * 4);
+        if (inc.frequency === 'Quincenal') return acc + (amt * 2);
+        return acc + amt;
+      }, 0);
+
+      const totalExpenses = expenses.reduce((acc, ex) => acc + (Number(ex.amount) || 0), 0);
+      const unpaidDebts = debts.filter(d => !d.paidThisMonth);
+      const totalDebtMinPay = unpaidDebts.reduce((acc, d) => acc + (Number(d.minPayment) || 0), 0);
+      const totalObligations = totalExpenses + totalDebtMinPay;
+      const freeCash = monthlyIncome - totalObligations;
+
+      let nextIncome = null;
+      let minDaysToPayday = 999;
+      incomes.forEach(inc => {
+        const d = daysBetweenTodayAndISO(inc.nextDate);
+        if (d >= 0 && d < minDaysToPayday) {
+          minDaysToPayday = d;
+          nextIncome = inc;
+        }
+      });
+      const daysWindow = (minDaysToPayday > 0 && minDaysToPayday <= 35) ? minDaysToPayday : 15;
+      const safeDaily = Math.max(0, Math.floor(freeCash / daysWindow));
+
+      const elInc = document.getElementById('finKpiTotalIncome');
+      const elIncSub = document.getElementById('finKpiNextIncomeSub');
+      const elObl = document.getElementById('finKpiTotalObligations');
+      const elDebtSub = document.getElementById('finKpiDebtCountSub');
+      const elFree = document.getElementById('finKpiFreeCash');
+      const elDaily = document.getElementById('finKpiSafeDailySpend');
+      const elDaysSub = document.getElementById('finKpiDaysUntilPaySub');
+
+      if (elInc) elInc.textContent = formatMoneyMXN(monthlyIncome);
+      if (elIncSub) {
+        elIncSub.textContent = nextIncome
+          ? `Próximo: ${nextIncome.name} (${minDaysToPayday === 0 ? '¡Hoy!' : 'en ' + minDaysToPayday + 'd'})`
+          : 'Agrega tu fecha de cobro';
+      }
+      if (elObl) elObl.textContent = formatMoneyMXN(totalObligations);
+      if (elDebtSub) elDebtSub.textContent = `${unpaidDebts.length} deuda(s) por pagar`;
+      if (elFree) {
+        elFree.textContent = formatMoneyMXN(freeCash);
+        elFree.className = `text-base sm:text-lg font-black ${freeCash >= 0 ? 'text-sky-400' : 'text-rose-400'}`;
+      }
+      if (elDaily) elDaily.textContent = `${formatMoneyMXN(safeDaily)} / día`;
+      if (elDaysSub) elDaysSub.textContent = `Para los próximos ${daysWindow} día(s)`;
+
+      const semBadge = document.getElementById('financePeaceSemaphoreBadge');
+      const countText = document.getElementById('nextPaydayCountdownText');
+      const ratioUsed = monthlyIncome > 0 ? Math.min(100, Math.round((totalObligations / monthlyIncome) * 100)) : 0;
+      if (semBadge) {
+        if (freeCash < 0) {
+          semBadge.textContent = '🔴 Alerta: Ajustar Gastos';
+          semBadge.className = 'text-[10px] font-black px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-400';
+        } else if (ratioUsed > 80) {
+          semBadge.textContent = '🟡 Margen Ajustado';
+          semBadge.className = 'text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400';
+        } else {
+          semBadge.textContent = '🟢 Paz Financiera';
+          semBadge.className = 'text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400';
+        }
+      }
+      if (countText) {
+        countText.textContent = nextIncome
+          ? `Tu próximo cobro (${nextIncome.name}: ${formatMoneyMXN(nextIncome.amount)}) es el ${nextIncome.nextDate}. Apartando tus deudas y fijos, puedes gastar hasta ${formatMoneyMXN(safeDaily)} por día con total tranquilidad.`
+          : 'Registra cuándo cobras y las fechas límite de tus tarjetas para saber exactamente cuánto puedes gastar hoy sin estrés.';
+      }
+
+      const debtPct = monthlyIncome > 0 ? Math.min(100, Math.round((totalDebtMinPay / monthlyIncome) * 100)) : 0;
+      const expPct = monthlyIncome > 0 ? Math.min(100 - debtPct, Math.round((totalExpenses / monthlyIncome) * 100)) : 0;
+      const freePct = Math.max(0, 100 - debtPct - expPct);
+
+      const segD = document.getElementById('finBarDebtsSeg');
+      const segE = document.getElementById('finBarExpensesSeg');
+      const segF = document.getElementById('finBarFreeSeg');
+      const lblU = document.getElementById('finBarLabelUsed');
+      const lblF = document.getElementById('finBarLabelFree');
+      if (segD) segD.style.width = debtPct + '%';
+      if (segE) segE.style.width = expPct + '%';
+      if (segF) segF.style.width = freePct + '%';
+      if (lblU) lblU.textContent = `Comprometido (Deudas ${debtPct}% + Gastos ${expPct}%): ${debtPct + expPct}%`;
+      if (lblF) lblF.textContent = `Liquidez libre: ${freePct}%`;
+
+      const urgentCount = unpaidDebts.filter(d => daysBetweenTodayAndISO(d.dueDate) <= 5).length;
+      const uBadge = document.getElementById('financeUrgentDebtsBadge');
+      if (uBadge) {
+        uBadge.textContent = urgentCount;
+        uBadge.classList.toggle('hidden', urgentCount === 0);
+      }
+
+      renderFinanceIncomesList();
+      renderFinanceExpensesList();
+      renderFinanceDebtsList();
+      renderFinancePaycheckAllocation();
+
+      const aiOut = document.getElementById('financeAiPeacePlanOutput');
+      if (aiOut && appState.finance.aiPeacePlanHtml) {
+        aiOut.innerHTML = appState.finance.aiPeacePlanHtml;
+      }
+    }
+
+    function renderFinanceIncomesList() {
+      const container = document.getElementById('financeIncomesList');
+      if (!container || !appState.finance) return;
+      const incomes = appState.finance.incomes || [];
+      if (incomes.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 italic p-2">Agrega arriba cuándo y cuánto cobras.</p>`;
+        return;
+      }
+      container.innerHTML = incomes.map(inc => {
+        const diff = daysBetweenTodayAndISO(inc.nextDate);
+        const tag = diff < 0 ? `Hace ${Math.abs(diff)}d` : (diff === 0 ? '¡Cobras HOY!' : `En ${diff} día(s)`);
+        return `
+          <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="font-bold text-slate-800 dark:text-slate-100">${escapeHtmlSafe(inc.name)}</span>
+              <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 text-[10px] font-bold">${escapeHtmlSafe(inc.frequency)}</span>
+              <span class="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-mono font-bold">📅 ${escapeHtmlSafe(inc.nextDate)} (${tag})</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-black text-emerald-400">${formatMoneyMXN(inc.amount)}</span>
+              <button onclick="markIncomeReceivedAndAdvance(${Number(inc.id)})" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 text-[10px] font-extrabold hover:bg-emerald-500/30">✓ ¡Ya cobré!</button>
+              <button onclick="deleteFinanceIncome(${Number(inc.id)})" class="text-slate-400 hover:text-rose-500 px-1"><i class="fi fi-rr-trash"></i></button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addFinanceIncome() {
+      const nameInp = document.getElementById('finIncomeNameInput');
+      const amtInp = document.getElementById('finIncomeAmountInput');
+      const freqSel = document.getElementById('finIncomeFreqSelect');
+      const dateInp = document.getElementById('finIncomeDateInput');
+      const name = (nameInp?.value || '').trim();
+      const amount = parseFloat(amtInp?.value || '0');
+      const frequency = freqSel?.value || 'Quincenal';
+      const nextDate = dateInp?.value || getLocalTodayIso();
+      if (!name || !(amount > 0)) { showToast("Escribe el concepto y monto de tu cobro", "warning"); return; }
+
+      appState.finance.incomes.push({ id: Date.now(), name, amount, frequency, nextDate });
+      if (nameInp) nameInp.value = '';
+      if (amtInp) amtInp.value = '';
+      saveState();
+      showToast("Cobro registrado en tu calendario financiero", "success");
+    }
+
+    function markIncomeReceivedAndAdvance(id) {
+      const inc = (appState.finance?.incomes || []).find(x => Number(x.id) === Number(id));
+      if (!inc) return;
+      const cur = new Date((inc.nextDate || getLocalTodayIso()) + 'T12:00:00');
+      if (inc.frequency === 'Semanal') cur.setDate(cur.getDate() + 7);
+      else if (inc.frequency === 'Quincenal') cur.setDate(cur.getDate() + 15);
+      else if (inc.frequency === 'Mensual') cur.setMonth(cur.getMonth() + 1);
+      inc.nextDate = formatIsoDateLocal(cur);
+      saveState();
+      showToast(`¡Cobro registrado! Siguiente fecha: ${inc.nextDate}`, "success");
+    }
+
+    function deleteFinanceIncome(id) {
+      appState.finance.incomes = (appState.finance?.incomes || []).filter(x => Number(x.id) !== Number(id));
+      saveState();
+    }
+
+    function renderFinanceExpensesList() {
+      const container = document.getElementById('financeExpensesList');
+      const totalBadge = document.getElementById('financeExpensesTotalBadge');
+      if (!container || !appState.finance) return;
+      const expenses = appState.finance.expenses || [];
+      const total = expenses.reduce((a, b) => a + (Number(b.amount) || 0), 0);
+      if (totalBadge) totalBadge.textContent = `Total: ${formatMoneyMXN(total)}`;
+
+      if (expenses.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 italic p-2">Sin gastos registrados.</p>`;
+        return;
+      }
+      container.innerHTML = expenses.map(ex => `
+        <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 text-xs">
+          <div>
+            <span class="font-bold">${escapeHtmlSafe(ex.name)}</span>
+            <span class="ml-2 px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold">${escapeHtmlSafe(ex.category)}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="font-black text-amber-400">-${formatMoneyMXN(ex.amount)}</span>
+            <button onclick="deleteFinanceExpense(${Number(ex.id)})" class="text-slate-400 hover:text-rose-500 px-1"><i class="fi fi-rr-trash"></i></button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function addFinanceExpense() {
+      const nameInp = document.getElementById('finExpenseNameInput');
+      const amtInp = document.getElementById('finExpenseAmountInput');
+      const catSel = document.getElementById('finExpenseCategorySelect');
+      const name = (nameInp?.value || '').trim();
+      const amount = parseFloat(amtInp?.value || '0');
+      const category = catSel?.value || 'Fijo Necesario';
+      if (!name || !(amount > 0)) { showToast("Ingresa el concepto y monto del gasto", "warning"); return; }
+
+      appState.finance.expenses.unshift({ id: Date.now(), name, amount, category, date: getLocalTodayIso() });
+      if (nameInp) nameInp.value = '';
+      if (amtInp) amtInp.value = '';
+      saveState();
+      showToast("Gasto registrado", "success");
+    }
+
+    function deleteFinanceExpense(id) {
+      appState.finance.expenses = (appState.finance?.expenses || []).filter(x => Number(x.id) !== Number(id));
+      saveState();
+    }
+
+    function renderFinanceDebtsList() {
+      const container = document.getElementById('financeDebtsList');
+      if (!container || !appState.finance) return;
+      const debts = (appState.finance.debts || []).slice().sort((a, b) => (a.dueDate || '9999').localeCompare(b.dueDate || '9999'));
+      if (debts.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 italic p-3 text-center">No hay deudas registradas. Agrega tus tarjetas o préstamos arriba con su fecha límite de pago.</p>`;
+        return;
+      }
+
+      container.innerHTML = debts.map(d => {
+        const daysLeft = daysBetweenTodayAndISO(d.dueDate);
+        let urgencyBadge = '';
+        if (d.paidThisMonth) {
+          urgencyBadge = `<span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[9px] font-black">✅ Pagado este mes</span>`;
+        } else if (daysLeft < 0) {
+          urgencyBadge = `<span class="px-2 py-0.5 rounded-full bg-rose-600 text-white text-[9px] font-black animate-pulse">⚠️ Vencido hace ${Math.abs(daysLeft)}d</span>`;
+        } else if (daysLeft <= 3) {
+          urgencyBadge = `<span class="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 text-[9px] font-black">🔴 Urgente: Vence en ${daysLeft}d</span>`;
+        } else if (daysLeft <= 7) {
+          urgencyBadge = `<span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[9px] font-black">🟡 Próximo: Vence en ${daysLeft}d</span>`;
+        } else {
+          urgencyBadge = `<span class="px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-400 text-[9px] font-black">🔵 En ${daysLeft} días</span>`;
+        }
+
+        const progressPct = d.totalBalance > 0 ? Math.min(100, Math.round((d.minPayment / d.totalBalance) * 100)) : 0;
+
+        return `
+          <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border ${d.paidThisMonth ? 'border-emerald-500/30 opacity-75' : (daysLeft <= 3 ? 'border-rose-500/50' : 'border-slate-200 dark:border-slate-800')} space-y-2 text-xs">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="text-sm font-black">${escapeHtmlSafe(d.name)}</span>
+                  <span class="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[9px] font-bold">${escapeHtmlSafe(d.priority || 'Media')}</span>
+                  ${urgencyBadge}
+                </div>
+                <p class="text-[11px] text-slate-400 mt-0.5">
+                  📅 Fecha límite de pago: <strong class="text-amber-400">${escapeHtmlSafe(d.dueDate || '--')}</strong>
+                  ${d.cutDay ? ` • ✂️ Día de corte: <strong>Día ${Number(d.cutDay)}</strong>` : ''}
+                </p>
+              </div>
+              <div class="text-right">
+                <span class="text-[10px] text-slate-400 block">Pago del mes:</span>
+                <span class="text-base font-black text-rose-400">${formatMoneyMXN(d.minPayment)}</span>
+                <span class="text-[10px] text-slate-400 block">Saldo total: ${formatMoneyMXN(d.totalBalance)}</span>
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
+              <span class="text-[10px] text-slate-400">Este pago cubre el <strong>${progressPct}%</strong> del saldo</span>
+              <div class="flex items-center gap-2">
+                <button onclick="toggleFinanceDebtPaid(${Number(d.id)})" class="px-3 py-1 rounded-xl ${d.paidThisMonth ? 'bg-slate-200 dark:bg-slate-700 text-slate-400' : 'bg-emerald-600 text-white'} text-[10px] font-black transition">
+                  ${d.paidThisMonth ? '↩ Desmarcar Pago' : '✓ Marcar Pagado este Mes'}
+                </button>
+                <button onclick="deleteFinanceDebt(${Number(d.id)})" class="text-slate-400 hover:text-rose-500 px-1"><i class="fi fi-rr-trash"></i></button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addFinanceDebt() {
+      const nameInp = document.getElementById('finDebtNameInput');
+      const prioSel = document.getElementById('finDebtPrioritySelect');
+      const totInp = document.getElementById('finDebtTotalInput');
+      const minInp = document.getElementById('finDebtMinPayInput');
+      const cutInp = document.getElementById('finDebtCutDayInput');
+      const dueInp = document.getElementById('finDebtDueDateInput');
+
+      const name = (nameInp?.value || '').trim();
+      const priority = prioSel?.value || 'Alta (Interés Alto)';
+      const totalBalance = parseFloat(totInp?.value || '0');
+      const minPayment = parseFloat(minInp?.value || '0');
+      const cutDay = parseInt(cutInp?.value || '0', 10) || null;
+      const dueDate = dueInp?.value || getLocalTodayIso();
+
+      if (!name || !(minPayment > 0)) { showToast("Escribe el nombre de la deuda y el pago del mes", "warning"); return; }
+
+      appState.finance.debts.push({
+        id: Date.now(),
+        name,
+        priority,
+        totalBalance: totalBalance > 0 ? totalBalance : minPayment,
+        minPayment,
+        cutDay,
+        dueDate,
+        paidThisMonth: false,
+        notified: ''
+      });
+
+      if (nameInp) nameInp.value = '';
+      if (totInp) totInp.value = '';
+      if (minInp) minInp.value = '';
+      if (cutInp) cutInp.value = '';
+      saveState();
+      scheduleCloudPushViaNtfy(`💳 Recordatorio de Pago: ${name} (${formatMoneyMXN(minPayment)})`, '09:00', `Fecha límite: ${dueDate}`);
+      showToast("Deuda registrada con alerta de fecha límite", "success");
+    }
+
+    function toggleFinanceDebtPaid(id) {
+      const d = (appState.finance?.debts || []).find(x => Number(x.id) === Number(id));
+      if (!d) return;
+      d.paidThisMonth = !d.paidThisMonth;
+      if (d.paidThisMonth) {
+        d.totalBalance = Math.max(0, (Number(d.totalBalance) || 0) - (Number(d.minPayment) || 0));
+        triggerStreakCelebration(`💳 ¡Deuda Pagada!`, `${d.name} (-${formatMoneyMXN(d.minPayment)})`);
+      }
+      saveState();
+    }
+
+    function deleteFinanceDebt(id) {
+      appState.finance.debts = (appState.finance?.debts || []).filter(x => Number(x.id) !== Number(id));
+      saveState();
+    }
+
+    function renderFinancePaycheckAllocation() {
+      const box = document.getElementById('financePaycheckAllocationBox');
+      if (!box || !appState.finance) return;
+      const incomes = (appState.finance.incomes || []).slice().sort((a, b) => (a.nextDate || '').localeCompare(b.nextDate || ''));
+      const unpaidDebts = (appState.finance.debts || []).filter(d => !d.paidThisMonth).sort((a, b) => (a.dueDate || '').localeCompare(b.dueDate || ''));
+
+      if (incomes.length === 0 || unpaidDebts.length === 0) {
+        box.innerHTML = `<div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs text-slate-400">Registra al menos un cobro y una deuda para ver automáticamente con qué quincena conviene pagar cada tarjeta.</div>`;
+        return;
+      }
+
+      const planRows = unpaidDebts.map(debt => {
+        const eligibleIncomes = incomes.filter(inc => (inc.nextDate || '') <= (debt.dueDate || '9999'));
+        const chosenIncome = eligibleIncomes.length > 0 ? eligibleIncomes[eligibleIncomes.length - 1] : incomes[0];
+        const daysLeft = daysBetweenTodayAndISO(debt.dueDate);
+        return `
+          <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div>
+              <span class="font-black">💳 ${escapeHtmlSafe(debt.name)}</span>
+              <span class="text-[10px] text-slate-400 block">Fecha límite: <strong class="text-amber-400">${escapeHtmlSafe(debt.dueDate)}</strong> (${daysLeft >= 0 ? 'en ' + daysLeft + 'd' : 'vencida'})</span>
+            </div>
+            <span class="px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-400 text-[10px] font-black">
+              👉 Apartar ${formatMoneyMXN(debt.minPayment)} del cobro: ${escapeHtmlSafe(chosenIncome.name)} (${escapeHtmlSafe(chosenIncome.nextDate)})
+            </span>
+          </div>
+        `;
+      }).join('');
+
+      box.innerHTML = `
+        <div class="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 space-y-2">
+          <span class="text-[10px] font-extrabold uppercase text-emerald-400 block">📌 Mapa Automático: ¿Con qué cobro pago cada deuda?</span>
+          ${planRows}
+        </div>
+      `;
+    }
+
+    async function generateFinancePeacePlanWithAI() {
+      if (!appState.apiKey) {
+        showToast("Configura tu API Key en Ajustes para consultar al Estratega IA", "warning");
+        switchTab('settings');
+        return;
+      }
+      const btn = document.getElementById('btnGeneratePeacePlanAI');
+      const out = document.getElementById('financeAiPeacePlanOutput');
+      const orig = btn ? btn.innerHTML : '';
+      if (btn) { btn.disabled = true; btn.innerHTML = `<span>Diseñando plan anti-presión...</span>`; }
+      try {
+        const prompt = `Actúa como un asesor financiero experto en paz mental y liquidación de deudas.
+        Analiza los datos reales del usuario:
+        COBROS E INGRESOS: ${JSON.stringify(appState.finance?.incomes || [])}
+        GASTOS DEL MES: ${JSON.stringify(appState.finance?.expenses || [])}
+        DEUDAS Y FECHAS LÍMITE: ${JSON.stringify(appState.finance?.debts || [])}
+
+        Devuelve ÚNICAMENTE un JSON válido con esta estructura:
+        {
+          "step1": "Regla exacta de cuánto apartar en su próximo cobro para no sentir presión",
+          "step2": "Orden recomendado para liquidar sus deudas (Avalancha/Bola de Nieve) según sus fechas e intereses",
+          "step3": "Consejo práctico para administrar su gasto diario seguro sin estrés"
+        }`;
+
+        const res = await callGeminiAPI(prompt, null);
+        const parsed = JSON.parse(res);
+        const htmlPlan = `
+          <div class="space-y-2 text-xs">
+            <p><strong class="text-emerald-400">1. Regla para tu Próximo Cobro:</strong> ${escapeHtmlSafe(parsed.step1 || '')}</p>
+            <p><strong class="text-sky-400">2. Orden de Ataque a tus Deudas:</strong> ${escapeHtmlSafe(parsed.step2 || '')}</p>
+            <p><strong class="text-amber-400">3. Tranquilidad Diaria:</strong> ${escapeHtmlSafe(parsed.step3 || '')}</p>
+          </div>
+        `;
+        appState.finance.aiPeacePlanHtml = htmlPlan;
+        saveState();
+        if (out) out.innerHTML = htmlPlan;
+        showToast("Plan Anti-Presión generado con éxito", "success");
+      } catch (e) {
+        showToast("Error IA: " + e.message, "error");
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+      }
+    }
+
+    // ==================== MÓDULO NUEVO C: NOTIFICACIONES 24/7 (CLOUD PUSH NTFY + KEEP-ALIVE + MASTER .ICS) ====================
+    let keepAliveAudioCtx = null;
+    let keepAliveWakeLock = null;
+    let keepAliveActive = false;
+
+    function saveNtfyTopicConfig(val) {
+      appState.ntfyTopic = (val || '').trim();
+      saveState();
+      showToast("Canal Push Cloud guardado", "success");
+    }
+
+    function autoGenerateNtfyTopic() {
+      const rand = Math.floor(1000 + Math.random() * 9000);
+      const topic = `allan_tcc_alertas_${rand}`;
+      appState.ntfyTopic = topic;
+      const inp = document.getElementById('ntfyTopicInput');
+      if (inp) inp.value = topic;
+      saveState();
+      showToast(`Canal único generado: ${topic}`, "success");
+    }
+
+    async function scheduleCloudPushViaNtfy(title, timeHHMM, bodyText = '') {
+      const topic = (appState.ntfyTopic || document.getElementById('ntfyTopicInput')?.value || '').trim();
+      if (!topic) return false;
+      try {
+        let unixTarget = 0;
+        if (timeHHMM && /^\d{2}:\d{2}$/.test(timeHHMM)) {
+          const [hh, mm] = timeHHMM.split(':').map(Number);
+          const now = new Date();
+          const target = new Date();
+          target.setHours(hh, mm, 0, 0);
+          if (target.getTime() <= now.getTime() + 15000) {
+            target.setDate(target.getDate() + 1);
+          }
+          unixTarget = Math.floor(target.getTime() / 1000);
+        }
+        const headers = {
+          'Title': title.replace(/[^\x20-\x7EÁÉÍÓÚáéíóúÑñ¡!¿?]/g, ''),
+          'Priority': 'high',
+          'Tags': 'bell,calendar'
+        };
+        if (unixTarget > Math.floor(Date.now() / 1000) + 15) {
+          headers['At'] = String(unixTarget);
+        }
+        await fetch(`https://ntfy.sh/${encodeURIComponent(topic)}`, {
+          method: 'POST',
+          headers,
+          body: bodyText || title
+        });
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    async function scheduleCloudPushTestIn10Sec() {
+      const inp = document.getElementById('ntfyTopicInput');
+      if (inp && inp.value.trim()) appState.ntfyTopic = inp.value.trim();
+      if (!appState.ntfyTopic) autoGenerateNtfyTopic();
+      saveState();
+
+      const targetUnix = Math.floor(Date.now() / 1000) + 10;
+      try {
+        await fetch(`https://ntfy.sh/${encodeURIComponent(appState.ntfyTopic)}`, {
+          method: 'POST',
+          headers: {
+            'Title': 'Control TCC - Alerta con App Cerrada',
+            'Priority': 'high',
+            'Tags': 'rocket,bell',
+            'At': String(targetUnix)
+          },
+          body: `¡Funciona! Este aviso fue programado en el servidor nube (${appState.ntfyTopic}) y llega aunque cierres el navegador.`
+        });
+        showToast("Push programado en 10 seg. ¡Sal de la app o apaga la pantalla para probarlo!", "success");
+      } catch (e) {
+        showToast("No se pudo conectar a ntfy.sh", "warning");
+      }
+    }
+
+    async function toggleBackgroundKeepAliveMode() {
+      const btn = document.getElementById('btnKeepAliveToggle');
+      if (!keepAliveActive) {
+        try {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) {
+            keepAliveAudioCtx = new AudioCtx();
+            const osc = keepAliveAudioCtx.createOscillator();
+            const gain = keepAliveAudioCtx.createGain();
+            gain.gain.value = 0.0001;
+            osc.connect(gain);
+            gain.connect(keepAliveAudioCtx.destination);
+            osc.start();
+          }
+          if ('wakeLock' in navigator) {
+            try { keepAliveWakeLock = await navigator.wakeLock.request('screen'); } catch (_) {}
+          }
+          keepAliveActive = true;
+          if (btn) {
+            btn.innerHTML = `<i class="fi fi-sr-volume"></i> <span>2. Segundo Plano: ON</span>`;
+            btn.className = "py-2.5 px-3 bg-amber-500 text-slate-950 font-black text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm";
+          }
+          showToast("Modo Segundo Plano Activo: evita que el celular duerma las alarmas", "success");
+        } catch (e) {
+          showToast("No se pudo iniciar el modo segundo plano", "warning");
+        }
+      } else {
+        if (keepAliveAudioCtx) { try { keepAliveAudioCtx.close(); } catch (_) {} keepAliveAudioCtx = null; }
+        if (keepAliveWakeLock) { try { keepAliveWakeLock.release(); } catch (_) {} keepAliveWakeLock = null; }
+        keepAliveActive = false;
+        if (btn) {
+          btn.innerHTML = `<i class="fi fi-rr-volume"></i> <span>2. Segundo Plano: OFF</span>`;
+          btn.className = "py-2.5 px-3 bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm";
+        }
+        showToast("Modo Segundo Plano desactivado", "info");
+      }
+    }
+
+    function downloadMasterNativeAlarmsICS() {
+      const nowStamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+      const todayCompact = getLocalTodayIso().replace(/-/g, '');
+      const vevents = [];
+
+      // 1. Agenda Diaria
+      (appState.workHub?.scheduleBlocks || []).filter(b => !b.done && b.startTime).forEach(b => {
+        const st = (b.startTime || '09:00').replace(':', '') + '00';
+        const et = (b.endTime || '10:00').replace(':', '') + '00';
+        vevents.push([
+          'BEGIN:VEVENT',
+          `UID:tcc-sched-${b.id}@controltcc.app`,
+          `DTSTAMP:${nowStamp}`,
+          `DTSTART:${todayCompact}T${st}`,
+          `DTEND:${todayCompact}T${et}`,
+          `SUMMARY:📅 [${b.code || 'AGENDA'}] ${b.title}`,
+          'DESCRIPTION:Agenda Laboral Control TCC',
+          'BEGIN:VALARM',
+          'TRIGGER:-PT5M',
+          'ACTION:DISPLAY',
+          `DESCRIPTION:⏰ En 5 min: ${b.title}`,
+          'END:VALARM',
+          'END:VEVENT'
+        ].join('\r\n'));
+      });
+
+      // 2. Tickets y Sesiones de Correo / WhatsApp
+      (appState.workHub?.inboxItems || []).filter(i => !i.done && i.time).forEach(i => {
+        const st = (i.time || '11:00').replace(':', '') + '00';
+        vevents.push([
+          'BEGIN:VEVENT',
+          `UID:tcc-inbox-${i.id}@controltcc.app`,
+          `DTSTAMP:${nowStamp}`,
+          `DTSTART:${todayCompact}T${st}`,
+          `DTEND:${todayCompact}T${st}`,
+          `SUMMARY:${i.category === 'session' ? '📹' : '🎫'} [${i.code || 'TRABAJO'}] ${i.title}`,
+          `DESCRIPTION:Vía ${i.source || 'Trabajo'} (${i.sender || ''})`,
+          'BEGIN:VALARM',
+          'TRIGGER:-PT10M',
+          'ACTION:DISPLAY',
+          `DESCRIPTION:🔔 Trabajo: ${i.title}`,
+          'END:VALARM',
+          'END:VEVENT'
+        ].join('\r\n'));
+      });
+
+      // 3. Tareas Oficiales PDF
+      (appState.tasks || []).filter(t => !t.done && t.time).forEach(t => {
+        const st = (t.time || '09:30').replace(':', '') + '00';
+        vevents.push([
+          'BEGIN:VEVENT',
+          `UID:tcc-task-${t.id}@controltcc.app`,
+          `DTSTAMP:${nowStamp}`,
+          `DTSTART:${todayCompact}T${st}`,
+          `DTEND:${todayCompact}T${st}`,
+          `SUMMARY:📋 Tarea #${t.project || '1'}: ${t.text}`,
+          `DESCRIPTION:Solicita: ${t.solicita || 'Lucia'}`,
+          'BEGIN:VALARM',
+          'TRIGGER:-PT0M',
+          'ACTION:DISPLAY',
+          `DESCRIPTION:⏰ Registrar tarea: ${t.text}`,
+          'END:VALARM',
+          'END:VEVENT'
+        ].join('\r\n'));
+      });
+
+      // 4. Fechas Límite de Pago de Deudas (día de pago y 1 día antes)
+      (appState.finance?.debts || []).filter(d => !d.paidThisMonth && d.dueDate).forEach(d => {
+        const dStr = d.dueDate.replace(/-/g, '');
+        vevents.push([
+          'BEGIN:VEVENT',
+          `UID:tcc-debt-${d.id}@controltcc.app`,
+          `DTSTAMP:${nowStamp}`,
+          `DTSTART:${dStr}T090000`,
+          `DTEND:${dStr}T093000`,
+          `SUMMARY:💳 PAGO DE DEUDA: ${d.name} (${formatMoneyMXN(d.minPayment)})`,
+          `DESCRIPTION:Saldo total: ${formatMoneyMXN(d.totalBalance)}`,
+          'BEGIN:VALARM',
+          'TRIGGER:-PT1440M',
+          'ACTION:DISPLAY',
+          `DESCRIPTION:⚠️ Mañana vence pago de ${d.name} (${formatMoneyMXN(d.minPayment)})`,
+          'END:VALARM',
+          'BEGIN:VALARM',
+          'TRIGGER:-PT0M',
+          'ACTION:DISPLAY',
+          `DESCRIPTION:💳 Hoy vence pago de ${d.name} (${formatMoneyMXN(d.minPayment)})`,
+          'END:VALARM',
+          'END:VEVENT'
+        ].join('\r\n'));
+      });
+
+      // 5. Protector Diario de Racha de Estudio
+      const td = ensureTutorMultiSubjectStructure();
+      const remTime = (td.streakReminderTime || '20:00').replace(':', '') + '00';
+      vevents.push([
+        'BEGIN:VEVENT',
+        'UID:tcc-streak-protector@controltcc.app',
+        `DTSTAMP:${nowStamp}`,
+        `DTSTART:${todayCompact}T${remTime}`,
+        `DTEND:${todayCompact}T${remTime}`,
+        'RRULE:FREQ=DAILY;COUNT=30',
+        'SUMMARY:🔥 ¡No pierdas tu racha de estudio en Profe IA!',
+        'DESCRIPTION:Completa 1 lección hoy en Control TCC.',
+        'BEGIN:VALARM',
+        'TRIGGER:-PT0M',
+        'ACTION:DISPLAY',
+        'DESCRIPTION:🔥 ¡Toma tu clase de hoy para cuidar tu racha!',
+        'END:VALARM',
+        'END:VEVENT'
+      ].join('\r\n'));
+
+      const icsContent = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Control TCC Master Cloud//Alarmas 24-7//ES',
+        'CALSCALE:GREGORIAN',
+        ...vevents,
+        'END:VCALENDAR'
+      ].join('\r\n');
+
+      const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `Alarmas_24_7_Control_TCC_${getLocalTodayIso()}.ics`;
+      link.click();
+      showToast("Alarmas Nativas (.ICS) descargadas: ábrelas para que suenen en tu celular incluso con el navegador cerrado", "success");
+    }
+
     function renderAll() {
       applyTheme();
       renderCalendar();
       renderNutrition();
       renderTasks();
+      renderWorkHubAll();
+      renderFinanceAll();
       renderTutor();
       renderGym();
       renderHabits();
       renderGroceries();
       renderSettings();
+      const ntfyInp = document.getElementById('ntfyTopicInput');
+      if (ntfyInp && document.activeElement !== ntfyInp) ntfyInp.value = appState.ntfyTopic || '';
     }
 
     renderAll();
