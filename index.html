@@ -12,6 +12,7 @@
   <!-- FAVICON SVG INMEDIATO -->
   <link id="faviconLink" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ea580c'/%3E%3Cstop offset='100%25' stop-color='%232563eb'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='24' fill='%230f172a'/%3E%3Crect x='6' y='6' width='88' height='88' rx='20' fill='none' stroke='url(%23g)' stroke-width='5'/%3E%3Cpath d='M56 18L26 56h22l-6 26 32-38H52l4-26z' fill='url(%23g)'/%3E%3C/svg%3E">
   <link id="appleTouchIconLink" rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%230f172a'/%3E%3C/svg%3E">
+  <link id="pwaManifestLink" rel="manifest" href="">
 
   <!-- ICONOS OFICIALES DE FLATICON (UICONS) -->
   <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
@@ -1863,19 +1864,53 @@
           <input id="streakReminderTimeInput" type="time" value="20:00" onchange="saveStreakReminderTime(this.value)" class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 font-black text-center text-terra-500 outline-none border border-terra-500/30">
         </div>
 
-        <!-- CAPA 1: CANAL PUSH EN LA NUBE CON PROGRAMACIÓN REMOTA (LLEGA CON LA APP/NAVEGADOR 100% CERRADO) -->
-        <div class="p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800/90 border border-indigo-500/35 space-y-2">
-          <div class="flex items-center justify-between gap-2">
-            <span class="text-[10px] font-black uppercase text-indigo-400">☁️ Push Cloud Programado (Funciona con Navegador Cerrado)</span>
-            <button onclick="autoGenerateNtfyTopic()" class="text-[10px] font-extrabold text-blue-400 underline">Generar canal único</button>
+        <!-- OPCIÓN 2 ACTIVA: PWA INSTALABLE + MOTOR CLOUD PUSH EN SEGUNDO PLANO (NTFY) -->
+        <div class="p-4 rounded-2xl bg-indigo-500/10 border-2 border-indigo-500/40 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <span class="text-[10px] font-black uppercase text-indigo-400 block">🚀 Opción 2: App Web (PWA) + Push Cloud 24/7 (App Cerrada)</span>
+              <h3 class="text-xs font-extrabold">Recibe notificaciones reales en iPhone y Android sin compilar tiendas</h3>
+            </div>
+            <span id="cloudPushSyncStatusBadge" class="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300">Listo para vincular</span>
           </div>
-          <p class="text-[10px] text-slate-400 leading-relaxed">
-            Los navegadores móviles suspenden las páginas al cerrarlas. Para que te lleguen avisos con el navegador cerrado, instala la app gratuita <strong>ntfy</strong> (iOS/Android), suscríbete a tu canal de abajo y cada tarea, bloque de agenda o pago se programará en el servidor nube (<code>At:</code>) para sonar a la hora exacta:
-          </p>
-          <div class="flex flex-wrap gap-1.5">
-            <input id="ntfyTopicInput" type="text" placeholder="Ej. allan_tcc_alertas_2026" onchange="saveNtfyTopicConfig(this.value)" class="flex-1 min-w-[160px] px-3 py-2 rounded-xl bg-white dark:bg-slate-900 text-xs font-mono font-bold outline-none border border-slate-300 dark:border-slate-700">
-            <button onclick="scheduleCloudPushTestIn10Sec()" class="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black shrink-0 shadow-sm">
-              Probar en 10s (Sal de la App)
+
+          <!-- Paso A: Instalar como App en Pantalla de Inicio -->
+          <div class="p-3 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2">
+            <div class="min-w-0 flex-1">
+              <span class="text-[10px] font-extrabold uppercase text-emerald-400 block">Paso 1 • App en Pantalla de Inicio (Sin barras de navegador)</span>
+              <p class="text-[10px] text-slate-400">En Android se instala directo; en iPhone abre Safari → <strong>Compartir [↑]</strong> → <strong>Agregar a inicio</strong>.</p>
+            </div>
+            <button onclick="installPwaAppPrompt()" id="btnInstallPwaApp" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black shrink-0 shadow-sm flex items-center gap-1.5">
+              <i class="fi fi-rr-mobile-button"></i> <span>Instalar App en mi Celular</span>
+            </button>
+          </div>
+
+          <!-- Paso B: Canal Push Cloud que despierta tu celular con la app cerrada -->
+          <div class="p-3 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-2.5">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-[10px] font-extrabold uppercase text-indigo-400">Paso 2 • Canal Push en la Nube (Suena con el navegador 100% cerrado)</span>
+              <div class="flex items-center gap-2">
+                <button onclick="autoGenerateNtfyTopic()" class="text-[10px] font-extrabold text-blue-400 underline">Generar canal único</button>
+                <button onclick="copyNtfyTopic()" class="text-[10px] font-extrabold text-emerald-400 underline">Copiar canal</button>
+              </div>
+            </div>
+            <p class="text-[10px] text-slate-400 leading-relaxed">
+              1. Descarga la app gratuita <strong>ntfy</strong> en App Store (iPhone) o Play Store (Android).<br>
+              2. Toca <strong>"Abrir en App ntfy"</strong> abajo (o pega tu canal en el botón <code>+</code> de ntfy).<br>
+              3. ¡Listo! Cada alarma de racha, tarea, sesión o pago se queda programada en el servidor nube y timbra en tu celular aunque cierres todo:
+            </p>
+            <div class="flex flex-wrap gap-1.5">
+              <input id="ntfyTopicInput" type="text" placeholder="Ej. allan_tcc_alertas_2026" onchange="saveNtfyTopicConfig(this.value)" class="flex-1 min-w-[160px] px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-mono font-bold outline-none border border-indigo-500/30">
+              <button onclick="openNtfyDeepLink()" class="px-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-[10px] font-black shrink-0 shadow-sm flex items-center gap-1">
+                <i class="fi fi-rr-link-alt"></i> <span>Abrir en App ntfy</span>
+              </button>
+              <button onclick="scheduleCloudPushTestIn10Sec()" class="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black shrink-0 shadow-sm">
+                Probar en 10s (Sal de la App)
+              </button>
+            </div>
+            <button onclick="syncAllAlarmsToCloudPushNow()" id="btnSyncAllCloudPush" class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-black text-xs shadow-md transition flex items-center justify-center gap-2">
+              <i class="fi fi-rr-cloud-upload"></i>
+              <span>Programar Todas mis Alertas de Hoy (Racha + Trabajo + Pagos) en la Nube</span>
             </button>
           </div>
         </div>
@@ -2003,6 +2038,25 @@
         document.getElementById('appleTouchIconLink').href = globalAppIconPng;
         document.getElementById('faviconLink').href = globalAppIconPng;
         document.getElementById('faviconLink').type = 'image/png';
+
+        // Generar Web App Manifest dinámico para instalar como App nativa (PWA Standalone) en Android/iPhone
+        const manifestObj = {
+          name: "Control TCC - Master Cloud",
+          short_name: "Control TCC",
+          description: "Sistema integral de Hábitos, Nutrición, Profe IA, Trabajo y Finanzas con Alertas Cloud.",
+          start_url: window.location.href.split('#')[0],
+          display: "standalone",
+          orientation: "portrait",
+          background_color: "#0f172a",
+          theme_color: "#0f172a",
+          icons: [
+            { src: globalAppIconPng, sizes: "192x192", type: "image/png", purpose: "any maskable" },
+            { src: globalAppIconPng, sizes: "512x512", type: "image/png", purpose: "any maskable" }
+          ]
+        };
+        const manifestBlob = new Blob([JSON.stringify(manifestObj)], { type: 'application/manifest+json' });
+        const manifestLinkEl = document.getElementById('pwaManifestLink');
+        if (manifestLinkEl) manifestLinkEl.href = URL.createObjectURL(manifestBlob);
 
         // Registrar Service Worker dinámico si el entorno lo permite para que showNotification funcione en Android/iOS
         if ('serviceWorker' in navigator) {
@@ -4427,7 +4481,12 @@
       td.streakReminderTime = val || '20:00';
       td.lastStreakRiskAlertDay = '';
       saveState();
-      showToast(`Aviso anti-corte de racha programado a las ${td.streakReminderTime}`, "success");
+      scheduleCloudPushViaNtfy(
+        "🔥 ¡Cuidado con tu racha de estudio en Profe IA!",
+        td.streakReminderTime,
+        "Aún estás a tiempo de completar 1 lección hoy en Control TCC para que no se corte tu racha."
+      );
+      showToast(`Aviso anti-corte de racha programado a las ${td.streakReminderTime} (Local + Cloud Push)`, "success");
     }
 
     function downloadStreakNativePhoneAlarm() {
@@ -8557,22 +8616,98 @@ Correo de Coordinación: "Favor de mandar el reporte PDF firmado antes de las 17
     let keepAliveWakeLock = null;
     let keepAliveActive = false;
 
+    let deferredPwaInstallPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPwaInstallPrompt = e;
+      const btn = document.getElementById('btnInstallPwaApp');
+      if (btn) btn.innerHTML = `<i class="fi fi-rr-download"></i> <span>Instalar App Ahora (1 Clic)</span>`;
+    });
+
+    async function installPwaAppPrompt() {
+      if (deferredPwaInstallPrompt) {
+        deferredPwaInstallPrompt.prompt();
+        const choice = await deferredPwaInstallPrompt.userChoice.catch(() => null);
+        if (choice && choice.outcome === 'accepted') {
+          showToast("¡App Control TCC instalada en tu pantalla de inicio!", "success");
+        }
+        deferredPwaInstallPrompt = null;
+        return;
+      }
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      if (isIOS) {
+        showToast("📲 En iPhone (Safari): toca el botón Compartir [↑] abajo y elige 'Agregar a pantalla de inicio'.", "info");
+      } else {
+        showToast("📲 Abre el menú de tu navegador (⋮) y selecciona 'Instalar aplicación' o 'Agregar a pantalla principal'.", "info");
+      }
+    }
+
+    function ensureNtfyTopicReady() {
+      const inp = document.getElementById('ntfyTopicInput');
+      if (inp && inp.value.trim()) {
+        appState.ntfyTopic = inp.value.trim().replace(/\s+/g, '_');
+      }
+      if (!appState.ntfyTopic) {
+        const cleanUser = (appState.profile?.name || 'tcc').toLowerCase().replace(/[^a-z0-9]/g, '') || 'tcc';
+        const rand = Math.floor(1000 + Math.random() * 9000);
+        appState.ntfyTopic = `${cleanUser}_tcc_alertas_${rand}`;
+        if (inp) inp.value = appState.ntfyTopic;
+      }
+      return appState.ntfyTopic;
+    }
+
     function saveNtfyTopicConfig(val) {
-      appState.ntfyTopic = (val || '').trim();
+      appState.ntfyTopic = (val || '').trim().replace(/\s+/g, '_');
       saveState();
+      updateCloudPushStatusBadge();
       showToast("Canal Push Cloud guardado", "success");
     }
 
     function autoGenerateNtfyTopic() {
+      const cleanUser = (appState.profile?.name || 'allan').toLowerCase().replace(/[^a-z0-9]/g, '') || 'allan';
       const rand = Math.floor(1000 + Math.random() * 9000);
-      const topic = `allan_tcc_alertas_${rand}`;
+      const topic = `${cleanUser}_tcc_alertas_${rand}`;
       appState.ntfyTopic = topic;
       const inp = document.getElementById('ntfyTopicInput');
       if (inp) inp.value = topic;
       saveState();
+      updateCloudPushStatusBadge();
       showToast(`Canal único generado: ${topic}`, "success");
     }
 
+    function copyNtfyTopic() {
+      const topic = ensureNtfyTopicReady();
+      saveState();
+      copyTextSafe(topic, `Canal "${topic}" copiado. Pégalo en la app ntfy.`);
+    }
+
+    function openNtfyDeepLink() {
+      const topic = ensureNtfyTopicReady();
+      saveState();
+      updateCloudPushStatusBadge();
+      // Intenta abrir la app nativa ntfy:// y ofrece respaldo web https://ntfy.sh/<topic>
+      window.open(`https://ntfy.sh/${encodeURIComponent(topic)}`, '_blank', 'noopener');
+      showToast(`Abriendo canal "${topic}". En la app ntfy suscríbete a este nombre exacto.`, "info");
+    }
+
+    function updateCloudPushStatusBadge(customText) {
+      const badge = document.getElementById('cloudPushSyncStatusBadge');
+      if (!badge) return;
+      if (customText) {
+        badge.textContent = customText;
+        badge.className = "text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400";
+        return;
+      }
+      if (appState.ntfyTopic) {
+        badge.textContent = `🟢 Canal activo: ${appState.ntfyTopic}`;
+        badge.className = "text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400";
+      } else {
+        badge.textContent = "Sin canal configurado";
+        badge.className = "text-[10px] font-black px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-400";
+      }
+    }
+
+    // Envía la notificación al servidor ntfy.sh usando JSON en el body (CORS Simple Request: soporta acentos, emojis y programación "delay" con la app cerrada)
     async function scheduleCloudPushViaNtfy(title, timeHHMM, bodyText = '') {
       const topic = (appState.ntfyTopic || document.getElementById('ntfyTopicInput')?.value || '').trim();
       if (!topic) return false;
@@ -8588,46 +8723,132 @@ Correo de Coordinación: "Favor de mandar el reporte PDF firmado antes de las 17
           }
           unixTarget = Math.floor(target.getTime() / 1000);
         }
-        const headers = {
-          'Title': title.replace(/[^\x20-\x7EÁÉÍÓÚáéíóúÑñ¡!¿?]/g, ''),
-          'Priority': 'high',
-          'Tags': 'bell,calendar'
+        const payload = {
+          topic: topic,
+          title: String(title || 'Control TCC'),
+          message: String(bodyText || title || 'Recordatorio pendiente en Control TCC'),
+          priority: 4,
+          tags: ['bell', 'flame']
         };
         if (unixTarget > Math.floor(Date.now() / 1000) + 15) {
-          headers['At'] = String(unixTarget);
+          payload.delay = String(unixTarget);
         }
-        await fetch(`https://ntfy.sh/${encodeURIComponent(topic)}`, {
+        const res = await fetch('https://ntfy.sh', {
           method: 'POST',
-          headers,
-          body: bodyText || title
+          body: JSON.stringify(payload)
         });
-        return true;
+        return res.ok;
       } catch (e) {
         return false;
       }
     }
 
     async function scheduleCloudPushTestIn10Sec() {
-      const inp = document.getElementById('ntfyTopicInput');
-      if (inp && inp.value.trim()) appState.ntfyTopic = inp.value.trim();
-      if (!appState.ntfyTopic) autoGenerateNtfyTopic();
+      const topic = ensureNtfyTopicReady();
+      saveState();
+      updateCloudPushStatusBadge();
+
+      try {
+        const payload = {
+          topic: topic,
+          title: "🔥 Control TCC • Alerta con App Cerrada",
+          message: `¡Funciona al 100%! Este aviso fue enviado desde la nube al canal (${topic}) y suena aunque cierres el navegador o bloquees tu celular.`,
+          priority: 4,
+          tags: ["rocket", "bell"],
+          delay: "10s"
+        };
+        const res = await fetch('https://ntfy.sh', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        showToast("🔔 Push programado en 10 seg. ¡Cierra el navegador o bloquea tu celular para verlo llegar en la app ntfy!", "success");
+      } catch (e) {
+        showToast("Error conectando con ntfy.sh: verifica tu conexión a internet", "warning");
+      }
+    }
+
+    // Programa en 1 clic todas las alertas del día (Protector de Racha, Bloques de Agenda, Tickets/Sesiones, Tareas PDF y Deudas) en el servidor nube ntfy.sh
+    async function syncAllAlarmsToCloudPushNow() {
+      const topic = ensureNtfyTopicReady();
       saveState();
 
-      const targetUnix = Math.floor(Date.now() / 1000) + 10;
+      const btn = document.getElementById('btnSyncAllCloudPush');
+      const orig = btn ? btn.innerHTML : '';
+      if (btn) { btn.disabled = true; btn.innerHTML = `<span>Programando alertas en servidor Cloud...</span>`; }
+
+      let count = 0;
       try {
-        await fetch(`https://ntfy.sh/${encodeURIComponent(appState.ntfyTopic)}`, {
-          method: 'POST',
-          headers: {
-            'Title': 'Control TCC - Alerta con App Cerrada',
-            'Priority': 'high',
-            'Tags': 'rocket,bell',
-            'At': String(targetUnix)
-          },
-          body: `¡Funciona! Este aviso fue programado en el servidor nube (${appState.ntfyTopic}) y llega aunque cierres el navegador.`
-        });
-        showToast("Push programado en 10 seg. ¡Sal de la app o apaga la pantalla para probarlo!", "success");
+        // 1. Protector diario anti-corte de racha de Tu Profe IA
+        const td = ensureTutorMultiSubjectStructure();
+        const studiedToday = (td.studyDaysHistory || []).includes(appState.currentDay);
+        const remTime = td.streakReminderTime || '20:00';
+        if (!studiedToday) {
+          const ok = await scheduleCloudPushViaNtfy(
+            "🔥 ¡Que no se corte tu racha de estudio!",
+            remTime,
+            `Llevas ${calculateTutorDailyStreak()} día(s) de racha. Toma 1 lección hoy en Tu Profe IA antes de medianoche.`
+          );
+          if (ok) count++;
+        }
+
+        // 2. Bloques de Agenda Laboral pendientes
+        for (const b of (appState.workHub?.scheduleBlocks || [])) {
+          if (!b.done && b.startTime) {
+            const ok = await scheduleCloudPushViaNtfy(
+              `📅 Agenda (${b.startTime}): ${b.title}`,
+              b.startTime,
+              `Bloque de trabajo programado de ${b.startTime} a ${b.endTime || ''}`
+            );
+            if (ok) count++;
+          }
+        }
+
+        // 3. Tickets y Sesiones de Correo / WhatsApp pendientes
+        for (const item of (appState.workHub?.inboxItems || [])) {
+          if (!item.done && item.time) {
+            const ok = await scheduleCloudPushViaNtfy(
+              `${item.category === 'session' ? '📹 Sesión' : '🎫 Ticket'} (${item.time}): ${item.title}`,
+              item.time,
+              `Folio: ${item.code || 'Trabajo'} • Origen: ${item.source || 'Sincronización'}`
+            );
+            if (ok) count++;
+          }
+        }
+
+        // 4. Tareas Oficiales PDF pendientes
+        for (const t of (appState.tasks || [])) {
+          if (!t.done && t.time) {
+            const ok = await scheduleCloudPushViaNtfy(
+              `⏰ Actividad Laboral (${t.time}): ${t.text}`,
+              t.time,
+              `Solicita: ${t.solicita || 'Trabajo'} • Folio #${t.project || '1'}`
+            );
+            if (ok) count++;
+          }
+        }
+
+        // 5. Deudas próximas a vencer (hoy o en los próximos 3 días)
+        for (const d of (appState.finance?.debts || [])) {
+          if (!d.paidThisMonth && d.dueDate) {
+            const diff = daysBetweenTodayAndISO(d.dueDate);
+            if (diff >= 0 && diff <= 3) {
+              const ok = await scheduleCloudPushViaNtfy(
+                `💳 Pago próximo: ${d.name} (${formatMoneyMXN(d.minPayment)})`,
+                '09:00',
+                `Fecha límite: ${d.dueDate} (${diff === 0 ? '¡Vence HOY!' : 'Vence en ' + diff + ' día(s)'})`
+              );
+              if (ok) count++;
+            }
+          }
+        }
+
+        updateCloudPushStatusBadge(`🟢 ${count} alerta(s) programadas en la nube`);
+        showToast(`☁️ ¡Listo! ${count} alerta(s) quedaron programadas en el servidor Cloud (${topic}). Sonarán aunque cierres la app.`, "success");
       } catch (e) {
-        showToast("No se pudo conectar a ntfy.sh", "warning");
+        showToast("Error al programar alertas en la nube", "warning");
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = orig; }
       }
     }
 
@@ -8811,6 +9032,7 @@ Correo de Coordinación: "Favor de mandar el reporte PDF firmado antes de las 17
       renderSettings();
       const ntfyInp = document.getElementById('ntfyTopicInput');
       if (ntfyInp && document.activeElement !== ntfyInp) ntfyInp.value = appState.ntfyTopic || '';
+      if (typeof updateCloudPushStatusBadge === 'function') updateCloudPushStatusBadge();
     }
 
     renderAll();
