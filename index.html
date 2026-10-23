@@ -71,12 +71,12 @@
 
     /* Animaciones minimalistas globales para todas las secciones y transiciones */
     @keyframes viewSlideUpFade {
-      0% { opacity: 0; transform: translateY(14px) scale(0.992); }
-      100% { opacity: 1; transform: translateY(0) scale(1); }
+      0% { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: none; }
     }
     @keyframes subtleSlideRight {
-      0% { opacity: 0; transform: translateX(-12px); }
-      100% { opacity: 1; transform: translateX(0); }
+      0% { opacity: 0; transform: translateY(6px); }
+      100% { opacity: 1; transform: none; }
     }
     @keyframes streakPopGlow {
       0% { transform: scale(0.82) translateY(16px); opacity: 0; }
@@ -807,49 +807,51 @@
       </div>
     </section>
 
-    <!-- ==================== PESTAÑA 3: TU PROFE IA (MULTIMATERIA + MULTITAREA INFERIOR + MAPA CANDY CRUSH + IDE VISUAL + FÓRMULAS) ==================== -->
-    <section id="tab-tutor" class="space-y-4 pb-24 hidden">
+    <!-- ==================== PESTAÑA 3: TU PROFE IA (BARRA ESTÁTICA SUPERIOR + MULTIMATERIA + MAPA CANDY CRUSH + IDE VISUAL + FÓRMULAS) ==================== -->
+    <section id="tab-tutor" class="space-y-3.5 pb-10 hidden">
 
-      <!-- CABECERA COMPACTA SIEMPRE VISIBLE EN PROFE IA CON RACHA DIARIA Y SELECTOR RÁPIDO DE MATERIA -->
+      <!-- 1. TARJETA SUPERIOR BIEN PROPORCIONADA (SIN HUECOS NI TEXTO APLASTADO) -->
       <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3 card-minimal-anim">
-        <div class="flex justify-between items-start gap-2">
-          <div>
-            <span class="text-[10px] font-extrabold uppercase tracking-wider text-terra-500 block">Academia Gamificada Multi-Materia</span>
-            <h2 class="text-lg font-black tracking-tight flex items-center gap-2">
-              <i class="fi fi-rr-graduation-cap text-terra-500"></i>
-              <span>Tu Profe Personal IA</span>
+        <div class="flex items-center justify-between gap-2">
+          <div class="min-w-0 flex-1">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-terra-500 block">Academia Interactiva Multi-Materia</span>
+            <h2 class="text-base sm:text-lg font-black tracking-tight flex items-center gap-2 truncate">
+              <i class="fi fi-rr-graduation-cap text-terra-500 shrink-0"></i>
+              <span class="truncate">Tu Profe Personal IA</span>
             </h2>
-            <p class="text-[11px] text-slate-400">Cada materia inicia en Lección #1 y exige aprobar el examen para subir de nivel.</p>
           </div>
-          <div class="text-right shrink-0">
-            <div class="flex items-center justify-end gap-1.5">
-              <span id="tutorStreakBadge" onclick="triggerStreakCelebration('🔥 Racha de Estudio Activa', 'Se incrementa 1 vez por cada día calendario estudiado')" class="cursor-pointer text-xs font-black bg-terra-500/15 text-terra-500 px-2.5 py-1 rounded-xl inline-flex items-center gap-1" title="Racha por día calendario estudiado">
-                <i class="fi fi-sr-flame"></i> <span>0d racha</span>
-              </span>
-              <span id="tutorXpBadge" class="text-xs font-black bg-amber-500/15 text-amber-400 px-2.5 py-1 rounded-xl inline-flex items-center gap-1">
-                <i class="fi fi-sr-star"></i> <span>0 XP</span>
-              </span>
-            </div>
-            <span id="tutorProgressBadge" class="text-[10px] text-slate-400 font-bold mt-1 block">0 lecciones en esta materia</span>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <span id="tutorStreakBadge" onclick="triggerStreakCelebration('🔥 Racha de Estudio Activa', 'Se incrementa 1 vez por cada día calendario estudiado')" class="cursor-pointer text-[11px] font-black bg-terra-500/15 text-terra-500 px-2.5 py-1 rounded-xl inline-flex items-center gap-1 whitespace-nowrap" title="Racha por día calendario estudiado">
+              <i class="fi fi-sr-flame"></i> <span>0d racha</span>
+            </span>
+            <span id="tutorXpBadge" class="text-[11px] font-black bg-amber-500/15 text-amber-400 px-2.5 py-1 rounded-xl inline-flex items-center gap-1 whitespace-nowrap">
+              <i class="fi fi-sr-star"></i> <span>0 XP</span>
+            </span>
           </div>
         </div>
 
-        <!-- PÍLDORAS DE MATERIAS GUARDADAS (SIEMPRE ACCESIBLES PARA CAMBIAR AL INSTANTE) -->
-        <div class="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-          <div class="flex items-center justify-between">
-            <span class="text-[10px] font-extrabold uppercase text-slate-400">Tus Materias Activas (Toca para cambiar)</span>
-            <button onclick="toggleNewSubjectBox()" class="text-[10px] font-extrabold text-terra-500 bg-terra-500/10 px-2.5 py-1 rounded-lg flex items-center gap-1">
+        <!-- SUBTÍTULO Y PROGRESO DE LA MATERIA EN LÍNEA COMPLETA PARA NO APLASTAR EL TÍTULO -->
+        <div class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-slate-100/80 dark:bg-slate-800/60 text-[11px]">
+          <span class="text-slate-400 font-semibold truncate">Progreso en materia activa:</span>
+          <span id="tutorProgressBadge" class="text-slate-700 dark:text-slate-200 font-extrabold truncate max-w-[210px]">0 lecciones</span>
+        </div>
+
+        <!-- SELECTOR DE MATERIAS GUARDADAS (TRUNCADO LIMPIO PARA NOMBRES LARGOS) -->
+        <div class="space-y-2 pt-1 border-t border-slate-100 dark:border-slate-800">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[10px] font-extrabold uppercase text-slate-400">Tus Materias (Toca para cambiar)</span>
+            <button onclick="toggleNewSubjectBox()" class="text-[10px] font-extrabold text-terra-500 bg-terra-500/10 hover:bg-terra-500/20 px-2.5 py-1 rounded-lg flex items-center gap-1 shrink-0">
               <i class="fi fi-rr-plus-small"></i> <span>Nueva Materia</span>
             </button>
           </div>
 
-          <div id="tutorSubjectPills" class="flex gap-2 overflow-x-auto no-scrollbar py-1"></div>
+          <div id="tutorSubjectPills" class="flex gap-2 overflow-x-auto no-scrollbar py-0.5"></div>
 
           <!-- CAJA PARA CREAR UNA MATERIA NUEVA DESDE LECCIÓN 1 -->
           <div id="newSubjectCreatorBox" class="hidden p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-terra-500/40 space-y-2 subview-anim-enter">
-            <span class="text-[10px] font-extrabold uppercase text-terra-500 block">Agregar Nueva Materia (Inicia garantizado en Lección #1)</span>
+            <span class="text-[10px] font-extrabold uppercase text-terra-500 block">Agregar Nueva Materia (Inicia en Lección #1)</span>
             <div class="grid grid-cols-1 gap-2">
-              <input id="newSubjectNameInput" type="text" placeholder="Ej. Cálculo Diferencial / Python / Inglés / Finanzas..." class="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-slate-900 font-bold outline-none">
+              <input id="newSubjectNameInput" type="text" placeholder="Ej. Cálculo / Python / Inglés / Investigación de Operaciones..." class="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-slate-900 font-bold outline-none">
               <div class="flex gap-2">
                 <button onclick="createNewTutorSubject()" class="flex-1 py-2 bg-terra-500 text-white font-extrabold text-xs rounded-xl">Crear e Ir a Lección 1</button>
                 <button onclick="toggleNewSubjectBox()" class="px-3 py-2 bg-slate-300 dark:bg-slate-700 text-xs font-bold rounded-xl">Cancelar</button>
@@ -858,39 +860,60 @@
           </div>
         </div>
 
-        <!-- ESTADO DE BLOQUEO O AVANCE DE NIVEL Y BOTONES DE GENERACIÓN -->
-        <div id="tutorLevelGateBanner" class="flex items-center justify-between px-3 py-2 rounded-xl bg-terra-500/10 border border-terra-500/30 text-[11px]">
-          <span id="tutorGateStatusLabel" class="font-bold text-slate-600 dark:text-slate-300">Siguiente nivel en esta materia:</span>
-          <span id="tutorNextLessonBtnLabel" class="font-black text-terra-500">Generar Lección #1</span>
+        <!-- BANNER INTERACTIVO DE CANDADO / PASO DE NIVEL -->
+        <div id="tutorLevelGateBanner" onclick="handleLevelGateBannerClick()" class="cursor-pointer hover:border-terra-500 flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-2xl bg-terra-500/10 border border-terra-500/30 text-[11px] transition">
+          <span id="tutorGateStatusLabel" class="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 truncate">Siguiente nivel:</span>
+          <span id="tutorNextLessonBtnLabel" class="font-black text-terra-500 bg-terra-500/15 px-2.5 py-1 rounded-lg whitespace-nowrap shrink-0">Generar Lección #1</span>
         </div>
 
         <div class="grid grid-cols-2 gap-2">
-          <button id="tutorLessonBtn" onclick="startTutorSession('lesson')" class="py-3 bg-gradient-to-r from-terra-500 to-amber-500 hover:from-terra-600 hover:to-amber-600 text-white font-black text-xs rounded-2xl shadow-md transition flex items-center justify-center gap-1.5">
+          <button id="tutorLessonBtn" onclick="startTutorSession('lesson')" class="py-2.5 bg-gradient-to-r from-terra-500 to-amber-500 hover:from-terra-600 hover:to-amber-600 text-white font-black text-xs rounded-2xl shadow-md transition flex items-center justify-center gap-1.5">
             <i class="fi fi-rr-play-alt"></i>
             <span>Darme Clase + Examen</span>
           </button>
-          <button id="tutorReviewBtn" onclick="startTutorSession('review')" class="py-3 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs rounded-2xl shadow-md transition flex items-center justify-center gap-1.5">
+          <button id="tutorReviewBtn" onclick="startTutorSession('review')" class="py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs rounded-2xl shadow-md transition flex items-center justify-center gap-1.5">
             <i class="fi fi-rr-check-circle"></i>
             <span>Revisar Tarea/Código</span>
           </button>
         </div>
       </div>
 
+      <!-- 2. BARRA MULTITAREA ESTÁTICA ARRIBA (COMO EN HÁBITOS, FIJA EN EL FLUJO SUPERIOR Y SIN IRSE HASTA ABAJO) -->
+      <div id="tutorBottomMultitaskDock" class="bg-white dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm grid grid-cols-4 gap-1 text-[11px] font-extrabold">
+        <button onclick="switchTutorSubTab('map')" id="tbottom-map" class="py-2 px-1.5 rounded-xl flex items-center justify-center gap-1.5 bg-terra-500 text-white shadow-sm transition">
+          <i class="fi fi-sr-map-marker-home text-xs"></i>
+          <span class="truncate">Mapa</span>
+        </button>
+        <button onclick="switchTutorSubTab('lesson')" id="tbottom-lesson" class="py-2 px-1.5 rounded-xl flex items-center justify-center gap-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+          <i class="fi fi-rr-book-open-cover text-xs"></i>
+          <span class="truncate">Clase</span>
+        </button>
+        <button onclick="switchTutorSubTab('practice')" id="tbottom-practice" class="py-2 px-1.5 rounded-xl flex items-center justify-center gap-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+          <i class="fi fi-rr-laptop-code text-xs"></i>
+          <span id="tbottomPracticeLabel" class="truncate">Práctica</span>
+        </button>
+        <button onclick="switchTutorSubTab('exam')" id="tbottom-exam" class="py-2 px-1.5 rounded-xl flex items-center justify-center gap-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition relative">
+          <i class="fi fi-rr-trophy text-xs"></i>
+          <span class="truncate">Examen</span>
+          <span id="tbottomExamDot" class="hidden w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0"></span>
+        </button>
+      </div>
+
       <!-- SUB-SECCIÓN 1: MAPA DE SAGA CANDY CRUSH + CONFIGURACIÓN DE MATERIA + ALERTA DE RACHA -->
-      <div id="tutorSubView-map" class="space-y-4 subview-anim-enter">
-        <!-- MAPA DE NIVELES ESTILO CANDY CRUSH -->
+      <div id="tutorSubView-map" class="space-y-3.5 subview-anim-enter">
+        <!-- MAPA DE NIVELES ESTILO CANDY CRUSH BIEN CENTRADO -->
         <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border-2 border-amber-500/30 space-y-3 candy-map-bg card-minimal-anim">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <i class="fi fi-sr-map-marker-home text-amber-400 text-base"></i>
-              <div>
-                <h3 class="font-extrabold text-sm" id="candyMapSubjectTitle">Mapa de Niveles</h3>
-                <p class="text-[10px] text-slate-400">Debes aprobar el examen de cada lección para desbloquear el siguiente nivel.</p>
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-start gap-2 min-w-0 flex-1">
+              <i class="fi fi-sr-map-marker-home text-amber-400 text-base mt-0.5 shrink-0"></i>
+              <div class="min-w-0 flex-1">
+                <h3 class="font-extrabold text-sm leading-snug break-words" id="candyMapSubjectTitle">Mapa de Niveles</h3>
+                <p class="text-[10px] text-slate-400 mt-0.5">Toca cualquier lección desbloqueada para abrirla o repasar.</p>
               </div>
             </div>
-            <span id="candyMapStarsCount" class="text-xs font-black text-amber-400 bg-amber-500/15 px-2.5 py-1 rounded-xl">★ 0</span>
+            <span id="candyMapStarsCount" class="text-xs font-black text-amber-400 bg-amber-500/15 px-2.5 py-1 rounded-xl whitespace-nowrap shrink-0">★ 0</span>
           </div>
-          <div id="tutorCandyMapContainer" class="py-2"></div>
+          <div id="tutorCandyMapContainer" class="py-2 overflow-hidden"></div>
         </div>
 
         <!-- AJUSTES DE LA MATERIA ACTIVA Y APUNTES -->
@@ -899,7 +922,7 @@
             <span class="text-[10px] font-extrabold uppercase text-slate-400">Configuración de la Materia Activa</span>
             <span class="text-[10px] text-terra-500 font-bold">Personaliza tu clase</span>
           </div>
-          <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
             <div>
               <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Nombre de Materia Activa</label>
               <input id="tutorSubjectInput" type="text" placeholder="Ej. Inglés / Python / Matemáticas" onchange="saveTutorConfig()" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold outline-none">
@@ -917,7 +940,7 @@
 
           <div>
             <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Objetivo o Tema Específico para la clase</label>
-            <input id="tutorGoalInput" type="text" placeholder="Ej. Dominar funciones desde 0 / Derivadas / Verbos en pasado..." onchange="saveTutorConfig()" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 outline-none">
+            <input id="tutorGoalInput" type="text" placeholder="Ej. Dominar método Simplex / Derivadas / Verbos en pasado..." onchange="saveTutorConfig()" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 outline-none">
           </div>
 
           <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2.5">
@@ -926,7 +949,7 @@
                 <i class="fi fi-rr-clip"></i>
                 <span>Tus Apuntes, Tarea o Código (Opcional)</span>
               </span>
-              <label class="px-2.5 py-1 bg-blue-500/15 text-blue-400 border border-blue-500/30 rounded-lg text-[10px] font-bold cursor-pointer flex items-center gap-1">
+              <label class="px-2.5 py-1 bg-blue-500/15 text-blue-400 border border-blue-500/30 rounded-lg text-[10px] font-bold cursor-pointer flex items-center gap-1 shrink-0">
                 <i class="fi fi-rr-camera"></i>
                 <span>Foto de Apuntes</span>
                 <input type="file" accept="image/*" id="tutorImageInput" onchange="handleTutorImageUpload(event)" class="hidden">
@@ -944,70 +967,11 @@
           </div>
         </div>
 
-        <!-- PROTECTOR DE RACHA DIARIA Y NOTIFICACIONES EN CELULAR (INCLUSO CON NAVEGADOR CERRADO) -->
-        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border-2 border-terra-500/35 space-y-3 card-minimal-anim">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <i class="fi fi-sr-bell-ring text-terra-500 text-base"></i>
-              <div>
-                <h3 class="font-extrabold text-xs uppercase text-terra-500">Protector de Racha & Alertas en Celular</h3>
-                <p id="tutorStreakRiskStatusText" class="text-[11px] text-slate-400">Verifica tu estado de estudio hoy</p>
-              </div>
-            </div>
-            <button onclick="testMobileNotificationNow()" class="px-2.5 py-1 rounded-xl bg-terra-500/15 text-terra-500 text-[10px] font-extrabold">
-              Probar Alerta
-            </button>
-          </div>
 
-          <div class="grid grid-cols-2 gap-2 items-center text-xs bg-slate-50 dark:bg-slate-800/70 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
-            <div>
-              <span class="text-[10px] font-bold uppercase text-slate-400 block">Hora Aviso Anti-Corte de Racha</span>
-              <span class="text-[10px] text-slate-400">Te avisa si aún no estudias hoy</span>
-            </div>
-            <input id="streakReminderTimeInput" type="time" value="20:00" onchange="saveStreakReminderTime(this.value)" class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 font-black text-center text-terra-500 outline-none border border-terra-500/30">
-          </div>
-
-          <div class="grid grid-cols-2 gap-2">
-            <button onclick="enableBrowserNotifications()" class="py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] rounded-xl flex items-center justify-center gap-1.5 shadow-sm">
-              <i class="fi fi-rr-bell"></i>
-              <span>Permiso Push Web</span>
-            </button>
-            <button onclick="downloadStreakNativePhoneAlarm()" class="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] rounded-xl flex items-center justify-center gap-1.5 shadow-sm">
-              <i class="fi fi-rr-calendar-clock"></i>
-              <span>Alarma Nativa (App Cerrada)</span>
-            </button>
-          </div>
-          <p class="text-[10px] text-slate-400 leading-relaxed">
-            💡 <strong>¿Por qué a veces no suenan con el navegador cerrado?</strong> Android y iOS congelan las pestañas web al apagar la pantalla. Activando el <strong>Permiso Push Service Worker</strong> + la <strong>Alarma Nativa Diaria</strong>, tu teléfono sonará puntualmente aunque el navegador esté cerrado.
-          </p>
-        </div>
       </div>
 
-      <!-- CONTENEDOR DINÁMICO DE LA LECCIÓN (SE ORGANIZA SEGÚN LA PESTAÑA DE LA BARRA MULTITAREA INFERIOR) -->
-      <div id="tutorLessonContainer" class="space-y-4"></div>
-
-      <!-- BARRA MULTITAREA INFERIOR EXCLUSIVA DE PROFE IA (BOTTOM DOCK NAVEGABLE) -->
-      <div id="tutorBottomMultitaskDock" class="fixed bottom-3 inset-x-0 mx-auto max-w-md px-3 z-50">
-        <div class="bg-slate-900/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-3xl p-1.5 shadow-2xl grid grid-cols-4 gap-1 text-[10px] font-extrabold text-slate-300">
-          <button onclick="switchTutorSubTab('map')" id="tbottom-map" class="py-2 px-1 rounded-2xl flex flex-col items-center justify-center gap-1 bg-terra-500 text-white shadow">
-            <i class="fi fi-sr-map-marker-home text-sm"></i>
-            <span>Mapa/Materias</span>
-          </button>
-          <button onclick="switchTutorSubTab('lesson')" id="tbottom-lesson" class="py-2 px-1 rounded-2xl flex flex-col items-center justify-center gap-1 hover:bg-slate-800 text-slate-400">
-            <i class="fi fi-rr-book-open-cover text-sm"></i>
-            <span>Clase & Visual</span>
-          </button>
-          <button onclick="switchTutorSubTab('practice')" id="tbottom-practice" class="py-2 px-1 rounded-2xl flex flex-col items-center justify-center gap-1 hover:bg-slate-800 text-slate-400">
-            <i class="fi fi-rr-laptop-code text-sm"></i>
-            <span id="tbottomPracticeLabel">Práctica/Lab</span>
-          </button>
-          <button onclick="switchTutorSubTab('exam')" id="tbottom-exam" class="py-2 px-1 rounded-2xl flex flex-col items-center justify-center gap-1 hover:bg-slate-800 text-slate-400 relative">
-            <i class="fi fi-rr-trophy text-sm"></i>
-            <span>Examen Nivel</span>
-            <span id="tbottomExamDot" class="hidden absolute top-1.5 right-3 w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-          </button>
-        </div>
-      </div>
+      <!-- CONTENEDOR DINÁMICO DE LA LECCIÓN (CLASE, PRÁCTICA/IDE/FÓRMULAS, EXAMEN) -->
+      <div id="tutorLessonContainer" class="space-y-3.5 hidden"></div>
     </section>
 
     <!-- ==================== PESTAÑA 4: HÁBITOS, RACHAS & ESTADÍSTICAS ==================== -->
@@ -1314,6 +1278,45 @@
         </div>
 
         <button onclick="saveSettings()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl transition">Guardar Token, Modelo y Nivel de Pensamiento</button>
+      </div>
+
+      <!-- CENTRO DE NOTIFICACIONES MÓVILES Y PROTECTOR ANTI-CORTE DE RACHA (EN AJUSTES) -->
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border-2 border-amber-500/40 space-y-3 card-minimal-anim">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <i class="fi fi-sr-bell-ring text-amber-400 text-base shrink-0"></i>
+            <div class="min-w-0">
+              <span class="text-[10px] font-extrabold uppercase text-amber-400 block">Alertas del Sistema y Racha de Estudio</span>
+              <h2 class="font-extrabold text-sm truncate">Notificaciones en Celular y Protector de Racha</h2>
+              <p id="tutorStreakRiskStatusText" class="text-[11px] text-slate-400 truncate">Verifica tu estado de estudio hoy</p>
+            </div>
+          </div>
+          <button onclick="testMobileNotificationNow()" class="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[10px] font-extrabold shrink-0">
+            Probar Alerta
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 items-center text-xs bg-slate-100 dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
+          <div>
+            <span class="text-[10px] font-bold uppercase text-slate-400 block">Hora Aviso Anti-Corte de Racha</span>
+            <span class="text-[10px] text-slate-400">Si aún no tomas tu clase del día</span>
+          </div>
+          <input id="streakReminderTimeInput" type="time" value="20:00" onchange="saveStreakReminderTime(this.value)" class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 font-black text-center text-terra-500 outline-none border border-terra-500/30">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="enableBrowserNotifications()" class="py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm">
+            <i class="fi fi-rr-bell"></i>
+            <span>Permiso Push Web</span>
+          </button>
+          <button onclick="downloadStreakNativePhoneAlarm()" class="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm">
+            <i class="fi fi-rr-calendar-clock"></i>
+            <span>Alarma Nativa Celular</span>
+          </button>
+        </div>
+        <p class="text-[10px] text-slate-400 leading-relaxed">
+          Activa aquí el <strong>Permiso Push Web</strong> (Service Worker) y descarga la <strong>Alarma Nativa Celular</strong> para que tu teléfono te avise puntualmente de tus tareas y antes de que se corte tu racha de estudio, incluso cuando el navegador esté cerrado.
+        </p>
       </div>
 
       <!-- Calculadora IA de Calorías -->
@@ -3879,11 +3882,38 @@
       link.click();
     }
 
-    // ==================== 3. TU PROFE IA (MULTI-MATERIA, BLOQUEO DE NIVEL, MULTITAREA INFERIOR, IDE VISUAL Y FÓRMULAS) ====================
+    // ==================== 3. TU PROFE IA (MULTI-MATERIA, CANDADOS DE NIVEL, BARRA ESTÁTICA, IDE VISUAL Y FÓRMULAS) ====================
     let activeTutorSubTab = 'map';
+
+    // Candados vectoriales SVG nítidos para nunca depender de emojis del sistema
+    const SVG_PADLOCK_CLOSED = `<svg viewBox="0 0 24 24" class="w-4 h-4 inline-block shrink-0 fill-none stroke-current" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2.5"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path><circle cx="12" cy="16" r="1.2" fill="currentColor"></circle></svg>`;
+    const SVG_PADLOCK_OPEN = `<svg viewBox="0 0 24 24" class="w-4 h-4 inline-block shrink-0 fill-none stroke-current" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2.5"></rect><path d="M8 11V7a4 4 0 0 1 7.5-1.8"></path><circle cx="12" cy="16" r="1.2" fill="currentColor"></circle></svg>`;
 
     function normalizeSubjectKey(name) {
       return (name || 'General').trim().toLowerCase().replace(/\s+/g, '_');
+    }
+
+    // Resuelve siempre el índice numérico correcto (0..3) aunque la IA devuelva "A", "B", "1" o el texto de la opción
+    function resolveCorrectOptionIndex(lesson) {
+      if (!lesson) return 0;
+      const opts = Array.isArray(lesson.quizOptions) ? lesson.quizOptions : [];
+      const raw = lesson.correctOptionIndex;
+      if (typeof raw === 'number' && !isNaN(raw)) {
+        if (raw >= 0 && raw < opts.length) return raw;
+        if (raw >= 1 && raw <= opts.length) return raw - 1;
+      }
+      const str = String(raw || '').trim();
+      const num = parseInt(str, 10);
+      if (!isNaN(num)) {
+        if (num >= 0 && num < opts.length) return num;
+        if (num >= 1 && num <= opts.length) return num - 1;
+      }
+      const upper = str.toUpperCase();
+      const letterIdx = ['A', 'B', 'C', 'D'].indexOf(upper.replace('OPCIÓN ', '').replace('OPCION ', '').trim());
+      if (letterIdx !== -1 && letterIdx < opts.length) return letterIdx;
+      const matchTextIdx = opts.findIndex(o => String(o || '').trim().toLowerCase() === str.toLowerCase());
+      if (matchTextIdx !== -1) return matchTextIdx;
+      return 0;
     }
 
     function ensureTutorMultiSubjectStructure() {
@@ -3928,20 +3958,35 @@
         td.activeSubjectKey = initKey;
       }
 
-      // Garantizar que CADA materia tenga su propia numeración limpia desde Lección #1 (1, 2, 3...) sin saltos ni contadores globales mezclados
+      // Garantizar numeración limpia desde Lección #1 por materia y candados secuenciales coherentes
       Object.values(td.subjectsMap).forEach(sObj => {
         if (!Array.isArray(sObj.lessons)) sObj.lessons = [];
+        let foundUnpassed = false;
         sObj.lessons.forEach((les, idx) => {
           les.lessonNumber = idx + 1;
+          les.correctOptionIndex = resolveCorrectOptionIndex(les);
           if (typeof les.completedQuiz !== 'boolean') {
-            les.completedQuiz = (idx < sObj.lessons.length - 1);
+            les.completedQuiz = false;
           }
-          if (!les.stars) les.stars = les.completedQuiz ? 3 : 1;
+          // Si una lección previa no se ha aprobado, ninguna posterior puede estar marcada como aprobada
+          if (foundUnpassed) {
+            les.completedQuiz = false;
+          }
+          if (!les.completedQuiz) {
+            foundUnpassed = true;
+          }
+          les.stars = les.completedQuiz ? 3 : 1;
         });
+
         if (sObj.lessons.length === 0) {
           sObj.selectedLessonIndex = -1;
-        } else if (typeof sObj.selectedLessonIndex !== 'number' || sObj.selectedLessonIndex < 0 || sObj.selectedLessonIndex >= sObj.lessons.length) {
-          sObj.selectedLessonIndex = sObj.lessons.length - 1;
+        } else {
+          // Si el índice seleccionado apunta a una lección bloqueada por una anterior no aprobada, llevar a la primera pendiente
+          const firstUnpassedIdx = sObj.lessons.findIndex(l => !l.completedQuiz);
+          const maxAllowedIdx = firstUnpassedIdx !== -1 ? firstUnpassedIdx : (sObj.lessons.length - 1);
+          if (typeof sObj.selectedLessonIndex !== 'number' || sObj.selectedLessonIndex < 0 || sObj.selectedLessonIndex > maxAllowedIdx) {
+            sObj.selectedLessonIndex = maxAllowedIdx;
+          }
         }
       });
 
@@ -3956,14 +4001,24 @@
       return td.subjectsMap[td.activeSubjectKey];
     }
 
+    // Devuelve la primera lección que aún tiene el examen pendiente (candado activo)
+    function getUnpassedCurrentLesson(subj) {
+      if (!subj || !Array.isArray(subj.lessons) || subj.lessons.length === 0) return null;
+      const idx = subj.lessons.findIndex(l => !l.completedQuiz);
+      if (idx !== -1) {
+        return { lesson: subj.lessons[idx], index: idx, number: idx + 1 };
+      }
+      return null;
+    }
+
     function switchTutorSubTab(subTab) {
       activeTutorSubTab = subTab;
       ['map', 'lesson', 'practice', 'exam'].forEach(st => {
         const btn = document.getElementById(`tbottom-${st}`);
         if (btn) {
           btn.className = st === subTab
-            ? 'py-2 px-1 rounded-2xl flex flex-col items-center justify-center gap-1 bg-terra-500 text-white shadow transition relative'
-            : 'py-2 px-1 rounded-2xl flex flex-col items-center justify-center gap-1 hover:bg-slate-800 text-slate-400 transition relative';
+            ? 'py-2 px-1.5 rounded-xl flex items-center justify-center gap-1.5 bg-terra-500 text-white shadow-sm transition relative'
+            : 'py-2 px-1.5 rounded-xl flex items-center justify-center gap-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition relative';
         }
       });
 
@@ -3983,6 +4038,75 @@
           renderTutor();
           triggerElementSlideAnim(lessonContainer, 'subview-anim-enter');
         }
+      }
+    }
+
+    function handleLevelGateBannerClick() {
+      const subj = getActiveSubjectObj();
+      const unpassed = getUnpassedCurrentLesson(subj);
+      if (unpassed) {
+        subj.selectedLessonIndex = unpassed.index;
+        saveState();
+        switchTutorSubTab('exam');
+        showToast(`Abriendo Examen Jefe de la Lección #${unpassed.number} para desbloquear el candado`, "info");
+      } else {
+        startTutorSession('lesson');
+      }
+    }
+
+    function clickLockedCandyNode(lockedLevelNum, requiredLevelNum, nodeElId) {
+      const nodeEl = document.getElementById(nodeElId);
+      if (nodeEl) {
+        nodeEl.classList.remove('anim-lock-shake');
+        void nodeEl.offsetWidth;
+        nodeEl.classList.add('anim-lock-shake');
+      }
+      const subj = getActiveSubjectObj();
+      const unpassed = getUnpassedCurrentLesson(subj);
+      if (unpassed) {
+        showToast(`Candado activo: Primero aprueba el Examen del Nivel #${unpassed.number} para desbloquear el Nivel #${lockedLevelNum}`, "warning");
+      } else {
+        showToast(`Candado activo: Primero debes completar y aprobar el Nivel #${requiredLevelNum}`, "warning");
+      }
+    }
+
+    // Permite pasar de un nivel a otro desde la barra de la clase (o generar el siguiente nivel si ya aprobó el actual)
+    function goToNextTutorLevelOrGenerate() {
+      const subj = getActiveSubjectObj();
+      if (!subj || !Array.isArray(subj.lessons) || subj.lessons.length === 0) {
+        startTutorSession('lesson');
+        return;
+      }
+      const curIdx = subj.selectedLessonIndex;
+      const curLesson = subj.lessons[curIdx];
+      const curNum = curIdx + 1;
+
+      // Si la lección actual NO está aprobada, el candado impide avanzar al siguiente nivel y lleva al examen
+      if (!curLesson || !curLesson.completedQuiz) {
+        const navNextBtn = document.getElementById('tutorNavNextLevelBtn');
+        if (navNextBtn) {
+          navNextBtn.classList.remove('anim-lock-shake');
+          void navNextBtn.offsetWidth;
+          navNextBtn.classList.add('anim-lock-shake');
+        }
+        const examCardEl = document.getElementById('tutorExamGateCard');
+        if (examCardEl) {
+          examCardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          examCardEl.classList.remove('anim-lock-shake');
+          void examCardEl.offsetWidth;
+          examCardEl.classList.add('anim-lock-shake');
+        } else {
+          switchTutorSubTab('exam');
+        }
+        showToast(`Candado cerrado: Responde correctamente el Examen Jefe #${curNum} para pasar al Nivel #${curNum + 1}`, "warning");
+        return;
+      }
+
+      // Si la lección actual YA está aprobada:
+      if (curIdx + 1 < subj.lessons.length) {
+        openSavedLessonByIndex(curIdx + 1, 'lesson');
+      } else {
+        startTutorSession('lesson');
       }
     }
 
@@ -4048,7 +4172,7 @@
           lessons: [],
           selectedLessonIndex: -1
         };
-        showToast(`Materia "${rawName}" creada en Nivel 0. Tu primera clase será la Lección #1`, "success");
+        showToast(`Materia "${rawName}" creada. Inicia limpia en la Lección #1`, "success");
       } else {
         showToast(`Cambiado a "${td.subjectsMap[key].name}"`, "info");
       }
@@ -4074,7 +4198,7 @@
       saveState();
       const mainTutorSec = document.getElementById('tab-tutor');
       if (mainTutorSec) triggerElementSlideAnim(mainTutorSec, 'subview-anim-enter');
-      showToast(`Materia activa: ${subj.name} (${subj.lessons.length === 0 ? 'Inicia en Lección #1' : subj.lessons.length + ' lecciones guardadas'})`, "info");
+      showToast(`Materia activa: ${subj.name} (${subj.lessons.length === 0 ? 'Lista para Lección #1' : subj.lessons.length + ' nivel(es)'})`, "info");
     }
 
     function deleteTutorSubject(subjKey, ev) {
@@ -4085,7 +4209,7 @@
         td.subjectsMap[subjKey].lessons = [];
         td.subjectsMap[subjKey].selectedLessonIndex = -1;
         saveState();
-        showToast("Se reiniciaron las lecciones de esta materia a 0 (Lista para Lección #1)", "info");
+        showToast("Se reiniciaron los niveles de esta materia a 0 (Lista para Lección #1)", "info");
         return;
       }
       const deletedName = td.subjectsMap[subjKey]?.name || 'Materia';
@@ -4095,7 +4219,6 @@
       showToast(`Materia "${deletedName}" eliminada`, "info");
     }
 
-    // Guarda el nombre/nivel/objetivo de la materia activa o crea una nueva limpia en Lección 1 si escribió una nueva
     function saveTutorConfig() {
       const td = ensureTutorMultiSubjectStructure();
       const typedName = (document.getElementById('tutorSubjectInput')?.value || '').trim() || 'Inglés';
@@ -4143,24 +4266,24 @@
     function openSavedLessonByIndex(idx, targetSubTab = 'lesson') {
       const subj = getActiveSubjectObj();
       if (!subj || !subj.lessons[idx]) return;
+
+      // Verificar candado secuencial: no puede abrir una lección posterior si hay una anterior sin aprobar
+      for (let k = 0; k < idx; k++) {
+        if (!subj.lessons[k].completedQuiz) {
+          subj.selectedLessonIndex = k;
+          saveState();
+          switchTutorSubTab('exam');
+          showToast(`Candado activo: Primero debes aprobar el Examen del Nivel #${k + 1} antes de abrir el Nivel #${idx + 1}`, "warning");
+          return;
+        }
+      }
+
       subj.selectedLessonIndex = idx;
       saveState();
       switchTutorSubTab(targetSubTab);
-      showToast(`Abriendo Lección #${idx + 1}: ${subj.lessons[idx].lessonTitle}`, "info");
+      showToast(`Abriendo Nivel #${idx + 1}: ${subj.lessons[idx].lessonTitle}`, "info");
     }
 
-    // Verifica si la última lección generada en esta materia aún NO ha sido aprobada
-    function getUnpassedCurrentLesson(subj) {
-      if (!subj || !Array.isArray(subj.lessons) || subj.lessons.length === 0) return null;
-      const lastIdx = subj.lessons.length - 1;
-      const lastLesson = subj.lessons[lastIdx];
-      if (!lastLesson.completedQuiz) {
-        return { lesson: lastLesson, index: lastIdx, number: lastIdx + 1 };
-      }
-      return null;
-    }
-
-    // Regenera la explicación de la lección actual sin subir de número de lección
     async function regenerateCurrentTutorLesson() {
       await startTutorSession('lesson', true);
     }
@@ -4172,7 +4295,7 @@
       const td = ensureTutorMultiSubjectStructure();
       const subj = getActiveSubjectObj();
 
-      // REGLA DE BLOQUEO DE NIVEL: Si quiere una nueva lección ('lesson'), pero la lección actual NO ha sido aprobada en su examen, no puede saltar al siguiente nivel
+      // CANDADO DE PASO DE NIVEL: Si hay una lección sin aprobar el examen, no puede desbloquear el siguiente nivel
       const unpassed = getUnpassedCurrentLesson(subj);
       if (mode === 'lesson' && unpassed && !forceRegenerateSameLevel) {
         subj.selectedLessonIndex = unpassed.index;
@@ -4184,7 +4307,7 @@
           gateBanner.classList.add('anim-lock-shake');
         }
         switchTutorSubTab('exam');
-        showToast(`🔒 Primero debes aprobar el Examen Jefe de la Lección #${unpassed.number} para pasar al Nivel #${unpassed.number + 1}`, "warning");
+        showToast(`Candado activo: Primero aprueba el Examen Jefe de la Lección #${unpassed.number} para desbloquear el Nivel #${unpassed.number + 1}`, "warning");
         return;
       }
 
@@ -4201,7 +4324,7 @@
 
       const btn = document.getElementById(mode === 'lesson' ? 'tutorLessonBtn' : 'tutorReviewBtn');
       const orig = btn.innerHTML;
-      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner"></div><span>Creando Lección #${targetLessonNum}...</span>`;
+      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner"></div><span>Creando Nivel #${targetLessonNum}...</span>`;
       btn.disabled = true;
 
       try {
@@ -4216,13 +4339,13 @@
         REGLAS ESTRICTAS DE CONTENIDO VISUAL, MATEMÁTICAS Y CÓDIGO:
         1. Clasifica "category" estrictamente en UNO de estos 4 valores:
            - "code": ÚNICAMENTE si la materia o tema trata sobre programación, desarrollo de software, Python, JavaScript, HTML, CSS, SQL, C++, algoritmos o terminal.
-           - "math": Si trata sobre matemáticas, cálculo, álgebra, física, química, estadística, contabilidad o finanzas con ecuaciones.
+           - "math": Si trata sobre matemáticas, cálculo, álgebra, física, química, estadística, investigación de operaciones o finanzas con ecuaciones.
            - "language": Si trata sobre idiomas (inglés, francés, gramática, vocabulario).
            - "general": Cualquier otra materia teórica o práctica.
-        2. Si "category" NO es "code", DEBES poner obligatoriamente "codeLanguage": "none", "codeBlock": "" y "codeOutput": "". ¡Nunca pongas código ni comentarios de relleno cuando la clase no sea de programación!
-        3. Si "category" ES "code", llena "codeLanguage" (ej. "python", "javascript", "html", "sql"), pon un programa completo, didáctico y bien indentado en "codeBlock", y pon su resultado en consola en "codeOutput".
-        4. Si "category" ES "math" (o el tema usa fórmulas), llena "formulas" con al menos 2 fórmulas resaltadas, detallando sus variables y un ejemplo paso a paso. Si no lleva fórmulas, pon "formulas": [].
-        5. Llena SIEMPRE "visualDiagram" con 4 pasos visuales claros y llena "flashcards" con 3 tarjetas interactivas.
+        2. Si "category" NO es "code", DEBES poner obligatoriamente "codeLanguage": "none", "codeBlock": "" y "codeOutput": "". ¡Nunca pongas código cuando la clase no sea de programación!
+        3. Si "category" ES "code", llena "codeLanguage" (ej. "python", "javascript", "html", "sql"), pon un programa completo y bien indentado en "codeBlock", y su salida en "codeOutput".
+        4. Si "category" ES "math" (o el tema usa fórmulas), llena "formulas" con al menos 2 fórmulas claras (sin usar signos $ de LaTeX; usa subíndices legibles como x1, x2). Si no lleva fórmulas, pon "formulas": [].
+        5. En el examen ("quizQuestion", "quizOptions"), "correctOptionIndex" DEBE ser un número entero entre 0 y 3 (donde 0 es la primera opción, 1 la segunda, 2 la tercera, 3 la cuarta).
 
         Devuelve ÚNICAMENTE un objeto JSON válido con esta estructura exacta:
         {
@@ -4257,7 +4380,7 @@
             "solution": "Solución explicada paso a paso"
           },
           "homeworkFeedback": "Retroalimentación a sus apuntes o consejo experto del profesor",
-          "quizQuestion": "Pregunta de Examen Jefe para aprobar la Lección #${targetLessonNum} y desbloquear el Nivel #${targetLessonNum + 1}",
+          "quizQuestion": "Pregunta de Examen Jefe para aprobar la Lección #${targetLessonNum} y abrir el candado del Nivel #${targetLessonNum + 1}",
           "quizOptions": ["Opción A", "Opción B", "Opción C", "Opción D"],
           "correctOptionIndex": 0,
           "quizExplanation": "Por qué esta respuesta es la correcta"
@@ -4268,11 +4391,13 @@
 
         const newLessonObj = {
           ...parsed,
+          correctOptionIndex: resolveCorrectOptionIndex(parsed),
           lessonNumber: targetLessonNum,
           createdAt: appState.currentDay || '2026-10-22',
           referenceImage: currentTutorImageBase64 || null,
           stars: 1,
-          completedQuiz: false
+          completedQuiz: false,
+          lastSelectedQuizOption: null
         };
 
         if (forceRegenerateSameLevel && unpassed) {
@@ -4291,7 +4416,7 @@
         if (currentTutorImageBase64) clearTutorPhoto();
         saveState();
         switchTutorSubTab('lesson');
-        showToast(`¡Lección #${targetLessonNum} de ${subj.name} lista! Aprueba su examen al final para subir al Nivel #${targetLessonNum + 1}`, "success");
+        showToast(`¡Nivel #${targetLessonNum} creado! Lee la clase y aprueba el Examen Jefe al final para abrir el candado del Nivel #${targetLessonNum + 1}`, "success");
       } catch (err) {
         showToast("Error Profe IA: " + err.message, "error");
       } finally {
@@ -4307,7 +4432,28 @@
         .replace(/>/g, '&gt;');
     }
 
-    // Detector estricto para mostrar el IDE Visual ÚNICAMENTE cuando la clase es de código
+    function formatMathClean(str) {
+      if (!str) return '';
+      const subMap = { '0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉','i':'ᵢ','j':'ⱼ','n':'ₙ','m':'ₘ' };
+      const supMap = { '0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','n':'ⁿ' };
+      let out = String(str)
+        .replace(/\$([^$]+)\$/g, '$1')
+        .replace(/\\cdot/g, '·')
+        .replace(/\\times/g, '×')
+        .replace(/\\leq/g, '≤')
+        .replace(/\\geq/g, '≥')
+        .replace(/\\neq/g, '≠')
+        .replace(/\\rightarrow/g, '→')
+        .replace(/\\sum/g, '∑')
+        .replace(/\\sqrt\{([^}]+)\}/g, '√($1)')
+        .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)')
+        .replace(/_\{([0-9ijnm]+)\}/g, (_, g) => g.split('').map(c => subMap[c] || c).join(''))
+        .replace(/_([0-9ijnm])/g, (_, c) => subMap[c] || ('_' + c))
+        .replace(/\^\{([0-9n]+)\}/g, (_, g) => g.split('').map(c => supMap[c] || c).join(''))
+        .replace(/\^([0-9n])/g, (_, c) => supMap[c] || ('^' + c));
+      return escapeHtmlSafe(out);
+    }
+
     function isStrictCodeLesson(lesson, subjName) {
       if (!lesson) return false;
       const rawCode = String(lesson.codeBlock || '').trim();
@@ -4332,7 +4478,6 @@
       return codeKeywords.some(kw => combinedText.includes(kw));
     }
 
-    // Detector estricto para el Pizarrón de Fórmulas Matemáticas
     function getValidMathFormulas(lesson) {
       if (!lesson || !Array.isArray(lesson.formulas)) return [];
       return lesson.formulas.filter(fm => {
@@ -4388,11 +4533,10 @@
       const lesson = subj?.lessons?.[subj.selectedLessonIndex];
       if (!lesson) return;
 
-      const fbBox = document.getElementById('tutorQuizFeedback');
-      if (!fbBox) return;
-      fbBox.classList.remove('hidden');
+      const correctIdx = resolveCorrectOptionIndex(lesson);
+      lesson.lastSelectedQuizOption = selectedIdx;
 
-      if (selectedIdx === Number(lesson.correctOptionIndex)) {
+      if (selectedIdx === correctIdx) {
         const firstTime = !lesson.completedQuiz;
         lesson.completedQuiz = true;
         lesson.stars = 3;
@@ -4402,25 +4546,19 @@
         playBeep();
         saveState();
         triggerStreakCelebration(
-          `★★★ ¡Lección #${lesson.lessonNumber} Aprobada!`,
-          `Has desbloqueado el Nivel #${lesson.lessonNumber + 1} en ${subj.name} ${firstTime ? '(+100 XP)' : ''}`
+          `🔓 ¡Candado Abierto! Nivel #${lesson.lessonNumber} Superado`,
+          `Has ganado 3 estrellas (★★★) y desbloqueaste el Nivel #${lesson.lessonNumber + 1}`
         );
-        const updatedFb = document.getElementById('tutorQuizFeedback');
-        if (updatedFb) {
-          updatedFb.classList.remove('hidden');
-          updatedFb.className = "p-4 rounded-2xl bg-emerald-500/15 border-2 border-emerald-500/50 text-xs text-emerald-300 mt-3 space-y-2 subview-anim-enter";
-          updatedFb.innerHTML = `
-            <div class="font-black text-sm text-emerald-400">★★★ ¡Nivel #${lesson.lessonNumber} Superado con 3 Estrellas!</div>
-            <p>${escapeHtmlSafe(lesson.quizExplanation)}</p>
-            <button onclick="startTutorSession('lesson')" class="w-full mt-2 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5">
-              <i class="fi fi-rr-rocket-lunch"></i>
-              <span>Ir y Generar Siguiente Nivel (Lección #${subj.lessons.length + 1})</span>
-            </button>
-          `;
-        }
+        showToast(`¡Correcto! Se abrió el candado del Nivel #${lesson.lessonNumber + 1}`, "success");
       } else {
-        fbBox.className = "p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/40 text-xs text-rose-300 mt-3 anim-lock-shake";
-        fbBox.innerHTML = `<strong>Respuesta Incorrecta:</strong> Aún no puedes pasar de nivel. Revisa la explicación e inténtalo de nuevo. Pista: <em>${escapeHtmlSafe(lesson.quizExplanation)}</em>`;
+        saveState();
+        const examCardEl = document.getElementById('tutorExamGateCard');
+        if (examCardEl) {
+          examCardEl.classList.remove('anim-lock-shake');
+          void examCardEl.offsetWidth;
+          examCardEl.classList.add('anim-lock-shake');
+        }
+        showToast("Respuesta incorrecta: el candado sigue cerrado. Intenta con otra opción.", "error");
       }
     }
 
@@ -4454,7 +4592,6 @@
 
       return `
         <div class="rounded-3xl overflow-hidden border-2 border-emerald-500/40 bg-[#0d1117] text-slate-100 shadow-2xl card-minimal-anim">
-          <!-- BARRA SUPERIOR DE VENTANA DEL IDE -->
           <div class="flex items-center justify-between px-3.5 py-2 bg-[#161b22] border-b border-slate-800">
             <div class="flex items-center gap-2">
               <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
@@ -4475,7 +4612,6 @@
             </div>
           </div>
 
-          <!-- PESTAÑAS DE ARCHIVOS DEL IDE -->
           <div class="flex items-center bg-[#0d1117] border-b border-slate-800 text-[10px] font-mono overflow-x-auto no-scrollbar">
             <div class="px-3.5 py-2 bg-[#161b22] border-t-2 border-emerald-400 text-emerald-300 font-bold flex items-center gap-1.5">
               <i class="fi fi-rr-file-code text-emerald-400"></i>
@@ -4488,9 +4624,7 @@
             </div>
           </div>
 
-          <!-- CUERPO DEL IDE: BARRA DE ICONOS + EXPLORADOR LATERAL + EDITOR NUMERADO -->
           <div class="grid grid-cols-12 min-h-[190px]">
-            <!-- Explorador lateral visual -->
             <div class="col-span-4 sm:col-span-3 bg-[#161b22]/70 border-r border-slate-800 p-2.5 font-mono text-[10px] space-y-1.5 select-none">
               <div class="text-[9px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Explorador</div>
               <div class="text-slate-300 font-bold flex items-center gap-1 truncate">
@@ -4513,13 +4647,11 @@
               </div>
             </div>
 
-            <!-- Editor principal con numeración de líneas -->
             <div class="col-span-8 sm:col-span-9 py-2.5 overflow-x-auto bg-[#0d1117]">
               ${numberedCodeRows}
             </div>
           </div>
 
-          <!-- CONSOLA / TERMINAL INTEGRADA DEL IDE -->
           <div class="bg-[#090d13] border-t border-slate-800 p-3 font-mono text-[11px] space-y-1.5">
             <div class="flex items-center justify-between text-[9px] text-slate-400 border-b border-slate-800/80 pb-1.5">
               <div class="flex items-center gap-3 font-bold uppercase">
@@ -4535,7 +4667,6 @@
             </div>
           </div>
 
-          <!-- BARRA DE ESTADO INFERIOR DEL IDE -->
           <div class="bg-emerald-600 text-slate-950 px-3 py-1 text-[9px] font-mono font-black flex items-center justify-between">
             <div class="flex items-center gap-2.5">
               <span>⎇ main*</span>
@@ -4551,7 +4682,6 @@
       `;
     }
 
-    // Construye láminas gráficas SVG e infografía visual de referencia para la lección
     function buildVisualReferenceCardHtml(lesson, subjName) {
       const vd = lesson.visualDiagram || {};
       const steps = Array.isArray(vd.steps) && vd.steps.length > 0 ? vd.steps : [
@@ -4586,7 +4716,7 @@
             <line x1="35" y1="10" x2="35" y2="68" stroke="#64748b" stroke-width="1.5"/>
             <path d="M 35 58 Q 110 52, 165 28 T 245 12" fill="none" stroke="#fbbf24" stroke-width="3"/>
             <circle cx="165" cy="28" r="5" fill="#f43f5e"/>
-            <text x="160" y="20" fill="#fde68a" font-size="9" font-family="monospace" font-weight="bold">f(x) • Punto Clave</text>
+            <text x="160" y="20" fill="#fde68a" font-size="9" font-family="monospace" font-weight="bold">f(x) • Óptimo</text>
           </svg>
         `;
       } else if (cat === 'code') {
@@ -4612,8 +4742,8 @@
             <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-terra-500/20 text-terra-400">${escapeHtmlSafe(st.badge || `Paso ${idx + 1}`)}</span>
             <span class="text-[10px] text-slate-500 font-black">0${idx + 1}</span>
           </div>
-          <p class="text-xs font-extrabold text-white leading-snug">${escapeHtmlSafe(st.title)}</p>
-          <p class="text-[10px] text-slate-300 mt-1 leading-relaxed">${escapeHtmlSafe(st.detail)}</p>
+          <p class="text-xs font-extrabold text-white leading-snug">${formatMathClean(st.title)}</p>
+          <p class="text-[10px] text-slate-300 mt-1 leading-relaxed">${formatMathClean(st.detail)}</p>
         </div>
       `).join('');
 
@@ -4631,7 +4761,7 @@
               <i class="fi ${iconClass} text-base"></i>
               <div>
                 <span class="text-[9px] font-extrabold uppercase tracking-wider text-slate-300 block">Lámina & Esquema Visual Referencial</span>
-                <h4 class="text-xs font-black">${escapeHtmlSafe(vd.diagramTitle || `Mapa Visual: ${lesson.lessonTitle}`)}</h4>
+                <h4 class="text-xs font-black">${formatMathClean(vd.diagramTitle || `Mapa Visual: ${lesson.lessonTitle}`)}</h4>
               </div>
             </div>
             <span class="text-[9px] px-2 py-0.5 rounded-full bg-white/10 text-slate-200 font-bold">Ilustración IA</span>
@@ -4645,7 +4775,7 @@
       `;
     }
 
-    // Construye el mapa sinuoso estilo Candy Crush con bloqueo de nivel hasta aprobar examen
+    // Mapa de niveles tipo Candy Crush con medallones circulares, candados SVG reales y camino conectado
     function renderCandyCrushMap(subj) {
       const mapEl = document.getElementById('tutorCandyMapContainer');
       const titleEl = document.getElementById('candyMapSubjectTitle');
@@ -4653,13 +4783,13 @@
       if (!mapEl) return;
 
       const lessons = subj.lessons || [];
-      const totalStars = lessons.reduce((acc, l) => acc + (Number(l.stars) || 1), 0);
-      if (titleEl) titleEl.textContent = `Mapa de Saga: ${subj.name}`;
+      const totalStars = lessons.reduce((acc, l) => acc + (l.completedQuiz ? 3 : 1), 0);
+      if (titleEl) titleEl.textContent = `Mapa de Niveles: ${subj.name}`;
       if (starsEl) starsEl.textContent = `★ ${totalStars} estrellas`;
 
       const unpassed = getUnpassedCurrentLesson(subj);
-      const totalNodesToShow = Math.max(5, lessons.length + 2);
-      const offsets = ['translate-x-0', 'translate-x-10', 'translate-x-16', 'translate-x-6', '-translate-x-8', '-translate-x-14', '-translate-x-4'];
+      const totalNodesToShow = Math.max(4, lessons.length + 2);
+      const offsets = ['translate-x-0', 'translate-x-3', '-translate-x-3', 'translate-x-2', '-translate-x-2'];
 
       let nodesMarkup = '';
       for (let i = 0; i < totalNodesToShow; i++) {
@@ -4669,76 +4799,103 @@
         const isCurrentSelected = i === subj.selectedLessonIndex;
         const isNextToGenerate = i === lessons.length;
 
+        // Un nivel i está bloqueado con candado si cualquier nivel anterior k < i no ha aprobado su examen
+        let isLockedByPrevious = false;
+        let blockingLevelNum = 1;
+        for (let k = 0; k < i; k++) {
+          if (!lessons[k] || !lessons[k].completedQuiz) {
+            isLockedByPrevious = true;
+            blockingLevelNum = k + 1;
+            break;
+          }
+        }
+
+        const pathUnlocked = isGenerated && lessons[i].completedQuiz && !isLockedByPrevious;
         const connectorLine = i < totalNodesToShow - 1 ? `
-          <div class="w-1.5 h-6 ${i < lessons.length && lessons[i].completedQuiz ? 'bg-gradient-to-b from-emerald-400 to-terra-500' : 'bg-slate-300 dark:bg-slate-800'} rounded-full my-0.5"></div>
+          <div class="flex flex-col items-center my-0.5">
+            <div class="w-1.5 h-6 rounded-full ${pathUnlocked ? 'bg-gradient-to-b from-emerald-400 to-amber-400 shadow-sm' : 'bg-slate-300 dark:bg-slate-800 border-l border-dashed border-slate-500'}"></div>
+          </div>
         ` : '';
 
-        if (isGenerated) {
+        if (isGenerated && !isLockedByPrevious) {
           const lObj = lessons[i];
           const passed = !!lObj.completedQuiz;
           const starsCount = passed ? 3 : 1;
           const starsStr = '★'.repeat(starsCount) + '☆'.repeat(Math.max(0, 3 - starsCount));
           nodesMarkup += `
-            <div class="flex flex-col items-center">
-              <button onclick="openSavedLessonByIndex(${i}, 'lesson')" class="transform ${offsetClass} group relative flex items-center gap-3 px-4 py-2.5 rounded-3xl transition shadow-md ${
+            <div class="flex flex-col items-center w-full">
+              <button onclick="openSavedLessonByIndex(${i}, 'lesson')" class="transform ${offsetClass} w-full max-w-[275px] group relative flex items-center gap-3 p-2.5 rounded-3xl transition shadow-md border-2 ${
                 isCurrentSelected
-                  ? 'bg-gradient-to-r from-terra-500 to-amber-500 text-white ring-4 ring-terra-500/30 scale-105'
-                  : (passed ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-amber-500 text-slate-950 candy-node-active')
+                  ? 'bg-gradient-to-r from-terra-500 to-amber-500 text-white border-amber-200 ring-4 ring-terra-500/25'
+                  : (passed ? 'bg-emerald-600/95 hover:bg-emerald-500 text-white border-emerald-400/50' : 'bg-amber-500 hover:bg-amber-400 text-slate-950 border-amber-300 candy-node-active')
               }">
-                <div class="w-9 h-9 rounded-2xl bg-black/20 flex items-center justify-center font-black text-sm shrink-0">
-                  ${lessonNum}
+                <!-- Medallón circular de nivel -->
+                <div class="w-11 h-11 rounded-2xl ${passed ? 'bg-black/25 text-amber-300' : 'bg-slate-950 text-amber-400'} flex flex-col items-center justify-center shrink-0 shadow-inner border border-white/15">
+                  <span class="text-[8px] font-black uppercase leading-none opacity-80">NIVEL</span>
+                  <span class="text-sm font-black leading-tight">${lessonNum}</span>
                 </div>
-                <div class="text-left max-w-[175px]">
-                  <div class="text-[10px] font-black ${passed ? 'text-amber-200' : 'text-slate-900'} tracking-wider">
-                    ${starsStr} • LECCIÓN #${lessonNum} ${passed ? '✓' : '(EXAMEN PENDIENTE)'}
+                <div class="text-left min-w-0 flex-1">
+                  <div class="flex items-center justify-between gap-1">
+                    <span class="text-[10px] font-black ${passed ? 'text-amber-200' : 'text-slate-950'} tracking-wider">${starsStr}</span>
+                    <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md ${passed ? 'bg-black/20 text-emerald-100' : 'bg-slate-950/15 text-slate-950'} inline-flex items-center gap-1 shrink-0">
+                      ${passed ? `${SVG_PADLOCK_OPEN} Superado` : 'Examen Pendiente'}
+                    </span>
                   </div>
-                  <div class="text-xs font-extrabold truncate">${escapeHtmlSafe(lObj.lessonTitle)}</div>
+                  <div class="text-xs font-extrabold truncate mt-0.5">${escapeHtmlSafe(lObj.lessonTitle)}</div>
                 </div>
               </button>
               ${connectorLine}
             </div>
           `;
-        } else if (isNextToGenerate) {
-          const lockedByUnpassed = !!unpassed;
+        } else if (isNextToGenerate && !isLockedByPrevious) {
+          // El nivel anterior ya fue aprobado (o es el Nivel 1 inicial), por lo que este nivel está ABIERTO y listo para generarse
           nodesMarkup += `
-            <div class="flex flex-col items-center">
-              <button onclick="startTutorSession('lesson')" class="transform ${offsetClass} ${lockedByUnpassed ? 'bg-slate-300 dark:bg-slate-800 text-slate-400 border border-amber-500/40' : 'candy-node-active bg-amber-500 hover:bg-amber-400 text-slate-950 ring-4 ring-amber-400/30'} flex items-center gap-3 px-4 py-2.5 rounded-3xl font-black shadow-lg transition">
-                <div class="w-9 h-9 rounded-2xl bg-slate-950 text-amber-400 flex items-center justify-center font-black text-sm">
-                  ${lockedByUnpassed ? '<i class="fi fi-rr-lock"></i>' : lessonNum}
+            <div class="flex flex-col items-center w-full">
+              <button onclick="startTutorSession('lesson')" class="transform ${offsetClass} w-full max-w-[275px] candy-node-active flex items-center gap-3 p-2.5 rounded-3xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black shadow-lg border-2 border-amber-200 ring-4 ring-amber-400/25 transition">
+                <div class="w-11 h-11 rounded-2xl bg-slate-950 text-amber-400 flex flex-col items-center justify-center shrink-0 shadow">
+                  <span class="text-[8px] font-black uppercase leading-none">NIVEL</span>
+                  <span class="text-sm font-black leading-tight">${lessonNum}</span>
                 </div>
-                <div class="text-left">
-                  <div class="text-[9px] uppercase font-black tracking-wider">
-                    ${lockedByUnpassed ? `Aprueba Lección #${unpassed.number} primero` : '¡Siguiente Nivel Disponible!'}
+                <div class="text-left min-w-0 flex-1">
+                  <div class="text-[9px] uppercase font-black tracking-wider flex items-center gap-1 text-slate-900">
+                    ${SVG_PADLOCK_OPEN} <span>¡Candado Abierto!</span>
                   </div>
-                  <div class="text-xs font-black">Nivel / Lección #${lessonNum}</div>
+                  <div class="text-xs font-black truncate">Iniciar Lección #${lessonNum}</div>
                 </div>
               </button>
               ${connectorLine}
             </div>
           `;
         } else {
+          // Nivel bloqueado con candado cerrado SVG
+          const nodeId = `candy-locked-node-${lessonNum}`;
           nodesMarkup += `
-            <div class="flex flex-col items-center">
-              <div class="transform ${offsetClass} flex items-center gap-2.5 px-4 py-2 rounded-3xl bg-slate-200/70 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700 text-slate-400 opacity-65">
-                <div class="w-8 h-8 rounded-2xl bg-slate-300 dark:bg-slate-900 flex items-center justify-center text-xs font-bold">
-                  <i class="fi fi-rr-lock"></i>
+            <div class="flex flex-col items-center w-full">
+              <button id="${nodeId}" onclick="clickLockedCandyNode(${lessonNum}, ${blockingLevelNum}, '${nodeId}')" class="transform ${offsetClass} w-full max-w-[275px] flex items-center gap-3 p-2.5 rounded-3xl bg-slate-200/80 dark:bg-slate-800/75 border-2 border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-amber-500/50 transition">
+                <div class="w-11 h-11 rounded-2xl bg-slate-300 dark:bg-slate-900 text-slate-500 dark:text-amber-400/80 flex items-center justify-center shrink-0 border border-slate-400/30 dark:border-slate-700">
+                  ${SVG_PADLOCK_CLOSED}
                 </div>
-                <span class="text-xs font-bold">Nivel #${lessonNum} Bloqueado</span>
-              </div>
+                <div class="text-left min-w-0 flex-1">
+                  <div class="text-[9px] font-extrabold uppercase tracking-wider text-amber-500/90 truncate">
+                    Candado • Requiere Nivel #${blockingLevelNum}
+                  </div>
+                  <div class="text-xs font-extrabold truncate">Nivel #${lessonNum} Bloqueado</div>
+                </div>
+              </button>
               ${connectorLine}
             </div>
           `;
         }
       }
 
-      mapEl.innerHTML = `<div class="flex flex-col items-center py-2">${nodesMarkup}</div>`;
+      mapEl.innerHTML = `<div class="flex flex-col items-center py-1">${nodesMarkup}</div>`;
     }
 
     function renderTutor() {
       const td = ensureTutorMultiSubjectStructure();
       const subj = getActiveSubjectObj();
 
-      // Actualizar hora de recordatorio de racha y estado de estudio hoy
+      // Actualizar estado de recordatorio de racha (ubicado ahora en Ajustes)
       const remInput = document.getElementById('streakReminderTimeInput');
       if (remInput) remInput.value = td.streakReminderTime || '20:00';
       const studiedToday = (td.studyDaysHistory || []).includes(appState.currentDay);
@@ -4746,26 +4903,26 @@
       if (riskTextEl) {
         riskTextEl.innerHTML = studiedToday
           ? `<span class="text-emerald-400 font-bold">✓ Racha de hoy (${appState.currentDay}) asegurada</span>`
-          : `<span class="text-amber-400 font-bold">⚠ Aún no estudias hoy: toma 1 clase antes de las ${td.streakReminderTime || '20:00'}</span>`;
+          : `<span class="text-amber-400 font-bold">⚠ Aún no estudias hoy: aviso programado a las ${td.streakReminderTime || '20:00'}</span>`;
       }
 
-      // Renderizar píldoras de materias
+      // Renderizar píldoras de materias con truncado limpio
       const pillsEl = document.getElementById('tutorSubjectPills');
       if (pillsEl) {
         pillsEl.innerHTML = Object.values(td.subjectsMap).map(sItem => {
           const isAct = sItem.key === td.activeSubjectKey;
           const countL = (sItem.lessons || []).length;
           return `
-            <div onclick="selectTutorSubject('${sItem.key}')" class="px-3 py-1.5 rounded-2xl text-xs font-extrabold whitespace-nowrap cursor-pointer transition flex items-center gap-2 border ${
+            <div onclick="selectTutorSubject('${sItem.key}')" class="max-w-full px-3 py-1.5 rounded-2xl text-xs font-extrabold cursor-pointer transition flex items-center gap-2 border shrink-0 ${
               isAct
                 ? 'bg-terra-500 text-white border-terra-500 shadow-sm'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
             }">
-              <span>${escapeHtmlSafe(sItem.name)}</span>
-              <span class="text-[10px] px-1.5 py-0.5 rounded-full ${isAct ? 'bg-black/25 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-400'}">
-                ${countL === 0 ? 'Lección 1 lista' : `Niv. ${countL}`}
+              <span class="truncate max-w-[165px] sm:max-w-[200px]" title="${escapeHtmlSafe(sItem.name)}">${escapeHtmlSafe(sItem.name)}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap ${isAct ? 'bg-black/25 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-400'}">
+                ${countL === 0 ? 'Niv. 1 listo' : `Niv. ${countL}`}
               </span>
-              <button onclick="deleteTutorSubject('${sItem.key}', event)" class="opacity-70 hover:opacity-100" title="Borrar o reiniciar materia">
+              <button onclick="deleteTutorSubject('${sItem.key}', event)" class="opacity-80 hover:opacity-100 shrink-0 ml-0.5" title="Borrar o reiniciar materia">
                 <i class="fi fi-rr-cross-small"></i>
               </button>
             </div>
@@ -4787,18 +4944,18 @@
       const examDot = document.getElementById('tbottomExamDot');
 
       if (unpassed) {
-        if (gateStatusLabel) gateStatusLabel.textContent = `🔒 Nivel #${unpassed.number + 1} bloqueado hasta aprobar:`;
-        if (nextBtnLabel) nextBtnLabel.textContent = `Aprobar Examen Lección #${unpassed.number}`;
+        if (gateStatusLabel) gateStatusLabel.innerHTML = `${SVG_PADLOCK_CLOSED} <span class="truncate">Nivel #${unpassed.number + 1} con candado:</span>`;
+        if (nextBtnLabel) nextBtnLabel.textContent = `Ir a Examen #${unpassed.number} ▶`;
         if (examDot) examDot.classList.remove('hidden');
       } else {
         const nextNum = lessonsCount + 1;
-        if (gateStatusLabel) gateStatusLabel.textContent = `Siguiente nivel en ${subj.name}:`;
-        if (nextBtnLabel) nextBtnLabel.textContent = `Generar Lección #${nextNum}`;
+        if (gateStatusLabel) gateStatusLabel.innerHTML = `${SVG_PADLOCK_OPEN} <span class="truncate">Nivel #${nextNum} desbloqueado:</span>`;
+        if (nextBtnLabel) nextBtnLabel.textContent = `Generar Lección #${nextNum} ▶`;
         if (examDot) examDot.classList.add('hidden');
       }
 
       const dailyStreak = calculateTutorDailyStreak();
-      document.getElementById('tutorProgressBadge').textContent = `${lessonsCount} lección(es) en ${subj.name}`;
+      document.getElementById('tutorProgressBadge').textContent = `${lessonsCount} lección(es) • ${subj.name}`;
       document.getElementById('tutorStreakBadge').innerHTML = `<i class="fi fi-sr-flame"></i> <span>${dailyStreak}d racha</span>`;
       const xpEl = document.getElementById('tutorXpBadge');
       if (xpEl) xpEl.innerHTML = `<i class="fi fi-sr-star"></i> <span>${td.totalXp || 0} XP</span>`;
@@ -4810,11 +4967,14 @@
 
       if (lessonsCount === 0) {
         const pracLabel = document.getElementById('tbottomPracticeLabel');
-        if (pracLabel) pracLabel.textContent = 'Práctica/Lab';
+        if (pracLabel) pracLabel.textContent = 'Práctica';
         container.innerHTML = `
-          <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 text-center space-y-2 card-minimal-anim">
+          <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 text-center space-y-3 card-minimal-anim">
             <p class="text-xs font-extrabold text-terra-500 uppercase">Materia lista: ${escapeHtmlSafe(subj.name)}</p>
-            <p class="text-xs text-slate-400">Esta materia está en 0 lecciones. Presiona <strong>"Darme Clase + Examen"</strong> arriba para generar tu <strong>Lección #1</strong>.</p>
+            <p class="text-xs text-slate-400">Esta materia comienza desde cero. Presiona el botón de abajo o <strong>"Darme Clase + Examen"</strong> para abrir tu <strong>Lección #1 (Nivel 1)</strong>.</p>
+            <button onclick="startTutorSession('lesson')" class="px-5 py-2.5 bg-terra-500 hover:bg-terra-600 text-white font-black text-xs rounded-2xl shadow inline-flex items-center gap-2">
+              <i class="fi fi-rr-play-alt"></i> <span>Iniciar Nivel #1 Ahora</span>
+            </button>
           </div>
         `;
         return;
@@ -4831,23 +4991,34 @@
 
       const pracLabel = document.getElementById('tbottomPracticeLabel');
       if (pracLabel) {
-        pracLabel.textContent = isCode ? 'IDE Código' : (formulasList.length > 0 ? 'Fórmulas/Lab' : 'Flashcards');
+        pracLabel.textContent = isCode ? 'IDE Código' : (formulasList.length > 0 ? 'Fórmulas' : 'Práctica');
       }
 
-      // Barra rápida para navegar entre Lección Anterior / Siguiente guardadas en esta materia
+      // Barra superior de la lección con Candado Inteligente para pasar de un nivel a otro
       const prevDisabled = subj.selectedLessonIndex <= 0;
-      const nextDisabled = subj.selectedLessonIndex >= lessonsCount - 1;
+      const isCurrentPassed = !!lesson.completedQuiz;
+      const hasNextSaved = (subj.selectedLessonIndex + 1) < lessonsCount;
+
       const navHeaderHtml = `
-        <div class="flex items-center justify-between bg-slate-900 text-white px-4 py-2.5 rounded-2xl border border-slate-800 text-xs shadow-sm">
-          <button onclick="${!prevDisabled ? `openSavedLessonByIndex(${subj.selectedLessonIndex - 1}, '${activeTutorSubTab === 'map' ? 'lesson' : activeTutorSubTab}')` : ''}" ${prevDisabled ? 'disabled' : ''} class="px-2.5 py-1 rounded-xl font-bold flex items-center gap-1 ${prevDisabled ? 'opacity-30 cursor-not-allowed' : 'bg-white/10 hover:bg-white/20'}">
-            <i class="fi fi-rr-angle-left"></i> <span>Lección Anterior</span>
+        <div class="flex items-center justify-between gap-2 bg-slate-900 text-white px-3.5 py-2.5 rounded-2xl border border-slate-800 text-xs shadow-sm">
+          <button onclick="${!prevDisabled ? `openSavedLessonByIndex(${subj.selectedLessonIndex - 1}, '${activeTutorSubTab === 'map' ? 'lesson' : activeTutorSubTab}')` : ''}" ${prevDisabled ? 'disabled' : ''} class="px-2.5 py-1.5 rounded-xl font-bold flex items-center gap-1 shrink-0 ${prevDisabled ? 'opacity-30 cursor-not-allowed' : 'bg-white/10 hover:bg-white/20'}">
+            <i class="fi fi-rr-angle-left"></i> <span>Nivel #${Math.max(1, currentNum - 1)}</span>
           </button>
-          <div class="text-center">
-            <span class="font-black text-amber-400 block">Lección #${currentNum} de ${lessonsCount}</span>
-            <span class="text-[9px] text-slate-400">${lesson.completedQuiz ? '★★★ Nivel Aprobado' : '🔒 Examen Pendiente'}</span>
+
+          <div class="text-center min-w-0 flex-1">
+            <span class="font-black text-amber-400 block truncate">Nivel / Lección #${currentNum} de ${lessonsCount}</span>
+            <span class="text-[10px] ${isCurrentPassed ? 'text-emerald-400' : 'text-amber-300'} font-bold inline-flex items-center gap-1">
+              ${isCurrentPassed ? `${SVG_PADLOCK_OPEN} <span>Nivel Superado ★★★</span>` : `${SVG_PADLOCK_CLOSED} <span>Aprueba el examen para avanzar</span>`}
+            </span>
           </div>
-          <button onclick="${!nextDisabled ? `openSavedLessonByIndex(${subj.selectedLessonIndex + 1}, '${activeTutorSubTab === 'map' ? 'lesson' : activeTutorSubTab}')` : ''}" ${nextDisabled ? 'disabled' : ''} class="px-2.5 py-1 rounded-xl font-bold flex items-center gap-1 ${nextDisabled ? 'opacity-30 cursor-not-allowed' : 'bg-white/10 hover:bg-white/20'}">
-            <span>Siguiente</span> <i class="fi fi-rr-angle-right"></i>
+
+          <button id="tutorNavNextLevelBtn" onclick="goToNextTutorLevelOrGenerate()" class="px-3 py-1.5 rounded-xl font-extrabold flex items-center gap-1.5 shrink-0 transition ${
+            isCurrentPassed
+              ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow'
+              : 'bg-amber-500/20 border border-amber-500/40 text-amber-300'
+          }">
+            ${isCurrentPassed ? SVG_PADLOCK_OPEN : SVG_PADLOCK_CLOSED}
+            <span>${isCurrentPassed ? (hasNextSaved ? `Nivel #${currentNum + 1} ▶` : `Crear #${currentNum + 1} ▶`) : `Nivel #${currentNum + 1}`}</span>
           </button>
         </div>
       `;
@@ -4860,27 +5031,27 @@
               <i class="fi fi-rr-square-root"></i>
               <span>Pizarrón de Fórmulas y Ecuaciones Resaltadas</span>
             </span>
-            <span class="text-[10px] px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-bold">Matemáticas / Ciencias</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-bold">Matemáticas</span>
           </div>
           <div class="space-y-2.5">
             ${formulasList.map(fm => `
               <div class="p-3.5 rounded-2xl bg-slate-950/90 border border-amber-400/40 space-y-1.5 shadow-inner">
-                <span class="text-[10px] font-extrabold text-amber-300 uppercase block">${escapeHtmlSafe(fm.name || 'Fórmula Clave')}</span>
+                <span class="text-[10px] font-extrabold text-amber-300 uppercase block">${formatMathClean(fm.name || 'Fórmula Clave')}</span>
                 <div class="py-2.5 px-3 rounded-xl bg-amber-500/10 border border-amber-400/30 font-mono text-sm font-black text-amber-200 text-center tracking-wide overflow-x-auto">
-                  ${escapeHtmlSafe(fm.expression)}
+                  ${formatMathClean(fm.expression)}
                 </div>
-                ${fm.variables ? `<p class="text-[11px] text-slate-300"><strong>Variables:</strong> ${escapeHtmlSafe(fm.variables)}</p>` : ''}
-                ${fm.example ? `<p class="text-[11px] text-emerald-300 font-mono"><strong>Sustitución paso a paso:</strong> ${escapeHtmlSafe(fm.example)}</p>` : ''}
+                ${fm.variables ? `<p class="text-[11px] text-slate-300"><strong>Variables:</strong> ${formatMathClean(fm.variables)}</p>` : ''}
+                ${fm.example ? `<p class="text-[11px] text-emerald-300 font-mono"><strong>Sustitución paso a paso:</strong> ${formatMathClean(fm.example)}</p>` : ''}
               </div>
             `).join('')}
           </div>
         </div>
       ` : '';
 
-      // 2. Interfaz Visual de IDE Completa (SOLO cuando es clase de código; cuando no, es cadena vacía '')
+      // 2. Interfaz Visual de IDE Completa (SOLO cuando es clase de código)
       const codeIdeHtml = buildFullVisualIdeHtml(lesson, subj.name, currentNum);
 
-      // 3. Flashcards Interactivas con animación
+      // 3. Flashcards Interactivas
       const flashcards = Array.isArray(lesson.flashcards) ? lesson.flashcards : [];
       const flashcardsHtml = flashcards.length > 0 ? `
         <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200 dark:border-slate-800 space-y-3 card-minimal-anim">
@@ -4897,14 +5068,14 @@
                 <div id="fc-front-${idx}" class="flex items-center justify-between gap-2">
                   <div>
                     <span class="text-[9px] font-black uppercase text-terra-500 block">Tarjeta #${idx + 1} • Pregunta (Toca para girar)</span>
-                    <p class="text-xs font-bold mt-1">${escapeHtmlSafe(fc.front)}</p>
+                    <p class="text-xs font-bold mt-1">${formatMathClean(fc.front)}</p>
                   </div>
                   <i class="fi fi-rr-refresh text-terra-500 text-base"></i>
                 </div>
                 <div id="fc-back-${idx}" class="hidden flex items-center justify-between gap-2 text-emerald-400">
                   <div>
                     <span class="text-[9px] font-black uppercase text-emerald-400 block">✓ Respuesta / Concepto</span>
-                    <p class="text-xs font-extrabold mt-1">${escapeHtmlSafe(fc.back)}</p>
+                    <p class="text-xs font-extrabold mt-1">${formatMathClean(fc.back)}</p>
                   </div>
                   <i class="fi fi-sr-check-circle text-emerald-400 text-base"></i>
                 </div>
@@ -4927,33 +5098,88 @@
               <button onclick="toggleChallengeSolution('sol')" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">Ver Solución</button>
             </div>
           </div>
-          <p class="font-bold text-slate-700 dark:text-slate-200">${escapeHtmlSafe(ch.prompt)}</p>
+          <p class="font-bold text-slate-700 dark:text-slate-200">${formatMathClean(ch.prompt)}</p>
           <div id="tutor-challenge-hint" class="hidden p-2.5 rounded-xl bg-amber-500/15 text-amber-300 text-[11px]">
-            <strong>💡 Pista:</strong> ${escapeHtmlSafe(ch.hint)}
+            <strong>💡 Pista:</strong> ${formatMathClean(ch.hint)}
           </div>
           <div id="tutor-challenge-sol" class="hidden p-2.5 rounded-xl bg-emerald-500/15 text-emerald-300 text-[11px] font-mono">
-            <strong>✓ Solución paso a paso:</strong> ${escapeHtmlSafe(ch.solution)}
+            <strong>✓ Solución paso a paso:</strong> ${formatMathClean(ch.solution)}
           </div>
         </div>
       ` : '';
 
       const termsHtml = (lesson.keyTerms || []).map(k => `<span class="px-2.5 py-1 rounded-full bg-terra-500/15 text-terra-500 font-bold text-[11px]">+ ${escapeHtmlSafe(k)}</span>`).join('');
-      const optionsHtml = (lesson.quizOptions || []).map((opt, idx) => `
-        <button onclick="answerTutorQuiz(${idx})" class="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-terra-500 text-left text-xs font-bold flex items-center gap-2.5 transition bg-slate-50 dark:bg-slate-800/60">
-          <span class="w-6 h-6 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-black">${['A','B','C','D'][idx] || idx+1}</span>
-          <span>${escapeHtmlSafe(opt)}</span>
-        </button>
-      `).join('');
 
-      // Bloque de Clase Teórica + Esquema Visual
+      const correctIdx = resolveCorrectOptionIndex(lesson);
+      const selectedOpt = lesson.lastSelectedQuizOption;
+      const optionsHtml = (lesson.quizOptions || []).map((opt, idx) => {
+        let optStyle = "border-slate-200 dark:border-slate-700 hover:border-terra-500 bg-slate-50 dark:bg-slate-800/60";
+        let badgeStyle = "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200";
+        if (lesson.completedQuiz && idx === correctIdx) {
+          optStyle = "border-2 border-emerald-500 bg-emerald-500/15 text-emerald-300";
+          badgeStyle = "bg-emerald-500 text-slate-950";
+        } else if (!lesson.completedQuiz && selectedOpt === idx && idx !== correctIdx) {
+          optStyle = "border-2 border-rose-500 bg-rose-500/15 text-rose-300";
+          badgeStyle = "bg-rose-500 text-white";
+        }
+        return `
+          <button onclick="answerTutorQuiz(${idx})" class="p-3.5 rounded-2xl border ${optStyle} text-left text-xs font-bold flex items-center gap-2.5 transition">
+            <span class="w-6 h-6 rounded-lg ${badgeStyle} flex items-center justify-center text-[10px] font-black shrink-0">${['A','B','C','D'][idx] || idx+1}</span>
+            <span class="flex-1">${formatMathClean(opt)}</span>
+          </button>
+        `;
+      }).join('');
+
+      // Tarjeta de Candado y Examen Jefe para pasar de nivel
+      const examCardHtml = `
+        <div id="tutorExamGateCard" class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border-2 ${lesson.completedQuiz ? 'border-emerald-500/60' : 'border-amber-500/50'} space-y-3.5 card-minimal-anim">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <div class="w-9 h-9 rounded-2xl ${lesson.completedQuiz ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'} flex items-center justify-center shrink-0">
+                ${lesson.completedQuiz ? SVG_PADLOCK_OPEN : SVG_PADLOCK_CLOSED}
+              </div>
+              <div class="min-w-0">
+                <span class="text-[10px] font-extrabold uppercase ${lesson.completedQuiz ? 'text-emerald-400' : 'text-amber-400'} block truncate">
+                  ${lesson.completedQuiz ? `Candado Abierto • Nivel #${currentNum} Aprobado (★★★)` : `Candado de Nivel #${currentNum} • Aprueba para abrir Nivel #${currentNum + 1}`}
+                </span>
+                <p class="text-[11px] text-slate-400 truncate">Responde correctamente para desbloquear el siguiente nivel</p>
+              </div>
+            </div>
+            <span class="text-[10px] font-black bg-amber-500/15 text-amber-400 px-2.5 py-1 rounded-xl shrink-0">+100 XP</span>
+          </div>
+
+          <h4 class="text-sm font-black leading-snug">${formatMathClean(lesson.quizQuestion)}</h4>
+          <div class="grid grid-cols-1 gap-2">${optionsHtml}</div>
+
+          <div id="tutorQuizFeedback" class="${lesson.completedQuiz || (selectedOpt !== null && selectedOpt !== undefined) ? 'p-4 rounded-2xl border-2 text-xs mt-2 space-y-2.5 ' + (lesson.completedQuiz ? 'bg-emerald-500/15 border-emerald-500/50 text-emerald-200' : 'bg-rose-500/15 border-rose-500/40 text-rose-200') : 'hidden'}">
+            ${lesson.completedQuiz ? `
+              <div class="font-black text-sm text-emerald-400 flex items-center gap-1.5">
+                ${SVG_PADLOCK_OPEN} <span>★★★ ¡Nivel #${currentNum} Superado! Candado del Nivel #${currentNum + 1} Abierto</span>
+              </div>
+              <p>${formatMathClean(lesson.quizExplanation)}</p>
+              <button onclick="goToNextTutorLevelOrGenerate()" class="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black text-xs rounded-2xl shadow-lg flex items-center justify-center gap-2">
+                ${SVG_PADLOCK_OPEN}
+                <span>${hasNextSaved ? `Pasar Ahora al Nivel #${currentNum + 1} ▶` : `Desbloquear y Generar Nivel #${currentNum + 1} ▶`}</span>
+              </button>
+            ` : (selectedOpt !== null && selectedOpt !== undefined ? `
+              <div class="font-black text-rose-400 flex items-center gap-1.5">
+                ${SVG_PADLOCK_CLOSED} <span>Respuesta Incorrecta: El candado del Nivel #${currentNum + 1} sigue cerrado</span>
+              </div>
+              <p>Pista del profesor: <em>${formatMathClean(lesson.quizExplanation)}</em></p>
+            ` : '')}
+          </div>
+        </div>
+      `;
+
+      // Bloque de Clase Teórica + Esquema Visual + Candado de Examen al final
       const theoryCardHtml = `
         <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4 card-minimal-anim">
-          <div class="flex items-center justify-between">
-            <span class="text-[10px] font-extrabold uppercase bg-terra-500 text-white px-3 py-1 rounded-full">
-              ${escapeHtmlSafe(subj.name)} • Lección #${currentNum}
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[10px] font-extrabold uppercase bg-terra-500 text-white px-3 py-1 rounded-full truncate max-w-[200px] sm:max-w-[240px]" title="${escapeHtmlSafe(subj.name)} • Lección #${currentNum}">
+              ${escapeHtmlSafe(subj.name)} • Nivel #${currentNum}
             </span>
-            <div class="flex items-center gap-2">
-              ${!lesson.completedQuiz ? `<button onclick="regenerateCurrentTutorLesson()" class="text-[10px] px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-terra-500 font-bold" title="Explicar de nuevo esta misma lección sin subir de nivel"><i class="fi fi-rr-refresh"></i> Re-explicar #${currentNum}</button>` : ''}
+            <div class="flex items-center gap-2 shrink-0">
+              <button onclick="regenerateCurrentTutorLesson()" class="text-[10px] px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-terra-500 font-bold" title="Volver a generar explicación de este mismo nivel"><i class="fi fi-rr-refresh"></i> Re-explicar #${currentNum}</button>
               <span class="text-xs font-black text-amber-400">${'★'.repeat(lesson.completedQuiz ? 3 : 1)}</span>
             </div>
           </div>
@@ -4963,58 +5189,25 @@
             ${lesson.summaryBanner ? `<p class="text-[11px] text-terra-500 font-bold mt-0.5">${escapeHtmlSafe(lesson.summaryBanner)}</p>` : ''}
           </div>
 
-          <!-- ESQUEMA E INFOGRAFÍA VISUAL REFERENCIAL -->
           ${buildVisualReferenceCardHtml(lesson, subj.name)}
 
-          <!-- EXPLICACIÓN DEL PROFESOR -->
-          <div class="text-xs leading-relaxed whitespace-pre-wrap text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800">${escapeHtmlSafe(lesson.explanation)}</div>
+          <div class="text-xs leading-relaxed whitespace-pre-wrap text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800">${formatMathClean(lesson.explanation)}</div>
 
           ${formulasHtml}
           ${codeIdeHtml}
 
-          ${lesson.homeworkFeedback ? `<div class="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-xs"><strong class="text-blue-400 block mb-0.5">Nota del Profesor / Revisión:</strong> ${escapeHtmlSafe(lesson.homeworkFeedback)}</div>` : ''}
+          ${lesson.homeworkFeedback ? `<div class="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-xs"><strong class="text-blue-400 block mb-0.5">Nota del Profesor / Revisión:</strong> ${formatMathClean(lesson.homeworkFeedback)}</div>` : ''}
 
           <div>
-            <span class="text-[10px] font-bold uppercase text-slate-400 block mb-1.5">Conceptos Clave de la Lección #${currentNum}</span>
+            <span class="text-[10px] font-bold uppercase text-slate-400 block mb-1.5">Conceptos Clave del Nivel #${currentNum}</span>
             <div class="flex flex-wrap gap-1.5">${termsHtml}</div>
           </div>
-
-          <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex gap-2">
-            <button onclick="switchTutorSubTab('practice')" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5">
-              <i class="fi fi-rr-playing-cards"></i> <span>Ir a Práctica / Flashcards</span>
-            </button>
-            <button onclick="switchTutorSubTab('exam')" class="flex-1 py-2.5 bg-terra-500 hover:bg-terra-600 text-white font-black text-xs rounded-xl flex items-center justify-center gap-1.5">
-              <i class="fi fi-rr-trophy"></i> <span>Ir al Examen Jefe #${currentNum}</span>
-            </button>
-          </div>
         </div>
+
+        <!-- CANDADO Y EXAMEN JEFE INTEGRADO AL FINAL DE LA CLASE PARA PASAR DIRECTO AL SIGUIENTE NIVEL -->
+        ${examCardHtml}
       `;
 
-      // Bloque de Examen Jefe obligatorio para desbloquear el siguiente nivel
-      const examCardHtml = `
-        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border-2 ${lesson.completedQuiz ? 'border-emerald-500/50' : 'border-terra-500/50'} space-y-3 card-minimal-anim">
-          <div class="flex items-center justify-between">
-            <span class="text-[10px] font-extrabold uppercase ${lesson.completedQuiz ? 'text-emerald-400' : 'text-terra-500'} block">
-              ${lesson.completedQuiz ? `✓ Nivel #${currentNum} Superado (★★★)` : `🔒 Jefe de Nivel #${currentNum} • Obligatorio para pasar al Nivel #${currentNum + 1}`}
-            </span>
-            <span class="text-[10px] font-bold text-amber-400">+100 XP</span>
-          </div>
-          <h4 class="text-sm font-black">${escapeHtmlSafe(lesson.quizQuestion)}</h4>
-          <div class="grid grid-cols-1 gap-2">${optionsHtml}</div>
-          <div id="tutorQuizFeedback" class="${lesson.completedQuiz ? 'p-4 rounded-2xl bg-emerald-500/15 border-2 border-emerald-500/40 text-xs text-emerald-300 mt-3 space-y-2' : 'hidden'}">
-            ${lesson.completedQuiz ? `
-              <div class="font-black text-sm text-emerald-400">★★★ ¡Nivel #${currentNum} Aprobado!</div>
-              <p>${escapeHtmlSafe(lesson.quizExplanation)}</p>
-              <button onclick="startTutorSession('lesson')" class="w-full mt-2 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black text-xs rounded-xl shadow flex items-center justify-center gap-1.5">
-                <i class="fi fi-rr-rocket-lunch"></i>
-                <span>Generar Siguiente Nivel (Lección #${lessonsCount + 1})</span>
-              </button>
-            ` : ''}
-          </div>
-        </div>
-      `;
-
-      // Mostrar contenido según la pestaña activa de la Barra Multitarea Inferior de Profe IA
       if (activeTutorSubTab === 'practice') {
         container.innerHTML = `
           ${navHeaderHtml}
@@ -5023,8 +5216,8 @@
           ${challengeHtml}
           ${flashcardsHtml}
           <button onclick="switchTutorSubTab('exam')" class="w-full py-3 bg-gradient-to-r from-terra-500 to-amber-500 text-white font-black text-xs rounded-2xl shadow-md flex items-center justify-center gap-2">
-            <i class="fi fi-rr-trophy"></i>
-            <span>Listo: Presentar Examen Jefe de la Lección #${currentNum}</span>
+            ${lesson.completedQuiz ? SVG_PADLOCK_OPEN : SVG_PADLOCK_CLOSED}
+            <span>Ir al Examen Jefe del Nivel #${currentNum}</span>
           </button>
         `;
       } else if (activeTutorSubTab === 'exam') {
