@@ -615,8 +615,8 @@
         </div>
       </div>
 
-      <!-- ESCÁNER DE ALIMENTOS IA -->
-      <div id="nutSubView-scanner" class="space-y-4 hidden subview-anim-enter">
+      <!-- ESCÁNER DE ALIMENTOS IA (INTEGRADO EN LA VISTA PRINCIPAL JUNTO AL CONTADOR) -->
+      <div id="nutSubView-scanner" class="space-y-4 subview-anim-enter">
       <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3">
         <div class="flex justify-between items-center">
           <div class="flex items-center gap-2">
@@ -633,7 +633,7 @@
             <option value="Cena">Cena</option>
             <option value="Snack">Snack</option>
           </select>
-          <input id="aiFoodInput" type="text" placeholder="Describe tu plato (ej. 200g bistec con arroz)..." class="col-span-2 px-3.5 py-2.5 text-xs rounded-2xl bg-slate-100 dark:bg-slate-800 outline-none">
+          <input id="aiFoodInput" type="text" onkeydown="if(event.key==='Enter'){event.preventDefault();analyzeFoodWithGemini();}" placeholder="Describe tu plato (ej. 200g bistec con arroz)..." class="col-span-2 px-3.5 py-2.5 text-xs rounded-2xl bg-slate-100 dark:bg-slate-800 outline-none">
         </div>
 
         <div id="photoPreviewCard" class="hidden bg-slate-950 border-2 border-terra-500 rounded-2xl p-3 flex items-center gap-3">
@@ -657,8 +657,8 @@
           </button>
         </div>
       </div>
-
       </div>
+
       <!-- COMIDAS DE HOY (CON OPCIÓN DE REGISTRO Y EDICIÓN MANUAL SIN GASTAR TOKENS) -->
       <div id="nutSubView-mealsWrap" class="space-y-4">
       <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3">
@@ -702,10 +702,9 @@
 
         <div id="mealsList" class="space-y-2"></div>
       </div>
+      </div>
 
-      </div>
-      </div>
-      <!-- HIDRATACIÓN -->
+      <!-- HIDRATACIÓN (INTEGRADA EN LA MISMA VISTA PRINCIPAL) -->
       <div id="nutSubView-waterWrap" class="space-y-4">
       <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 flex items-center gap-4">
         <div class="relative w-14 h-20 bg-slate-100 dark:bg-slate-800 rounded-b-2xl border-2 border-t-0 border-sky-400 overflow-hidden flex flex-col justify-end shrink-0">
@@ -727,7 +726,7 @@
           </div>
         </div>
       </div>
-
+      </div>
       </div>
       <!-- CHEF IA INTELIGENTE ORIENTADO A COMPLETAR MACROS Y META -->
       <div id="nutSubView-chef" class="space-y-4 hidden subview-anim-enter">
@@ -2420,7 +2419,7 @@
       merged.habitsModifiedAt = Math.max(baseHabitsTime, incHabitsTime);
       merged.updatedAt = Math.max(baseTime, incTime);
 
-      // Unir días respetando quién tiene el timestamp más reciente para agua (-250 ml), comidas borradas y checks de hábitos
+      // Unir días sin perder registros de comidas ni hidratación entre sesiones/nube
       if (incomingSt.days) {
         if (!merged.days) merged.days = {};
         Object.keys(incomingSt.days).forEach(dayId => {
@@ -2430,18 +2429,63 @@
             merged.days[dayId] = JSON.parse(JSON.stringify(incDay));
           } else {
             const mDay = merged.days[dayId];
-            if (incomingIsNewer) {
+            const baseMeals = Array.isArray(mDay.meals) ? mDay.meals : [];
+            const incMeals = Array.isArray(incDay.meals) ? incDay.meals : [];
+            const baseClearedAt = Number(mDay.mealsClearedAt || 0);
+            const incClearedAt = Number(incDay.mealsClearedAt || 0);
+            const baseMealsMod = Number(mDay.mealsModifiedAt || baseClearedAt || 0);
+            const incMealsMod = Number(incDay.mealsModifiedAt || incClearedAt || 0);
+
+            if (incMeals.length === 0 && baseMeals.length > 0) {
+              if (incClearedAt > baseMealsMod && incClearedAt > baseTime) {
+                mDay.meals = [];
+                mDay.mealsClearedAt = incClearedAt;
+              } else {
+                mDay.meals = JSON.parse(JSON.stringify(baseMeals));
+              }
+            } else if (baseMeals.length === 0 && incMeals.length > 0) {
+              if (baseClearedAt > incMealsMod && baseClearedAt > incTime) {
+                mDay.meals = [];
+              } else {
+                mDay.meals = JSON.parse(JSON.stringify(incMeals));
+                mDay.mealsModifiedAt = Math.max(baseMealsMod, incMealsMod);
+              }
+            } else if (baseMeals.length > 0 && incMeals.length > 0) {
+              if (incMealsMod > baseMealsMod) {
+                mDay.meals = JSON.parse(JSON.stringify(incMeals));
+              } else if (baseMealsMod > incMealsMod) {
+                mDay.meals = JSON.parse(JSON.stringify(baseMeals));
+              } else {
+                // Ambos tienen comidas sin timestamp explícito: combinar sin duplicar
+                const combinedMeals = JSON.parse(JSON.stringify(baseMeals));
+                const seenKeys = new Set(combinedMeals.map(x => `${String(x.name || '').trim().toLowerCase()}_${Number(x.kcal) || 0}`));
+                incMeals.forEach(im => {
+                  const key = `${String(im.name || '').trim().toLowerCase()}_${Number(im.kcal) || 0}`;
+                  if (!seenKeys.has(key)) {
+                    seenKeys.add(key);
+                    combinedMeals.push(JSON.parse(JSON.stringify(im)));
+                  }
+                });
+                mDay.meals = combinedMeals;
+              }
+              mDay.mealsModifiedAt = Math.max(baseMealsMod, incMealsMod);
+            }
+
+            const baseWaterMod = Number(mDay.waterModifiedAt || 0);
+            const incWaterMod = Number(incDay.waterModifiedAt || 0);
+            if (incWaterMod > baseWaterMod) {
               mDay.water = incDay.water || 0;
-              mDay.meals = JSON.parse(JSON.stringify(incDay.meals || []));
-              mDay.impulses = JSON.parse(JSON.stringify(incDay.impulses || []));
-            } else if (baseTime === 0) {
+              mDay.waterModifiedAt = incWaterMod;
+            } else if (baseWaterMod > incWaterMod) {
+              mDay.water = mDay.water || 0;
+            } else {
               mDay.water = Math.max(mDay.water || 0, incDay.water || 0);
-              if ((!mDay.meals || mDay.meals.length === 0) && (incDay.meals || []).length > 0) {
-                mDay.meals = JSON.parse(JSON.stringify(incDay.meals));
-              }
-              if ((incDay.impulses || []).length > (mDay.impulses || []).length) {
-                mDay.impulses = incDay.impulses;
-              }
+            }
+
+            if (incomingIsNewer && (incDay.impulses || []).length >= (mDay.impulses || []).length) {
+              mDay.impulses = JSON.parse(JSON.stringify(incDay.impulses || []));
+            } else if ((incDay.impulses || []).length > (mDay.impulses || []).length) {
+              mDay.impulses = JSON.parse(JSON.stringify(incDay.impulses));
             }
 
             if (incomingHabitsNewer) {
@@ -2602,31 +2646,29 @@
 
       let combinedState = primaryState ? JSON.parse(JSON.stringify(primaryState)) : createDefaultState();
 
-      // Solo escanear llaves antiguas si STORAGE_KEY no existía o estaba en blanco
-      if (!primaryState) {
-        let bestScore = -1;
-        try {
-          for (let i = 0; i < localStorage.length; i++) {
-            const k = localStorage.key(i);
-            if (!k || k === 'allan_tcc_firebase_config') continue;
-            try {
-              const raw = localStorage.getItem(k);
-              if (raw && raw.trim().startsWith('{')) {
-                const parsed = JSON.parse(raw);
-                if (parsed && (parsed.days || parsed.profile || parsed.tasks || parsed.targetKcal)) {
-                  const sc = getStateRichnessScore(parsed);
-                  if (sc > bestScore) {
-                    bestScore = sc;
-                    combinedState = mergeStatesNonDestructively(parsed, combinedState);
-                  } else {
-                    combinedState = mergeStatesNonDestructively(combinedState, parsed);
-                  }
+      // Escanear respaldos locales (como allan_tcc_backup_mirror o llaves previas) para rescatar comidas o días que hayan quedado vacíos
+      let bestScore = getStateRichnessScore(combinedState);
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (!k || k === 'allan_tcc_firebase_config' || k === STORAGE_KEY) continue;
+          try {
+            const raw = localStorage.getItem(k);
+            if (raw && raw.trim().startsWith('{')) {
+              const parsed = JSON.parse(raw);
+              if (parsed && (parsed.days || parsed.profile || parsed.tasks || parsed.targetKcal)) {
+                const sc = getStateRichnessScore(parsed);
+                if (!primaryState && sc > bestScore) {
+                  bestScore = sc;
+                  combinedState = mergeStatesNonDestructively(parsed, combinedState);
+                } else {
+                  combinedState = mergeStatesNonDestructively(combinedState, parsed);
                 }
               }
-            } catch (e) {}
-          }
-        } catch (e) {}
-      }
+            }
+          } catch (e) {}
+        }
+      } catch (e) {}
 
       normalizeHabitsStructure(combinedState);
 
@@ -2661,20 +2703,35 @@
       if (!appState.days[d.id].impulses) appState.days[d.id].impulses = [];
     });
     normalizeHabitsStructure(appState);
+    normalizeAllDaysMeals(appState);
 
     // Hidratar desde la bóveda IndexedDB automáticamente solo si localStorage estaba vacío o si la bóveda tiene un timestamp más reciente
     restoreFromIndexedDBVault().then(vaultState => {
       if (!vaultState) return;
       const localEmpty = !appState.onboardingComplete && getStateRichnessScore(appState) === 0 && !(appState.updatedAt > 0);
       const vaultNewer = Number(vaultState.updatedAt || 0) > Number(appState.updatedAt || 0);
-      if (localEmpty || vaultNewer) {
-        appState = mergeStatesNonDestructively(vaultState, appState);
+      let vaultHasMissingMeals = false;
+      if (vaultState.days && appState.days) {
+        Object.keys(vaultState.days).forEach(dId => {
+          const vMeals = vaultState.days[dId]?.meals || [];
+          const lMeals = appState.days[dId]?.meals || [];
+          const lCleared = Number(appState.days[dId]?.mealsClearedAt || 0);
+          if (vMeals.length > 0 && lMeals.length === 0 && !lCleared) {
+            vaultHasMissingMeals = true;
+          }
+        });
+      }
+      if (localEmpty || vaultNewer || vaultHasMissingMeals) {
+        appState = vaultNewer
+          ? mergeStatesNonDestructively(vaultState, appState)
+          : mergeStatesNonDestructively(appState, vaultState);
+        normalizeAllDaysMeals(appState);
         appState.onboardingComplete = true;
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch (e) {}
         renderAll();
         checkOnboarding();
-        if (localEmpty && getStateRichnessScore(appState) > 0) {
-          showToast("Datos recuperados automáticamente de la bóveda permanente", "success");
+        if ((localEmpty && getStateRichnessScore(appState) > 0) || vaultHasMissingMeals) {
+          showToast("Registros recuperados automáticamente de la bóveda permanente", "success");
         }
       }
     });
@@ -2731,11 +2788,22 @@
       const waterWrap = document.getElementById('nutSubView-waterWrap');
       const chefEl = document.getElementById('nutSubView-chef');
 
-      if (macrosEl) macrosEl.classList.toggle('hidden', sub !== 'macros');
-      if (mealsWrap) mealsWrap.classList.toggle('hidden', sub !== 'macros');
-      if (scannerEl) scannerEl.classList.toggle('hidden', sub !== 'scanner');
-      if (waterWrap) waterWrap.classList.toggle('hidden', sub !== 'scanner');
+      const showMainTracker = (sub === 'macros' || sub === 'scanner');
+      if (macrosEl) macrosEl.classList.toggle('hidden', !showMainTracker);
+      if (mealsWrap) mealsWrap.classList.remove('hidden');
+      if (scannerEl) scannerEl.classList.remove('hidden');
+      if (waterWrap) waterWrap.classList.remove('hidden');
       if (chefEl) chefEl.classList.toggle('hidden', sub !== 'chef');
+
+      if (sub === 'scanner' && scannerEl) {
+        setTimeout(() => {
+          scannerEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const inp = document.getElementById('aiFoodInput');
+          if (inp) inp.focus();
+        }, 60);
+      } else if (sub === 'macros' && macrosEl) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
 
       ['macros', 'scanner', 'chef'].forEach(k => {
         const btn = document.getElementById(`nsub-${k}`);
@@ -3832,14 +3900,161 @@
     }
 
     // ==================== 1. NUTRICIÓN Y CUADRADOR DE MACROS ====================
+    function parseNutritionNum(val) {
+      if (typeof val === 'number' && !isNaN(val)) return Math.max(0, Math.round(val));
+      if (val === null || val === undefined) return 0;
+      const str = String(val).replace(/,/g, '.');
+      const m = str.match(/(\d+(?:\.\d+)?)/);
+      return m ? Math.max(0, Math.round(parseFloat(m[1]))) : 0;
+    }
+
+    // Estimador nutricional inteligente local y de respaldo para que NUNCA quede en 0 kcal
+    function estimateNutritionFromText(rawText, fallbackTag = 'Comida') {
+      const text = String(rawText || '').trim();
+      const lower = text.toLowerCase();
+
+      // 1. Si el usuario escribió explícitamente kcal o macros en el texto (ej. "450 kcal", "40g p")
+      const explicitKcal = lower.match(/(\d+)\s*(?:kcal|calor[ií]as|cal)/i);
+      const explicitP = lower.match(/(\d+)\s*g?\s*(?:de\s*)?(?:prot(?:e[ií]nas?)?|p)/i);
+      const explicitC = lower.match(/(\d+)\s*g?\s*(?:de\s*)?(?:carb(?:ohidratos|os|s)?|c)/i);
+      const explicitF = lower.match(/(\d+)\s*g?\s*(?:de\s*)?(?:grasas?|fat|g|f)/i);
+
+      // 2. Base de alimentos frecuentes con porciones estándar y detección de gramos/piezas
+      const foodDB = [
+        { rx: /(\d+)?\s*(?:g|gr|gramos)?\s*(?:de\s*)?(?:pechuga|pollo|fajitas de pollo)/i, baseG: 150, kcal: 248, p: 46, c: 0, f: 5 },
+        { rx: /(\d+)?\s*(?:g|gr|gramos)?\s*(?:de\s*)?(?:bistec|res|carne|sirloin|arrachera|cortes?)/i, baseG: 150, kcal: 315, p: 42, c: 0, f: 15 },
+        { rx: /(\d+)?\s*(?:g|gr|gramos)?\s*(?:de\s*)?(?:at[uú]n|lata de at[uú]n)/i, baseG: 120, kcal: 140, p: 30, c: 0, f: 2 },
+        { rx: /(\d+)?\s*(?:g|gr|gramos)?\s*(?:de\s*)?(?:salm[oó]n|pescado|tilapia|filete)/i, baseG: 150, kcal: 260, p: 34, c: 0, f: 12 },
+        { rx: /(\d+)?\s*(?:piezas?|pzas?)?\s*(?:de\s*)?huevos?/i, isUnit: true, defUnits: 2, kcal: 72, p: 6, c: 1, f: 5 },
+        { rx: /(\d+)?\s*(?:claras?)/i, isUnit: true, defUnits: 4, kcal: 17, p: 4, c: 0, f: 0 },
+        { rx: /(\d+)?\s*(?:scoops?|medidas?)\s*(?:de\s*)?(?:prote[ií]na|whey|iso)/i, isUnit: true, defUnits: 1, kcal: 125, p: 25, c: 3, f: 1.5 },
+        { rx: /(\d+)?\s*(?:g|gr|gramos)?\s*(?:de\s*)?arroz/i, baseG: 130, kcal: 170, p: 4, c: 37, f: 0.5 },
+        { rx: /(\d+)?\s*(?:g|gr|gramos)?\s*(?:de\s*)?avena/i, baseG: 60, kcal: 228, p: 8, c: 40, f: 4 },
+        { rx: /(\d+)?\s*(?:g|gr|gramos)?\s*(?:de\s*)?(?:pasta|espagueti|fideo)/i, baseG: 150, kcal: 220, p: 8, c: 43, f: 1.5 },
+        { rx: /(\d+)?\s*(?:g|gr|gramos)?\s*(?:de\s*)?(?:papa|papas|camote)/i, baseG: 150, kcal: 135, p: 3, c: 30, f: 0.2 },
+        { rx: /(\d+)?\s*(?:g|gr|gramos)?\s*(?:de\s*)?(?:frijol|frijoles|lentejas)/i, baseG: 120, kcal: 155, p: 10, c: 27, f: 1 },
+        { rx: /(\d+)?\s*(?:piezas?|pzas?)?\s*(?:de\s*)?tortillas?/i, isUnit: true, defUnits: 2, kcal: 60, p: 1.5, c: 13, f: 0.7 },
+        { rx: /(\d+)?\s*(?:piezas?|rebanadas?)?\s*(?:de\s*)?pan(?:\s*integral|\s*tostado)?/i, isUnit: true, defUnits: 2, kcal: 75, p: 3, c: 14, f: 1 },
+        { rx: /(\d+)?\s*(?:piezas?)?\s*(?:de\s*)?tacos?/i, isUnit: true, defUnits: 3, kcal: 175, p: 11, c: 16, f: 7 },
+        { rx: /(\d+)?\s*(?:piezas?)?\s*(?:de\s*)?(?:quesadillas?|s[aá]ndwich|torta|burrito|enchiladas?|chilaquiles)/i, isUnit: true, defUnits: 1, kcal: 420, p: 22, c: 42, f: 18 },
+        { rx: /(\d+)?\s*(?:g|gr|gramos)?\s*(?:de\s*)?(?:aguacate|guacamole)/i, baseG: 60, kcal: 96, p: 1, c: 5, f: 9 },
+        { rx: /(\d+)?\s*(?:g|gr|gramos)?\s*(?:de\s*)?(?:queso|panela|oaxaca|cotija|manchego)/i, baseG: 60, kcal: 145, p: 12, c: 2, f: 10 },
+        { rx: /(\d+)?\s*(?:g|gr|ml)?\s*(?:de\s*)?(?:yogurt|yogur|leche)/i, baseG: 200, kcal: 140, p: 12, c: 12, f: 4 },
+        { rx: /(\d+)?\s*(?:piezas?)?\s*(?:de\s*)?(?:pl[aá]tano|banana|manzana|fruta|fresas|moras)/i, isUnit: true, defUnits: 1, kcal: 95, p: 1, c: 24, f: 0.3 },
+        { rx: /(\d+)?\s*(?:g|gr|cucharadas?)?\s*(?:de\s*)?(?:crema de man[ií]|cacahuate|almendras|nueces)/i, isUnit: true, defUnits: 1, kcal: 180, p: 7, c: 6, f: 15 },
+        { rx: /(?:ensalada|verduras|vegetales|br[oó]coli|nopales)/i, isUnit: true, defUnits: 1, kcal: 55, p: 3, c: 10, f: 0.5 },
+        { rx: /(?:prote[ií]na|batido|licuado|shake)/i, isUnit: true, defUnits: 1, kcal: 160, p: 26, c: 8, f: 2 }
+      ];
+
+      let sumKcal = 0, sumP = 0, sumC = 0, sumF = 0, matchedAny = false;
+      foodDB.forEach(item => {
+        const m = lower.match(item.rx);
+        if (m) {
+          matchedAny = true;
+          const qty = m[1] ? parseFloat(m[1]) : (item.isUnit ? item.defUnits : item.baseG);
+          const factor = item.isUnit
+            ? (qty > 25 ? qty / 100 : qty)
+            : (qty <= 10 ? 1 : qty / item.baseG);
+          sumKcal += item.kcal * factor;
+          sumP += item.p * factor;
+          sumC += item.c * factor;
+          sumF += item.f * factor;
+        }
+      });
+
+      let p = explicitP ? parseInt(explicitP[1], 10) : Math.round(sumP);
+      let c = explicitC ? parseInt(explicitC[1], 10) : Math.round(sumC);
+      let f = explicitF ? parseInt(explicitF[1], 10) : Math.round(sumF);
+      let kcal = explicitKcal ? parseInt(explicitKcal[1], 10) : Math.round(sumKcal);
+
+      if (!matchedAny && kcal === 0 && p === 0 && c === 0 && f === 0) {
+        // Estimación inteligente por tipo de comida si puso un nombre genérico (ej. "Comida corrida", "Cena ligera")
+        const isSnack = /snack|colaci[oó]n|postre|caf[eé]/i.test(fallbackTag + ' ' + lower);
+        kcal = isSnack ? 220 : 480;
+        p = isSnack ? 15 : 35;
+        c = isSnack ? 22 : 45;
+        f = isSnack ? 8 : 16;
+      } else {
+        if (kcal === 0 && (p > 0 || c > 0 || f > 0)) {
+          kcal = Math.round(p * 4 + c * 4 + f * 9);
+        } else if (kcal > 0 && p === 0 && c === 0 && f === 0) {
+          p = Math.round((kcal * 0.30) / 4);
+          c = Math.round((kcal * 0.40) / 4);
+          f = Math.round((kcal * 0.30) / 9);
+        }
+      }
+
+      const cleanTitle = text
+        ? (text.toLowerCase().includes(fallbackTag.toLowerCase()) ? text : `${fallbackTag}: ${text}`)
+        : `${fallbackTag}: Platillo registrado`;
+
+      return {
+        name: cleanTitle,
+        kcal: Math.max(10, Math.round(kcal)),
+        p: Math.max(0, Math.round(p)),
+        c: Math.max(0, Math.round(c)),
+        f: Math.max(0, Math.round(f))
+      };
+    }
+
+    function normalizeMealEntry(raw, fallbackTag = 'Comida') {
+      if (!raw || typeof raw !== 'object') {
+        return estimateNutritionFromText(String(raw || ''), fallbackTag);
+      }
+      const src = Array.isArray(raw) ? (raw[0] || {}) : (raw.meal || raw.plato || raw.food || raw.data || raw);
+      const rawName = String(src.name || src.nombre || src.title || src.titulo || src.plato || src.food || src.descripcion || '').trim();
+      let kcal = parseNutritionNum(src.kcal ?? src.calories ?? src.calorias ?? src.kcalorias ?? src.energia ?? src.cal);
+      let p = parseNutritionNum(src.p ?? src.prot ?? src.protein ?? src.proteina ?? src.proteinas ?? src.proteins);
+      let c = parseNutritionNum(src.c ?? src.carb ?? src.carbs ?? src.carbohidratos ?? src.carbohydrates ?? src.hidratos);
+      let f = parseNutritionNum(src.f ?? src.fat ?? src.fats ?? src.grasa ?? src.grasas ?? src.lipidos);
+
+      if (kcal === 0 && (p > 0 || c > 0 || f > 0)) {
+        kcal = Math.round(p * 4 + c * 4 + f * 9);
+      }
+      if (kcal === 0 && p === 0 && c === 0 && f === 0) {
+        const est = estimateNutritionFromText(rawName, fallbackTag);
+        kcal = est.kcal;
+        p = est.p;
+        c = est.c;
+        f = est.f;
+      } else if (kcal > 0 && p === 0 && c === 0 && f === 0) {
+        const est = estimateNutritionFromText(rawName, fallbackTag);
+        p = est.p || Math.round((kcal * 0.30) / 4);
+        c = est.c || Math.round((kcal * 0.40) / 4);
+        f = est.f || Math.round((kcal * 0.30) / 9);
+      }
+
+      let finalName = rawName || `${fallbackTag}: Platillo registrado`;
+      if (fallbackTag && !finalName.toLowerCase().includes(fallbackTag.toLowerCase()) && !/^(desayuno|comida|cena|snack)\s*:/i.test(finalName)) {
+        finalName = `${fallbackTag}: ${finalName}`;
+      }
+
+      return { name: finalName, kcal, p, c, f };
+    }
+
+    function normalizeAllDaysMeals(stateObj) {
+      if (!stateObj || !stateObj.days) return;
+      Object.keys(stateObj.days).forEach(dId => {
+        const day = stateObj.days[dId];
+        if (day && Array.isArray(day.meals)) {
+          day.meals = day.meals.map(m => normalizeMealEntry(m, ''));
+        }
+      });
+    }
+
     function getTodayTotals() {
-      const dayData = appState.days[appState.currentDay] || { meals: [] };
+      if (!appState.days[appState.currentDay]) {
+        appState.days[appState.currentDay] = { water: 0, meals: [], habitsState: {}, impulses: [] };
+      }
+      const dayData = appState.days[appState.currentDay];
       let totKcal = 0, totP = 0, totC = 0, totF = 0;
-      (dayData.meals || []).forEach(m => {
-        totKcal += Number(m.kcal) || 0;
-        totP += Number(m.p) || 0;
-        totC += Number(m.c) || 0;
-        totF += Number(m.f) || 0;
+      (dayData.meals || []).forEach((m, idx) => {
+        const norm = normalizeMealEntry(m, '');
+        dayData.meals[idx] = norm;
+        totKcal += norm.kcal;
+        totP += norm.p;
+        totC += norm.c;
+        totF += norm.f;
       });
       return { totKcal, totP, totC, totF };
     }
@@ -4113,10 +4328,33 @@
     }
 
     async function analyzeFoodWithGemini() {
-      if (!appState.apiKey) { showToast("Configura tu API Key en Ajustes", "warning"); switchTab('settings'); return; }
       const promptText = document.getElementById('aiFoodInput').value.trim();
       const mealTypeTag = document.getElementById('mealTypeTagSelect').value || 'Comida';
-      if (!promptText && !currentUploadedImageBase64) { showToast("Describe tu comida o sube una foto", "warning"); return; }
+      if (!promptText && !currentUploadedImageBase64) {
+        showToast("Describe tu comida o sube una foto del plato", "warning");
+        return;
+      }
+
+      if (!appState.days[appState.currentDay]) {
+        appState.days[appState.currentDay] = { water: 0, meals: [], habitsState: {}, impulses: [] };
+      }
+
+      // Si no tiene API Key configurada y escribió texto, calcular con el estimador nutricional local para que funcione al instante
+      if (!appState.apiKey && promptText && !currentUploadedImageBase64) {
+        const estimated = estimateNutritionFromText(promptText, mealTypeTag);
+        appState.days[appState.currentDay].meals.push(estimated);
+        appState.days[appState.currentDay].mealsModifiedAt = Date.now();
+        document.getElementById('aiFoodInput').value = '';
+        saveState();
+        showToast(`Registrado: ${estimated.name} (${estimated.kcal} kcal | ${estimated.p}g P • ${estimated.c}g C • ${estimated.f}g G)`, "success");
+        return;
+      }
+
+      if (!appState.apiKey) {
+        showToast("Para analizar fotos con IA configura tu Clave API en Ajustes", "warning");
+        switchTab('settings');
+        return;
+      }
 
       const btn = document.getElementById('aiFoodBtn');
       const originalText = btn.innerHTML;
@@ -4124,22 +4362,31 @@
       btn.disabled = true;
 
       try {
-        let prompt = `Analiza con precisión nutricional este alimento o plato (${mealTypeTag}). Calcula calorías y macronutrientes reales. Devuelve ÚNICAMENTE un JSON válido sin texto extra: {"name": "${mealTypeTag}: nombre del plato y porción", "kcal": número_entero, "p": gramos_proteina_entero, "c": gramos_carbohidratos_entero, "f": gramos_grasas_entero}.`;
+        let prompt = `Analiza con precisión nutricional este alimento o plato (${mealTypeTag}). Calcula calorías y macronutrientes reales (nunca devuelvas 0 kcal). Devuelve ÚNICAMENTE un JSON válido sin texto extra con valores numéricos enteros: {"name": "${mealTypeTag}: nombre del plato y porción", "kcal": 450, "p": 35, "c": 40, "f": 14}.`;
         if (promptText) prompt += ` Descripción del usuario: ${promptText}`;
 
         const textResult = await callGeminiAPI(prompt, currentUploadedImageBase64);
-        const parsed = JSON.parse(textResult);
-        if (parsed.name && !parsed.name.toLowerCase().includes(mealTypeTag.toLowerCase())) {
-          parsed.name = `${mealTypeTag}: ${parsed.name}`;
-        }
+        const rawParsed = JSON.parse(textResult);
+        const mealObj = normalizeMealEntry(rawParsed, mealTypeTag);
 
-        appState.days[appState.currentDay].meals.push(parsed);
+        appState.days[appState.currentDay].meals.push(mealObj);
+        appState.days[appState.currentDay].mealsModifiedAt = Date.now();
         document.getElementById('aiFoodInput').value = '';
         clearUploadedPhoto();
         saveState();
-        showToast(`Registrado: ${parsed.name} (${parsed.kcal} kcal | ${parsed.p}g P)`, "success");
+        showToast(`Registrado: ${mealObj.name} (${mealObj.kcal} kcal | ${mealObj.p}g P)`, "success");
       } catch (err) {
-        showToast("Error IA: " + err.message, "error");
+        if (promptText) {
+          const fallbackMeal = estimateNutritionFromText(promptText, mealTypeTag);
+          appState.days[appState.currentDay].meals.push(fallbackMeal);
+          appState.days[appState.currentDay].mealsModifiedAt = Date.now();
+          document.getElementById('aiFoodInput').value = '';
+          clearUploadedPhoto();
+          saveState();
+          showToast(`Registrado con cálculo inteligente: ${fallbackMeal.name} (${fallbackMeal.kcal} kcal | ${fallbackMeal.p}g P)`, "info");
+        } else {
+          showToast("Error IA: " + err.message, "error");
+        }
       } finally {
         btn.innerHTML = originalText;
         btn.disabled = false;
@@ -4290,12 +4537,20 @@
     function logFridgeProposal(idx) {
       if (!appState.lastFridgePlan || !appState.lastFridgePlan.proposals[idx]) return;
       const p = appState.lastFridgePlan.proposals[idx];
-      appState.days[appState.currentDay].meals.push({
+      if (!appState.days[appState.currentDay]) {
+        appState.days[appState.currentDay] = { water: 0, meals: [], habitsState: {}, impulses: [] };
+      }
+      const mealObj = normalizeMealEntry({
         name: `${p.mealTime}: ${p.title}`,
-        kcal: Number(p.kcal) || 400, p: Number(p.p) || 35, c: Number(p.c) || 25, f: Number(p.f) || 15
-      });
+        kcal: p.kcal,
+        p: p.p,
+        c: p.c,
+        f: p.f
+      }, p.mealTime || 'Comida');
+      appState.days[appState.currentDay].meals.push(mealObj);
+      appState.days[appState.currentDay].mealsModifiedAt = Date.now();
       saveState();
-      showToast(`Registrado en tu día: ${p.title}`, "success");
+      showToast(`Registrado en tu día: ${mealObj.name} (${mealObj.kcal} kcal)`, "success");
     }
 
     let editingMealIndex = null;
@@ -4308,19 +4563,30 @@
         return;
       }
       editingMealIndex = null;
+      const scannerTyped = (document.getElementById('aiFoodInput')?.value || '').trim();
+      const mealTypeTag = document.getElementById('mealTypeTagSelect')?.value || 'Comida';
       document.getElementById('manualMealFormTitle').textContent = 'Agregar Platillo Manual';
-      document.getElementById('manualMealNameInput').value = '';
-      document.getElementById('manualMealKcalInput').value = '';
-      document.getElementById('manualMealProtInput').value = '';
-      document.getElementById('manualMealCarbInput').value = '';
-      document.getElementById('manualMealFatInput').value = '';
+      if (scannerTyped) {
+        const est = estimateNutritionFromText(scannerTyped, mealTypeTag);
+        document.getElementById('manualMealNameInput').value = est.name;
+        document.getElementById('manualMealKcalInput').value = est.kcal;
+        document.getElementById('manualMealProtInput').value = est.p;
+        document.getElementById('manualMealCarbInput').value = est.c;
+        document.getElementById('manualMealFatInput').value = est.f;
+      } else {
+        document.getElementById('manualMealNameInput').value = '';
+        document.getElementById('manualMealKcalInput').value = '';
+        document.getElementById('manualMealProtInput').value = '';
+        document.getElementById('manualMealCarbInput').value = '';
+        document.getElementById('manualMealFatInput').value = '';
+      }
       box.classList.remove('hidden');
     }
 
     function openEditMealByIndex(idx) {
       const dayData = appState.days[appState.currentDay];
       if (!dayData || !dayData.meals || !dayData.meals[idx]) return;
-      const m = dayData.meals[idx];
+      const m = normalizeMealEntry(dayData.meals[idx], '');
       editingMealIndex = idx;
       document.getElementById('manualMealFormTitle').textContent = `Editar Platillo #${idx + 1}`;
       document.getElementById('manualMealNameInput').value = m.name || '';
@@ -4343,35 +4609,60 @@
         showToast("Escribe el nombre del platillo o alimento", "warning");
         return;
       }
-      const pVal = Math.max(0, Math.round(Number(document.getElementById('manualMealProtInput').value) || 0));
-      const cVal = Math.max(0, Math.round(Number(document.getElementById('manualMealCarbInput').value) || 0));
-      const fVal = Math.max(0, Math.round(Number(document.getElementById('manualMealFatInput').value) || 0));
-      let kcalVal = Math.max(0, Math.round(Number(document.getElementById('manualMealKcalInput').value) || 0));
-      if (kcalVal === 0 && (pVal > 0 || cVal > 0 || fVal > 0)) {
-        kcalVal = (pVal * 4) + (cVal * 4) + (fVal * 9);
-      }
+      const mealTypeTag = document.getElementById('mealTypeTagSelect')?.value || 'Comida';
+      const pVal = parseNutritionNum(document.getElementById('manualMealProtInput').value);
+      const cVal = parseNutritionNum(document.getElementById('manualMealCarbInput').value);
+      const fVal = parseNutritionNum(document.getElementById('manualMealFatInput').value);
+      const kcalVal = parseNutritionNum(document.getElementById('manualMealKcalInput').value);
 
-      const mealObj = { name: nameVal, kcal: kcalVal, p: pVal, c: cVal, f: fVal };
+      const mealObj = normalizeMealEntry({
+        name: nameVal,
+        kcal: kcalVal,
+        p: pVal,
+        c: cVal,
+        f: fVal
+      }, mealTypeTag);
+
       if (!appState.days[appState.currentDay]) {
         appState.days[appState.currentDay] = { water: 0, meals: [], habitsState: {}, impulses: [] };
       }
 
       if (editingMealIndex !== null && appState.days[appState.currentDay].meals[editingMealIndex]) {
         appState.days[appState.currentDay].meals[editingMealIndex] = mealObj;
-        showToast("Platillo actualizado", "success");
+        showToast(`Platillo actualizado: ${mealObj.kcal} kcal (${mealObj.p}g P)`, "success");
       } else {
         appState.days[appState.currentDay].meals.push(mealObj);
-        showToast("Platillo registrado manualmente", "success");
+        showToast(`Registrado: ${mealObj.name} (${mealObj.kcal} kcal | ${mealObj.p}g P)`, "success");
       }
+      appState.days[appState.currentDay].mealsModifiedAt = Date.now();
       cancelManualMealEdit();
       saveState();
     }
 
-    function removeMeal(index) { appState.days[appState.currentDay].meals.splice(index, 1); saveState(); }
-    function clearTodayMeals() { appState.days[appState.currentDay].meals = []; saveState(); showToast("Comidas de hoy reiniciadas", "info"); }
+    function removeMeal(index) {
+      if (!appState.days[appState.currentDay]) return;
+      appState.days[appState.currentDay].meals.splice(index, 1);
+      appState.days[appState.currentDay].mealsModifiedAt = Date.now();
+      if (appState.days[appState.currentDay].meals.length === 0) {
+        appState.days[appState.currentDay].mealsClearedAt = Date.now();
+      }
+      saveState();
+    }
+    function clearTodayMeals() {
+      if (!appState.days[appState.currentDay]) return;
+      appState.days[appState.currentDay].meals = [];
+      appState.days[appState.currentDay].mealsClearedAt = Date.now();
+      appState.days[appState.currentDay].mealsModifiedAt = Date.now();
+      saveState();
+      showToast("Comidas de hoy reiniciadas", "info");
+    }
     function addWater(amount) {
+      if (!appState.days[appState.currentDay]) {
+        appState.days[appState.currentDay] = { water: 0, meals: [], habitsState: {}, impulses: [] };
+      }
       const dayData = appState.days[appState.currentDay];
       dayData.water = Math.max(0, (dayData.water || 0) + amount);
+      dayData.waterModifiedAt = Date.now();
       saveState();
     }
 
