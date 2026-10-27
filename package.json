@@ -16,13 +16,13 @@
     "vite": "^8.3.5"
   },
   "name": "control-tcc-studio",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "private": true,
   "type": "module",
   "engines": {
     "node": ">=22.14.0"
   },
-  "description": "Aplicaci\u00f3n modular de h\u00e1bitos y organizaci\u00f3n personal",
+  "description": "Aplicación modular de hábitos y organización personal",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",

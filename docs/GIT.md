@@ -44,7 +44,7 @@ Reemplaza `URL_DE_TU_REPOSITORIO` por la dirección HTTPS o SSH real que te da G
 
 1. En tu repo, abre **Settings → Pages → Source → GitHub Actions**.
 2. Sube esta versión. El workflow `ci.yml` comprueba cambios y Pull Requests.
-3. En **Actions → Publicar frontend en GitHub Pages → Run workflow**, ejecuta el despliegue manual.
+3. Al subir a `main` se ejecuta **Actions → Publicar Control TCC** automáticamente. También puedes usar **Run workflow**. Espera a que termine en verde.
 4. Abre la URL generada. Vite utiliza rutas relativas para funcionar en `https://usuario.github.io/repositorio/`.
 5. Añade `usuario.github.io` a los dominios autorizados de Firebase Auth. Configura el backend según `FIREBASE.md`.
 

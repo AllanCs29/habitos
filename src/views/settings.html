@@ -8,6 +8,13 @@
       Tus registros se guardan en este dispositivo. Inicia sesión para
       sincronizarlos entre tus equipos.
     </p>
+    <p id="syncNotice" class="sync-notice hidden" role="status"></p>
+    <div id="legacyRecoveryNotice" class="sync-notice hidden">
+      <p>Hay registros de tu versión anterior que todavía no aparecen aquí.</p>
+      <button class="secondary-action" onclick="restoreFromCloudBackup()">
+        Revisar y recuperar historial
+      </button>
+    </div>
     <div id="authLoggedOutBox" class="space-y-3">
       <label for="authEmail">Correo electrónico</label
       ><input
@@ -257,9 +264,9 @@
       /></label>
     </div>
     <button class="text-action" onclick="rescueLegacyLocalData()">
-      Recuperar datos de la versión anterior</button
+      Recuperar historial de este navegador</button
     ><button class="text-action" onclick="restoreFromCloudBackup()">
-      Importar respaldo anterior de la cuenta
+      Recuperar historial anterior de Firebase
     </button>
     <details>
       <summary>Reiniciar espacio local</summary>
@@ -281,6 +288,11 @@
       conexión una vez cargada la aplicación; la IA y la sincronización
       necesitan internet.
     </p>
+    <p class="help-copy">
+      En iPhone: abre en Safari, toca Compartir y Añadir a pantalla de inicio;
+      activa Abrir como app web si aparece. En Android: abre el menú de Chrome y
+      elige Instalar aplicación. Después entra desde el icono instalado.
+    </p>
     <button
       id="btnInstallPwaApp"
       class="secondary-action"
@@ -288,6 +300,6 @@
     >
       Instalar aplicación
     </button>
-    <p class="version-label">Control TCC Studio · versión 2.0.0</p>
+    <p class="version-label">Control TCC Studio · versión 2.0.1</p>
   </div>
 </section>

@@ -179,6 +179,7 @@ export function updateCloudUI() {
       synced: "Sincronizado",
       error: "Revisar conexión",
       loading: "Cargando cuenta…",
+      migration: "Historial recuperado · falta sincronizar",
     }[status] || status;
   for (const id of ["cloudStatusBadge", "firebaseAuthStatus"]) {
     const el = document.getElementById(id);
@@ -200,6 +201,16 @@ export function updateCloudUI() {
     runtime.fbUser?.email || "Espacio local";
   const transfer = document.getElementById("importGuestButton");
   if (transfer) transfer.classList.toggle("hidden", !runtime.fbUser);
+  const notice = document.getElementById("syncNotice");
+  if (notice) {
+    notice.textContent = runtime.syncError || "";
+    notice.classList.toggle("hidden", !runtime.syncError || !runtime.fbUser);
+  }
+  const recovery = document.getElementById("legacyRecoveryNotice");
+  recovery?.classList.toggle(
+    "hidden",
+    !runtime.fbUser || !runtime.legacyRecoveryAvailable,
+  );
 }
 
 export function checkOnboarding() {
@@ -267,10 +278,10 @@ export function applyTheme() {
   const btn = document.getElementById("themeBtn");
   if (runtime.appState.theme === "dark") {
     html.classList.add("dark");
-    btn.innerHTML = `<i class="fi fi-rr-sun text-amber-400"></i>`;
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>`;
   } else {
     html.classList.remove("dark");
-    btn.innerHTML = `<i class="fi fi-rr-moon-stars text-slate-700"></i>`;
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></svg>`;
   }
 }
 

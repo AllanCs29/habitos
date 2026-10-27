@@ -1,4 +1,17 @@
-# Cambios · 2.0.0
+# Cambios
+
+## 2.0.1 · Pantalla móvil y recuperación
+
+- Ajuste de ancho para pantallas de 320 px en adelante, nombres largos, cabecera y calendario; desplazamiento horizontal contenido en paneles que lo necesitan.
+- Control de overscroll donde lo admite el navegador, áreas seguras y altura dinámica; se mantiene el zoom accesible.
+- Campos móviles de 16 px para evitar el zoom automático al enfocar en iOS. Controles del temporizador del gimnasio distribuidos sin recortes.
+- Icono del tema disponible sin una fuente externa; guía de instalación como app web y comprobación del service worker sin caché HTTP.
+- Lectura del documento original independiente de los permisos de `v2_records`, sin modificar el original ni mostrar sincronización falsa.
+- Recuperación explícita de `stateJson` cuando ya existe v2; conservación de ediciones y borrados; recuperación desde la copia local o espejo cuando corresponde.
+- “Sincronizar ahora” relee y reconecta; cambios pendientes se reenvían al entrar; lecturas tardías no cruzan cuentas.
+- Se conserva el workflow actual del repositorio, con publicación de `dist/` al subir a `main`.
+
+## 2.0.0
 
 ## Presentación y navegación
 

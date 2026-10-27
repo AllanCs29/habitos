@@ -12,7 +12,13 @@
 
 Al abrir la versión nueva por primera vez, el espacio **local/invitado** busca `allan_tcc_master_permanent_store`, después `allan_tcc_backup_mirror` y después IndexedDB `ControlTCC_PermanentVault_DB/state_vault`, registro `master_state`. Esto sólo funciona en el mismo navegador y origen (dominio, protocolo y puerto). Cambiar de dominio no traslada el almacenamiento del navegador: utiliza el JSON.
 
-Al iniciar sesión, se usa una caché independiente para ese UID. Si aún no hay registros v2 en Firestore, se lee `stateJson` del documento `tcc_users/{uid}`, o `backupStateJson` como alternativa. El documento anterior no se sobrescribe ni elimina.
+Al iniciar sesión, se usa una caché independiente para ese UID. Desde 2.0.1 se consulta primero `stateJson` del documento `tcc_users/{uid}`, o `backupStateJson` si el principal falta o no es legible, independientemente del permiso de la subcolección nueva. Un `stateJson` válido tiene prioridad aunque contenga menos registros: no se reviven borrados usando automáticamente una copia más antigua. El documento anterior no se sobrescribe ni elimina.
+
+Si la lectura de `v2_records` está bloqueada, se presenta el historial anterior cuando no existe una caché v2 autoritativa y se guarda localmente. El estado **“Historial recuperado · falta sincronizar”** indica que aún hace falta desplegar las reglas; las ediciones no se declaran sincronizadas. Después de publicar `firestore.rules`, **Sincronizar ahora** vuelve a leer la nube y reintenta la migración/subida. No basta con volver a pulsar un botón de subida sin releer la cuenta.
+
+Si ya existen registros v2, se respetan. Cuando faltan elementos del historial anterior, Ajustes ofrece **Revisar y recuperar historial**, y también está disponible **Recuperar historial anterior de Firebase**. La recuperación pide revisar antes de agregar registros, conserva las ediciones existentes y los borrados v2, y completa solamente los campos vacíos del perfil. No reemplaza toda la cuenta con el documento viejo.
+
+Una lectura fallida o un resultado vacío obtenido sólo de la caché no autoriza crear una cuenta vacía en Firebase. Los cambios pendientes se reenvían al volver a iniciar sesión o reconectar. Las lecturas tardías se descartan si cambió el usuario.
 
 Se conserva una copia local de migración sin claves privadas. Los originales del almacenamiento anterior permanecen intactos. La recuperación está disponible en Ajustes. El espacio de invitado **no se mezcla automáticamente con una cuenta**: usa “Importar datos locales a mi cuenta” si esos datos te pertenecen.
 
@@ -20,7 +26,7 @@ La versión anterior no entiende `v2_records`, y la nueva no reescribe el monoli
 
 ## Importar un JSON
 
-En Ajustes, selecciona el respaldo y revisa la confirmación. Se añaden registros que faltan; cuando existe el mismo identificador, se conserva el registro actual. Las preferencias actuales tienen prioridad. Importar es una **fusión**, no un reemplazo destructivo de toda la cuenta. Puedes usar Deshacer durante la sesión. Límite de importación: 25 MiB.
+En Ajustes, selecciona el respaldo y revisa la confirmación. Se añaden registros que faltan; cuando existe el mismo identificador, se conserva el registro actual y se respetan los borrados v2. Las preferencias actuales tienen prioridad; los campos vacíos del perfil se completan con el respaldo. Importar es una **fusión**, no un reemplazo destructivo de toda la cuenta. Puedes usar Deshacer durante la sesión. Límite de importación: 25 MiB.
 
 Para recuperar una versión exacta en otro entorno, usa un navegador/espacio de prueba vacío, importa allí, revisa los datos y configura las preferencias deseadas. No borres tu cuenta para resolver una diferencia de importación.
 

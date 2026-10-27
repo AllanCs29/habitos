@@ -1,6 +1,8 @@
-# Control TCC Studio · 2.0
+# Control TCC Studio · 2.0.1
 
 Aplicación personal de hábitos, alimentación, trabajo, finanzas, aprendizaje, gimnasio y despensa. Esta versión separa las vistas, estilos, lógica y servicios; conserva el proyecto Firebase **`control-tcc`** del HTML original.
+
+**Si ya subiste la versión 2.0.0 a GitHub, empieza por [ACTUALIZAR-2.0.1.md](ACTUALIZAR-2.0.1.md).** Corrige el ajuste móvil y la recuperación del historial anterior cuando faltan permisos para la nueva estructura de Firestore. No borres los datos del navegador para actualizar.
 
 ## Empezar
 
@@ -12,6 +14,8 @@ npm run dev
 ```
 
 Abre la dirección que indica Vite. El registro manual funciona sin iniciar sesión ni configurar IA. No abras `index.html` con doble clic: usa el servidor de desarrollo o publica el contenido de `dist/`.
+
+Para probar desde el teléfono, conecta ambos equipos a la misma Wi-Fi y abre la dirección **Network** que muestra Vite, por ejemplo `http://192.168.1.20:5173`. Permite la conexión entrante si tu equipo lo solicita. Esa dirección sirve para revisar la interfaz; la instalación PWA y las funciones que exigen HTTPS se prueban en la URL publicada de GitHub Pages.
 
 El ZIP incluye **código fuente y `dist/` ya compilado**. Para modificarlo, trabaja en `src/` y vuelve a ejecutar `npm run build`; editar `dist/` directamente se pierde en la próxima compilación.
 

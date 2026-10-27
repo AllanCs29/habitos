@@ -31,6 +31,11 @@
 }
 html {
   scroll-behavior: smooth;
+  width: 100%;
+  overflow-x: clip;
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 body {
   margin: 0;
@@ -46,7 +51,12 @@ body {
     sans-serif;
   font-size: 15px;
   line-height: 1.55;
-  min-width: 320px;
+  width: 100%;
+  min-width: 0;
+  min-height: 100svh;
+  min-height: 100dvh;
+  overflow-x: clip;
+  overscroll-behavior: none;
   -webkit-font-smoothing: antialiased;
 }
 button,
@@ -55,6 +65,7 @@ input,
 select,
 textarea {
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 button {
   cursor: pointer;
@@ -116,7 +127,13 @@ summary:focus-visible {
 button:active:not(:disabled) {
   transform: translateY(1px);
 }
-.flex-1 {
+.flex-1,
+.flex > *,
+.grid > * {
+  min-width: 0;
+}
+#app {
+  width: 100%;
   min-width: 0;
 }
 .skip-link {
@@ -145,6 +162,11 @@ button:active:not(:disabled) {
   flex-direction: column;
   z-index: 80;
   transform: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  padding-top: max(30px, env(safe-area-inset-top));
+  padding-bottom: max(18px, env(safe-area-inset-bottom));
 }
 .brand {
   display: flex;
@@ -266,6 +288,7 @@ button:active:not(:disabled) {
 }
 .workspace {
   margin-left: 242px;
+  min-width: 0;
 }
 .app-header {
   padding: 24px 38px 16px;
@@ -327,6 +350,10 @@ button:active:not(:disabled) {
   font-size: 18px;
   background: var(--surface);
   color: var(--muted);
+}
+.icon-action svg {
+  width: 19px;
+  height: 19px;
 }
 #menuButton {
   display: none;
@@ -403,6 +430,7 @@ button:active:not(:disabled) {
   max-width: 1280px;
   margin: auto;
   outline: none;
+  overflow-wrap: anywhere;
 }
 .app-footer {
   max-width: 1204px;
@@ -943,6 +971,21 @@ details select {
   overflow: auto;
   max-width: 100%;
   tab-size: 2;
+  overscroll-behavior-x: contain;
+}
+.overflow-x-auto {
+  overscroll-behavior-x: contain;
+}
+.sync-notice {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface2);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.sync-notice button {
+  margin-top: 10px;
 }
 #appMain .space-y-4 > :not([hidden]) ~ :not([hidden]) {
   margin-top: 18px;
@@ -1207,8 +1250,45 @@ dialog h2 {
   }
 }
 @media (max-width: 767px) {
+  .gym-rest-panel {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .gym-rest-panel > div:first-child {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+  }
+  .gym-rest-controls {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    width: 100%;
+  }
+  .gym-rest-controls button {
+    white-space: nowrap;
+    min-height: 44px;
+    padding-inline: 4px;
+  }
+  #tab-gym label {
+    font-size: 11px;
+  }
+  #tab-gym label input {
+    margin-top: 6px;
+  }
+  input:not([type="checkbox"]):not([type="file"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+  .header-top {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
   #sidebarDrawer {
-    width: 270px;
+    width: min(290px, calc(100% - 36px));
+    padding-left: max(20px, env(safe-area-inset-left));
     transition: transform 0.2s;
   }
   #sidebarDrawer.-translate-x-full {
@@ -1245,11 +1325,16 @@ dialog h2 {
   }
   .header-actions {
     gap: 6px;
+    margin-left: auto;
+    max-width: 100%;
   }
   #cloudStatusBadge {
     max-width: 118px;
     font-size: 9px;
     padding: 4px 7px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .header-actions > .icon-action:nth-of-type(3) {
     display: none;
@@ -1259,7 +1344,9 @@ dialog h2 {
     min-height: 34px;
   }
   .app-header {
-    padding: 12px 18px 8px;
+    padding: max(12px, env(safe-area-inset-top))
+      max(18px, env(safe-area-inset-right)) 8px
+      max(18px, env(safe-area-inset-left));
   }
   .calendar-row {
     padding-top: 15px;
@@ -1280,17 +1367,21 @@ dialog h2 {
     margin: 0;
   }
   #calendarBar {
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 22px repeat(7, minmax(0, 1fr)) 22px;
+    gap: 2px;
+    width: 100%;
   }
   .calendar-day {
-    width: 36px;
+    width: 100%;
     padding: 6px 0;
   }
   .calendar-arrow {
-    width: 24px;
+    width: 22px;
   }
   #appMain {
-    padding: 12px 18px 24px;
+    padding: 12px max(18px, env(safe-area-inset-right)) 24px
+      max(18px, env(safe-area-inset-left));
   }
   .welcome-panel {
     padding: 25px 23px;
@@ -1382,7 +1473,7 @@ dialog h2 {
   }
   .app-footer {
     margin: 0 18px;
-    padding-bottom: 110px;
+    padding-bottom: calc(110px + env(safe-area-inset-bottom));
     font-size: 10px;
   }
   .mobile-nav {
@@ -1394,7 +1485,9 @@ dialog h2 {
     justify-content: space-around;
     background: var(--surface);
     border-top: 1px solid var(--border);
-    padding: 8px 10px calc(9px + env(safe-area-inset-bottom));
+    padding: 8px max(10px, env(safe-area-inset-right))
+      calc(9px + env(safe-area-inset-bottom))
+      max(10px, env(safe-area-inset-left));
     z-index: 65;
     box-shadow: 0 -5px 30px #0001;
   }
@@ -1406,7 +1499,8 @@ dialog h2 {
     gap: 4px;
     font-size: 9px;
     color: var(--muted);
-    min-width: 50px;
+    min-width: 0;
+    flex: 1;
     min-height: 46px;
     border-radius: 11px;
   }
@@ -1445,6 +1539,7 @@ dialog h2 {
   }
   .button-row {
     gap: 8px;
+    flex-wrap: wrap;
   }
   .button-row > .primary-action,
   .button-row > .secondary-action {
@@ -1486,6 +1581,10 @@ dialog h2 {
   }
   .grid-cols-4 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .panel-heading {
+    flex-wrap: wrap;
+    gap: 10px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

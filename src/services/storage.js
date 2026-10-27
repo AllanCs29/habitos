@@ -6,6 +6,11 @@ import "firebase/compat/functions";
 import { runtime, actions } from "../core/context.js";
 import { firebaseConfig, functionsRegion } from "../firebase-config.js";
 import {
+  readLegacyDocument,
+  recoveryCounts,
+  recoveryRecords,
+} from "../core/recovery.js";
+import {
   clone,
   migrateState,
   toRecords,
@@ -14,7 +19,6 @@ import {
   withoutSecrets,
   isoDate,
   newId,
-  hash,
 } from "../core/domain.js";
 
 const LEGACY_KEY = "allan_tcc_master_permanent_store";
@@ -27,6 +31,19 @@ let dbPromise,
   syncTimer,
   unsubscribe;
 const flushes = new Map();
+const hydrations = new Map();
+const activeAccount = (uid, epoch) =>
+  scope === uid && runtime.fbUser?.uid === uid && runtime.authEpoch === epoch;
+const permissionsError = (error) =>
+  String(error?.code || "").includes("permission-denied");
+function cloudErrorMessage(error) {
+  if (permissionsError(error))
+    return "Firebase no permite leer o guardar la nueva estructura. Publica las reglas de firestore.rules en tu proyecto y pulsa Sincronizar ahora. Tus cambios siguen guardados en este dispositivo.";
+  return (
+    "No se pudo completar la sincronización. Tus cambios siguen guardados en este dispositivo. Revisa la conexión y pulsa Sincronizar ahora. " +
+    (error?.message || "")
+  );
+}
 function openDB() {
   return (dbPromise ||= new Promise((resolve, reject) => {
     const r = indexedDB.open("ControlTCC_Studio_v2", 1);
@@ -57,8 +74,14 @@ function defaults() {
   return actions.createDefaultState();
 }
 function setStatus(status, error = "") {
+  if (
+    scope !== "guest" &&
+    runtime.cloudMode === "legacy" &&
+    status !== "loading"
+  )
+    status = "migration";
   runtime.persistenceStatus = status;
-  runtime.syncError = error;
+  runtime.syncError = error || runtime.cloudIssue || "";
   actions.updateCloudUI?.();
 }
 function envelope() {
@@ -93,12 +116,10 @@ export async function bootStorage() {
     );
   }
 }
-async function switchLocalScope(key) {
+async function switchLocalScope(key, epoch = runtime.authEpoch) {
   await localQueue.catch(() => {});
-  scope = key;
+  if (epoch !== runtime.authEpoch) return false;
   const cache = await cacheGet(key);
-  pending = cache?.pending || {};
-  cloud = cache?.cloud || {};
   let raw = cache?.state;
   if (!raw && key === "guest") {
     for (const name of [LEGACY_KEY, "allan_tcc_backup_mirror"]) {
@@ -113,6 +134,14 @@ async function switchLocalScope(key) {
     if (!raw) raw = await restoreFromIndexedDBVault();
     if (raw) await cachePut("migration-backup", withoutSecrets(raw));
   }
+  if (epoch !== runtime.authEpoch) return false;
+  scope = key;
+  pending = cache?.pending || {};
+  cloud = cache?.cloud || {};
+  runtime.cloudMode = "unknown";
+  runtime.cloudIssue = "";
+  runtime.isCloudHydrated = false;
+  runtime.legacyRecoveryAvailable = false;
   runtime.appState = migrateState(raw || defaults(), defaults());
   runtime.appState.currentDay = isoDate();
   runtime.appState.days[isoDate()] ||= {
@@ -133,6 +162,7 @@ async function switchLocalScope(key) {
   await persist();
   actions.renderAll();
   actions.checkOnboarding();
+  return true;
 }
 export function saveState({ undo = true } = {}) {
   runtime.appState.updatedAt = Date.now();
@@ -198,52 +228,59 @@ export async function initFirebaseIfConfigured() {
     null,
     2,
   );
-  runtime.fbAuth.onAuthStateChanged(async (user) => {
-    const epoch = ++runtime.authEpoch;
-    actions.cancelAIRequest?.();
-    clearTimeout(runtime.reminderTimer);
-    actions.closeTaskFormatModal?.();
-    actions.closeDemoModal?.();
-    actions.closePdfPreviewModal?.();
-    actions.cancelManualMealEdit?.();
-    runtime.currentModalEvidenceImages = [];
-    runtime.currentUploadedImageBase64 = null;
-    runtime.currentTutorImageBase64 = null;
-    runtime.pendingWorkInboxImageBase64 = null;
-    for (const id of [
-      "greenApiTokenInput",
-      "callMeBotKeyInput",
-      "ntfyTokenInput",
-      "authPass",
-      "obPass",
-    ])
-      document.getElementById(id).value = "";
-    unsubscribe?.();
-    unsubscribe = null;
-    runtime.fbUser = user;
-    runtime.undoStack = [];
-    try {
-      await switchLocalScope(user ? user.uid : "guest");
-      if (epoch !== runtime.authEpoch) return;
-      if (user) {
-        await pullCloudDataFirst(user.uid);
-        if (epoch === runtime.authEpoch) subscribeToUserCloudData(user.uid);
-      }
-    } catch (e) {
-      if (epoch === runtime.authEpoch) {
-        setStatus("error", e.message);
-        actions.showToast(
-          "No se pudo cargar la cuenta. Los datos locales siguen guardados. Reintenta la sincronización.",
-          "error",
-        );
-      }
-    }
-    actions.updateCloudUI();
-  });
-  window.addEventListener("online", () => pushStateToCloud());
+  runtime.fbAuth.onAuthStateChanged(handleAuthStateChanged);
+  window.addEventListener("online", () => synchronizeAccount());
   window.addEventListener("offline", () => {
     if (runtime.fbUser) setStatus("pending");
   });
+}
+export async function handleAuthStateChanged(user) {
+  const epoch = ++runtime.authEpoch;
+  runtime.isCloudHydrated = false;
+  runtime.cloudMode = "unknown";
+  runtime.cloudIssue = "";
+  clearTimeout(syncTimer);
+  actions.cancelAIRequest?.();
+  clearTimeout(runtime.reminderTimer);
+  actions.closeTaskFormatModal?.();
+  actions.closeDemoModal?.();
+  actions.closePdfPreviewModal?.();
+  actions.cancelManualMealEdit?.();
+  runtime.currentModalEvidenceImages = [];
+  runtime.currentUploadedImageBase64 = null;
+  runtime.currentTutorImageBase64 = null;
+  runtime.pendingWorkInboxImageBase64 = null;
+  for (const id of [
+    "greenApiTokenInput",
+    "callMeBotKeyInput",
+    "ntfyTokenInput",
+    "authPass",
+    "obPass",
+  ])
+    document.getElementById(id).value = "";
+  unsubscribe?.();
+  unsubscribe = null;
+  runtime.fbUser = user;
+  runtime.undoStack = [];
+  try {
+    await switchLocalScope(user ? user.uid : "guest", epoch);
+    if (epoch !== runtime.authEpoch) return;
+    if (user) {
+      await pullCloudDataFirst(user.uid);
+      if (activeAccount(user.uid, epoch) && runtime.isCloudHydrated)
+        subscribeToUserCloudData(user.uid);
+    }
+  } catch (e) {
+    if (epoch === runtime.authEpoch) {
+      runtime.cloudIssue = cloudErrorMessage(e);
+      setStatus("error", runtime.cloudIssue);
+      actions.showToast(
+        "No se pudo cargar la cuenta. Los datos locales siguen guardados. Reintenta la sincronización.",
+        "error",
+      );
+    }
+  }
+  actions.updateCloudUI();
 }
 const collection = (uid) =>
   runtime.fbDb.collection("tcc_users").doc(uid).collection("v2_records");
@@ -302,32 +339,119 @@ async function assetDecode(value, uid) {
 }
 export async function pullCloudDataFirst(uid) {
   const epoch = runtime.authEpoch;
-  const snap = await collection(uid).get();
-  if (epoch !== runtime.authEpoch) return;
-  if (!snap.empty) {
-    await applySnapshot(snap, uid, epoch);
-    return;
+  if (!activeAccount(uid, epoch)) return false;
+  const key = `${uid}:${epoch}`;
+  if (hydrations.has(key)) return hydrations.get(key);
+  const work = hydrateAccount(uid, epoch);
+  hydrations.set(key, work);
+  try {
+    return await work;
+  } finally {
+    hydrations.delete(key);
   }
-  const legacy = await runtime.fbDb.collection("tcc_users").doc(uid).get();
-  if (epoch !== runtime.authEpoch) return;
-  const raw = legacy.exists
-    ? legacy.data().stateJson || legacy.data().backupStateJson
-    : null;
-  if (raw) {
-    const old = migrateState(JSON.parse(raw), defaults());
-    await cachePut(`migration-backup:${uid}`, withoutSecrets(old));
-    runtime.appState = old;
-    runtime.appState.currentDay = isoDate();
-    baseline = {};
-    saveState({ undo: false });
-  } else if (!Object.keys(pending).length) {
-    baseline = {};
-    saveState({ undo: false });
+}
+async function hydrateAccount(uid, epoch) {
+  if (!navigator.onLine) {
+    setStatus(
+      "pending",
+      "Sin conexión. Se conservan tus registros en este dispositivo.",
+    );
+    return false;
   }
-  runtime.isCloudHydrated = true;
-  await pushStateToCloud();
+  runtime.isCloudHydrated = false;
+  setStatus("loading");
+  let legacy = null,
+    legacyError;
+  // Read the original document independently of the new subcollection's permissions.
+  try {
+    const doc = await runtime.fbDb
+      .collection("tcc_users")
+      .doc(uid)
+      .get({ source: "server" });
+    if (!activeAccount(uid, epoch)) return false;
+    legacy = readLegacyDocument(doc.exists ? doc.data() : null, defaults());
+    if (legacy) {
+      if (!(await cacheGet(`migration-backup:${uid}`)))
+        await cachePut(`migration-backup:${uid}`, withoutSecrets(legacy.state));
+    }
+  } catch (e) {
+    legacyError = e;
+  }
+  if (!activeAccount(uid, epoch)) return false;
+  try {
+    // An offline/cache-only empty result is not evidence of an empty cloud account.
+    const snapshot = await collection(uid).get({ source: "server" });
+    if (!activeAccount(uid, epoch)) return false;
+    if (snapshot.empty && legacyError) throw legacyError;
+    runtime.cloudMode = "records";
+    runtime.cloudIssue = "";
+    if (!snapshot.empty) {
+      await applySnapshot(snapshot, uid, epoch);
+      if (!activeAccount(uid, epoch)) return false;
+      if (legacy) {
+        const original = toRecords(legacy.state),
+          known = { ...cloud, ...pending };
+        runtime.legacyRecoveryAvailable = Object.entries(original).some(
+          ([key, r]) =>
+            !(key in known) &&
+            r.path.length > 1 &&
+            !["meta", "water"].includes(r.path.at(-1)),
+        );
+      }
+    } else {
+      const records = {
+        ...toRecords(legacy?.state || runtime.appState),
+        ...pending,
+      };
+      renderRecords(records);
+      cloud = {};
+      for (const [key, record] of Object.entries(records))
+        pending[key] ||= { ...record, opId: newId() };
+      runtime.isCloudHydrated = true;
+      await persist();
+    }
+    if (!activeAccount(uid, epoch)) return false;
+    return await pushStateToCloud();
+  } catch (error) {
+    if (!activeAccount(uid, epoch)) return false;
+    runtime.isCloudHydrated = false;
+    // Display readable history even while v2 permissions still need deployment.
+    // Keep a known v2 cache authoritative so old records cannot revive deletions.
+    if (legacy && !Object.keys(cloud).length) {
+      renderRecords({ ...toRecords(legacy.state), ...pending });
+      runtime.cloudMode = "legacy";
+      await persist();
+    }
+    if (!activeAccount(uid, epoch)) return false;
+    runtime.cloudIssue = cloudErrorMessage(error);
+    setStatus("error", runtime.cloudIssue);
+    return false;
+  }
+}
+function renderRecords(records) {
+  const date = runtime.appState.currentDay;
+  runtime.appState = migrateState(fromRecords(records, defaults()), defaults());
+  runtime.appState.currentDay = date;
+  runtime.appState.days[date] ||= {
+    water: 0,
+    meals: [],
+    habitsState: {},
+    habitValues: {},
+    impulses: [],
+  };
+  baseline = toRecords(runtime.appState);
+  actions.renderAll();
+  actions.checkOnboarding();
 }
 async function applySnapshot(snapshot, uid, epoch) {
+  if (!activeAccount(uid, epoch)) return;
+  if (snapshot.empty && snapshot.metadata?.fromCache) {
+    setStatus(
+      "pending",
+      "Esperando una lectura del servidor. Se conserva el historial de este dispositivo.",
+    );
+    return;
+  }
   const received = {};
   for (const doc of snapshot.docs) {
     const r = doc.data();
@@ -342,21 +466,17 @@ async function applySnapshot(snapshot, uid, epoch) {
   }
   if (epoch !== runtime.authEpoch || scope !== uid) return;
   cloud = received;
-  const merged = { ...cloud, ...pending },
-    date = runtime.appState.currentDay;
-  runtime.appState = migrateState(fromRecords(merged, defaults()), defaults());
-  runtime.appState.currentDay = date;
-  runtime.appState.days[date] ||= {
-    water: 0,
-    meals: [],
-    habitsState: {},
-    habitValues: {},
-    impulses: [],
-  };
-  baseline = toRecords(runtime.appState);
+  renderRecords({ ...cloud, ...pending });
   runtime.isCloudHydrated = true;
   await persist();
-  setStatus(Object.keys(pending).length ? "pending" : "synced");
+  if (!activeAccount(uid, epoch)) return;
+  setStatus(
+    Object.keys(pending).length ||
+      snapshot.metadata?.fromCache ||
+      snapshot.metadata?.hasPendingWrites
+      ? "pending"
+      : "synced",
+  );
   actions.renderAll();
   actions.checkOnboarding();
 }
@@ -365,6 +485,7 @@ export function subscribeToUserCloudData(uid) {
   const epoch = runtime.authEpoch;
   let queue = Promise.resolve();
   unsubscribe = collection(uid).onSnapshot(
+    { includeMetadataChanges: true },
     (snap) => {
       queue = queue
         .catch(() => {})
@@ -373,7 +494,13 @@ export function subscribeToUserCloudData(uid) {
           if (epoch === runtime.authEpoch) setStatus("error", e.message);
         });
     },
-    (e) => setStatus("error", e.message),
+    (e) => {
+      if (activeAccount(uid, epoch)) {
+        runtime.isCloudHydrated = false;
+        runtime.cloudIssue = cloudErrorMessage(e);
+        setStatus("error", runtime.cloudIssue);
+      }
+    },
   );
 }
 export async function pushStateToCloud() {
@@ -381,6 +508,7 @@ export async function pushStateToCloud() {
     epoch = runtime.authEpoch;
   if (!runtime.fbUser || uid === "guest" || runtime.fbUser.uid !== uid)
     return false;
+  if (!runtime.isCloudHydrated) return false;
   if (!navigator.onLine) {
     setStatus("pending");
     return false;
@@ -388,7 +516,7 @@ export async function pushStateToCloud() {
   if (flushes.has(uid)) return flushes.get(uid);
   const work = (async () => {
     try {
-      while (scope === uid && Object.keys(pending).length) {
+      while (activeAccount(uid, epoch) && Object.keys(pending).length) {
         const entries = Object.entries(pending).slice(0, 100),
           batch = runtime.fbDb.batch();
         for (const [key, r] of entries) {
@@ -408,19 +536,23 @@ export async function pushStateToCloud() {
             );
           batch.set(collection(uid).doc(docId(key)), data);
         }
+        if (!activeAccount(uid, epoch)) return false;
         await batch.commit();
-        if (epoch !== runtime.authEpoch) return false;
+        if (!activeAccount(uid, epoch)) return false;
         for (const [key, r] of entries) {
           cloud[key] = r;
           if (pending[key]?.opId === r.opId) delete pending[key];
         }
         await persist();
       }
-      if (epoch === runtime.authEpoch) setStatus("synced");
+      if (!activeAccount(uid, epoch)) return false;
+      runtime.cloudIssue = "";
+      setStatus("synced");
       return true;
     } catch (e) {
       if (epoch === runtime.authEpoch) {
-        setStatus("error", e.message);
+        runtime.cloudIssue = cloudErrorMessage(e);
+        setStatus("error", runtime.cloudIssue);
         actions.showToast(
           "Guardado localmente. No se pudo sincronizar: " + e.message,
           "error",
@@ -441,8 +573,24 @@ export async function forceCloudSyncNow() {
     actions.showToast("Inicia sesión para sincronizar.", "warning");
     return;
   }
-  if (await pushStateToCloud())
+  if (await synchronizeAccount())
     actions.showToast("Cambios sincronizados.", "success");
+}
+async function synchronizeAccount() {
+  const uid = runtime.fbUser?.uid,
+    epoch = runtime.authEpoch;
+  if (!uid) return false;
+  unsubscribe?.();
+  unsubscribe = null;
+  try {
+    const synced = await pullCloudDataFirst(uid);
+    if (activeAccount(uid, epoch) && runtime.isCloudHydrated)
+      subscribeToUserCloudData(uid);
+    return synced;
+  } catch (error) {
+    if (activeAccount(uid, epoch)) setStatus("error", cloudErrorMessage(error));
+    return false;
+  }
 }
 export async function loginWithFirebase(prefix = "auth") {
   const email = document
@@ -565,20 +713,27 @@ export async function exportBackupJSON() {
   }
 }
 async function importState(raw) {
+  const epoch = runtime.authEpoch,
+    target = scope;
   const state = migrateState(raw.state || raw, defaults()),
-    counts = `${state.habitsList.length} hábitos, ${state.tasks.length} tareas y ${Object.values(state.days).reduce((n, d) => n + (d.meals?.length || 0), 0)} comidas.`;
+    counts = recoveryCounts(state);
   if (
     !(await actions.reviewAIResult(
       "Importar respaldo",
-      `${counts}\nSe agregarán los registros del respaldo. Si un registro con el mismo identificador ya existe, se conservará el actual. Las claves privadas no se importan.`,
+      `${counts}.\nSe agregarán los registros que faltan y se completarán los campos vacíos del perfil. Se conservan los registros actuales y los borrados de esta versión. Las claves privadas no se importan.`,
     ))
   )
     return;
+  if (epoch !== runtime.authEpoch || target !== scope) return;
   const date = runtime.appState.currentDay,
-    records = { ...toRecords(state), ...toRecords(runtime.appState) };
+    records = recoveryRecords(state, runtime.appState, {
+      ...cloud,
+      ...pending,
+    });
   runtime.appState = migrateState(fromRecords(records, defaults()), defaults());
   runtime.appState.currentDay = date;
   runtime.appState.onboardingComplete = true;
+  runtime.legacyRecoveryAvailable = false;
   await saveState();
   actions.checkOnboarding();
   actions.showToast("Respaldo importado.", "success");
@@ -605,33 +760,66 @@ export async function importGuestIntoAccount() {
   if (cache?.state) await importState(cache.state);
 }
 export async function restoreFromCloudBackup() {
+  if (!runtime.fbUser) {
+    actions.showToast(
+      "Inicia sesión con tu cuenta anterior para recuperar su historial.",
+      "warning",
+    );
+    return;
+  }
+  const uid = runtime.fbUser.uid,
+    epoch = runtime.authEpoch;
   try {
-    const backup = await cacheGet(`migration-backup:${scope}`);
-    if (backup) {
-      await importState(backup);
-      return;
+    let state, readError;
+    try {
+      const doc = await runtime.fbDb
+        .collection("tcc_users")
+        .doc(uid)
+        .get({ source: "server" });
+      state = readLegacyDocument(
+        doc.exists ? doc.data() : null,
+        defaults(),
+      )?.state;
+    } catch (e) {
+      readError = e;
     }
-    const doc = await runtime.fbDb
-      .collection("tcc_users")
-      .doc(runtime.fbUser.uid)
-      .get();
-    const raw = doc.data()?.backupStateJson;
-    if (raw) await importState(JSON.parse(raw));
-    else
+    if (!activeAccount(uid, epoch)) return;
+    state ||= await cacheGet(`migration-backup:${uid}`);
+    if (!activeAccount(uid, epoch)) return;
+    if (state) {
+      await importState(state);
+    } else if (readError) {
+      throw readError;
+    } else {
       actions.showToast(
-        "No hay un respaldo anterior. Puedes importar un archivo JSON.",
+        "Esta cuenta no tiene historial anterior en Firebase. Comprueba el correo o recupera los registros del navegador donde usabas la app.",
       );
+    }
   } catch (e) {
     actions.showToast(e.message, "error");
   }
 }
 export async function rescueLegacyLocalData() {
+  const epoch = runtime.authEpoch,
+    target = scope;
   try {
-    const backup = await cacheGet("migration-backup");
-    const text = localStorage.getItem(LEGACY_KEY);
-    const raw =
-      backup || (text ? JSON.parse(text) : await restoreFromIndexedDBVault());
+    let raw, error;
+    try {
+      raw = readLegacyDocument(
+        {
+          stateJson: localStorage.getItem(LEGACY_KEY),
+          backupStateJson: localStorage.getItem("allan_tcc_backup_mirror"),
+        },
+        defaults(),
+      )?.state;
+    } catch (e) {
+      error = e;
+    }
+    raw ||= await restoreFromIndexedDBVault();
+    raw ||= await cacheGet("migration-backup");
+    if (epoch !== runtime.authEpoch || target !== scope) return;
     if (raw) await importState(raw);
+    else if (error) throw error;
     else
       actions.showToast(
         "No se encontraron datos anteriores en este navegador.",

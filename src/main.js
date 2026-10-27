@@ -99,7 +99,10 @@ document.addEventListener("visibilitychange", () => {
 });
 if (import.meta.env.PROD && "serviceWorker" in navigator) {
   navigator.serviceWorker
-    .register(new URL("sw.js", document.baseURI), { scope: "./" })
+    .register(new URL("sw.js", document.baseURI), {
+      scope: "./",
+      updateViaCache: "none",
+    })
     .then((reg) => {
       runtime.globalSwRegistration = reg;
     })
