@@ -1,0 +1,1 @@
+var e={apiKey:`AIzaSyC4CQ-PW9nRfVl3ZZ1PyR2NwXcRUas-I7o`,authDomain:`control-tcc.firebaseapp.com`,projectId:`control-tcc`,storageBucket:`control-tcc.firebasestorage.app`,messagingSenderId:`161724547834`,appId:`1:161724547834:web:0fe73c589f0252f598ff43`},t=`us-central1`;export{t as n,e as t};

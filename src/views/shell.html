@@ -1,0 +1,356 @@
+<a class="skip-link" href="#appMain">Ir al contenido</a>
+<div id="toastContainer" aria-live="polite"></div>
+<div id="streakCelebrationOverlay" class="hidden" aria-live="polite"></div>
+<div id="sidebarOverlay" onclick="toggleSidebar()" class="hidden"></div>
+<aside id="sidebarDrawer" class="-translate-x-full">
+  <div class="brand">
+    <span class="brand-mark">t<span>•</span></span>
+    <div>
+      <h1 id="headerTitle">Control TCC</h1>
+      <p id="headerSubtitle">Un paso a la vez</p>
+    </div>
+    <button
+      class="drawer-close"
+      onclick="toggleSidebar()"
+      aria-label="Cerrar menú"
+    >
+      ×
+    </button>
+  </div>
+  <p class="nav-label">MI ESPACIO</p>
+  <nav aria-label="Navegación principal">
+    <button
+      id="side-today"
+      data-nav="today"
+      class="nav-item nav-active"
+      onclick="
+        switchTab('today');
+        closeMobileMenu();
+      "
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" /></svg
+      ><span>Hoy</span><i></i></button
+    ><button
+      id="side-habits"
+      data-nav="habits"
+      class="nav-item"
+      onclick="
+        switchTab('habits');
+        closeMobileMenu();
+      "
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path
+          d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"
+        /></svg
+      ><span>Hábitos</span></button
+    ><button
+      id="side-nutrition"
+      data-nav="nutrition"
+      class="nav-item"
+      onclick="
+        switchTab('nutrition');
+        closeMobileMenu();
+      "
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M20 4C7 2 2 10 7 17c5 6 15-1 13-13ZM7 17l9-9" /></svg
+      ><span>Alimentación</span>
+    </button>
+    <p class="nav-label">MIS HERRAMIENTAS</p>
+    <button
+      id="side-focus"
+      data-nav="focus"
+      class="nav-item"
+      onclick="
+        switchTab('focus');
+        closeMobileMenu();
+      "
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M8 5V3h8v2M3 7h18v14H3zM3 12h18M10 12v3h4v-3" /></svg
+      ><span>Trabajo</span></button
+    ><button
+      id="side-finance"
+      data-nav="finance"
+      class="nav-item"
+      onclick="
+        switchTab('finance');
+        closeMobileMenu();
+      "
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M3 5h16v4H3zM3 9h18v12H3zM16 14h5" /></svg
+      ><span>Finanzas</span></button
+    ><button
+      id="side-tutor"
+      data-nav="tutor"
+      class="nav-item"
+      onclick="
+        switchTab('tutor');
+        closeMobileMenu();
+      "
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path
+          d="M12 5C8 2 3 3 3 3v17s5-1 9 2c4-3 9-2 9-2V3s-5-1-9 2ZM12 5v17"
+        /></svg
+      ><span>Aprender</span></button
+    ><button
+      id="side-gym"
+      data-nav="gym"
+      class="nav-item"
+      onclick="
+        switchTab('gym');
+        closeMobileMenu();
+      "
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M6 4v16M3 7v10M18 4v16M21 7v10M6 12h12" /></svg
+      ><span>Entrenar</span></button
+    ><button
+      id="side-grocery"
+      data-nav="grocery"
+      class="nav-item"
+      onclick="
+        switchTab('grocery');
+        closeMobileMenu();
+      "
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M3 3h2l3 12h11l3-8H6M9 20h.01M18 20h.01" /></svg
+      ><span>Despensa</span></button
+    ><button
+      id="side-settings"
+      data-nav="settings"
+      class="nav-item"
+      onclick="
+        switchTab('settings');
+        closeMobileMenu();
+      "
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path
+          d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"
+        /></svg
+      ><span>Ajustes</span>
+    </button>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="sidebar-note">
+      <span>MENOS PRISA.<br />MÁS CONSTANCIA.</span>
+      <p>Tu progreso también está en volver a intentarlo.</p>
+    </div>
+    <button
+      class="account-link"
+      onclick="
+        switchTab('settings');
+        closeMobileMenu();
+      "
+    >
+      <span class="account-avatar">◎</span
+      ><span id="drawerUserSubtitle">Espacio local</span><span>↗</span>
+    </button>
+  </div>
+</aside>
+<div class="workspace">
+  <header class="app-header">
+    <div class="header-top">
+      <div class="header-location">
+        <button
+          id="menuButton"
+          onclick="toggleSidebar()"
+          aria-label="Abrir menú"
+          aria-expanded="false"
+        >
+          ☰</button
+        ><span class="breadcrumb">Mi espacio <span>/</span></span>
+        <h2 id="currentTabHeaderLabel">Hoy</h2>
+      </div>
+      <div class="header-actions">
+        <button id="cloudStatusBadge" onclick="switchTab('settings')">
+          En este dispositivo</button
+        ><button
+          class="icon-action"
+          onclick="undoLastChange()"
+          aria-label="Deshacer último cambio"
+          title="Deshacer"
+        >
+          ↶</button
+        ><button
+          class="icon-action"
+          onclick="copyDailyReport()"
+          aria-label="Copiar resumen del día"
+          title="Copiar resumen"
+        >
+          ↗</button
+        ><button
+          id="themeBtn"
+          class="icon-action"
+          onclick="toggleTheme()"
+          aria-label="Cambiar tema"
+        ></button>
+      </div>
+    </div>
+    <div class="calendar-row">
+      <div class="date-label">
+        <span id="selectedDateLabel"></span
+        ><button onclick="selectDay(getLocalTodayIso())">Volver a hoy</button>
+      </div>
+      <div id="calendarBar" aria-label="Calendario semanal"></div>
+    </div>
+  </header>
+  <main id="appMain" tabindex="-1"></main>
+  <footer class="app-footer">Pequeñas acciones. Un día a la vez.</footer>
+</div>
+<nav class="mobile-nav" aria-label="Accesos principales">
+  <button data-nav="today" onclick="switchTab('today')">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" /></svg
+    ><span>Hoy</span></button
+  ><button data-nav="habits" onclick="switchTab('habits')">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path
+        d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"
+      /></svg
+    ><span>Hábitos</span></button
+  ><button data-nav="nutrition" onclick="switchTab('nutrition')">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M20 4C7 2 2 10 7 17c5 6 15-1 13-13ZM7 17l9-9" /></svg
+    ><span>Salud</span></button
+  ><button data-nav="tutor" onclick="switchTab('tutor')">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path
+        d="M12 5C8 2 3 3 3 3v17s5-1 9 2c4-3 9-2 9-2V3s-5-1-9 2ZM12 5v17"
+      /></svg
+    ><span>Aprender</span></button
+  ><button onclick="toggleSidebar()">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <circle cx="5" cy="12" r="2" />
+      <circle cx="12" cy="12" r="2" />
+      <circle cx="19" cy="12" r="2" /></svg
+    ><span>Más</span>
+  </button>
+</nav>
+<div id="aiActivity" class="hidden">
+  <span></span><button onclick="cancelAIRequest()">Cancelar</button>
+</div>
+<dialog id="reviewDialog">
+  <form method="dialog">
+    <span class="eyebrow">ANTES DE APLICAR</span>
+    <h2 id="reviewTitle"></h2>
+    <p id="reviewDescription"></p>
+    <div class="button-row">
+      <button type="submit" value="cancel" class="secondary-action">
+        Cancelar</button
+      ><button type="submit" value="accept" class="primary-action">
+        Aceptar y aplicar
+      </button>
+    </div>
+  </form>
+</dialog>

@@ -1,0 +1,92 @@
+<div
+  id="onboardingModal"
+  data-modal
+  aria-label="Bienvenida y perfil"
+  class="hidden onboarding-overlay"
+>
+  <div class="onboarding-card">
+    <button
+      class="onboarding-close"
+      data-close
+      onclick="dismissOnboardingModal()"
+      aria-label="Continuar sin configurar"
+    >
+      ×</button
+    ><span class="eyebrow">BIENVENIDO A TU ESPACIO</span>
+    <h2>Los cambios grandes<br />empiezan pequeño.</h2>
+    <p>
+      Organiza tus hábitos y lo que importa en tu día. Puedes empezar con un
+      solo paso.
+    </p>
+    <label for="obName">¿Cómo te llamas?</label
+    ><input
+      id="obName"
+      autocomplete="given-name"
+      placeholder="Tu nombre o alias"
+    /><button class="primary-action" onclick="completeOnboarding()">
+      Empezar mi día →
+    </button>
+    <details>
+      <summary>Ya tengo una cuenta</summary>
+      <label for="obEmail">Correo</label
+      ><input id="obEmail" type="email" autocomplete="username" /><label
+        for="obPass"
+        >Contraseña</label
+      ><input id="obPass" type="password" autocomplete="current-password" />
+      <div class="button-row">
+        <button
+          class="secondary-action"
+          onclick="completeOnboardingWithCloud('login')"
+        >
+          Iniciar sesión</button
+        ><button
+          class="text-action"
+          onclick="completeOnboardingWithCloud('register')"
+        >
+          Crear cuenta
+        </button>
+      </div>
+      <button class="text-action" onclick="rescueLegacyLocalData()">
+        Recuperar registros anteriores
+      </button>
+    </details>
+    <details>
+      <summary>Datos opcionales para alimentación y ejercicio</summary>
+      <p class="help-copy">
+        Puedes completarlos después. Las metas iniciales son referencias
+        editables.
+      </p>
+      <div class="form-grid">
+        <input id="obWeight" type="number" placeholder="Peso (kg)" /><input
+          id="obHeight"
+          type="number"
+          placeholder="Altura (cm)"
+        /><input id="obAge" type="number" placeholder="Edad" /><input
+          id="obGymDays"
+          type="number"
+          placeholder="Días de ejercicio"
+          min="1"
+          max="7"
+        /><select id="obActivity">
+          <option value="1.2">Sedentaria</option>
+          <option value="1.375">Ligera</option>
+          <option value="1.55" selected>Moderada</option>
+          <option value="1.725">Intensa</option></select
+        ><select id="obGoal">
+          <option value="recomp">Recomposición</option>
+          <option value="deficit">Pérdida de grasa</option>
+          <option value="hypertrophy">Ganancia muscular</option>
+          <option value="bulk">Volumen</option>
+        </select>
+      </div>
+      <input
+        id="obMedical"
+        placeholder="Restricciones que quieras considerar"
+      />
+    </details>
+    <small
+      >Tú eliges el ritmo. Podrás cambiar tus preferencias cuando
+      quieras.</small
+    >
+  </div>
+</div>

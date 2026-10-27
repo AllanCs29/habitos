@@ -1,0 +1,97 @@
+<section id="tab-grocery" class="space-y-4 hidden">
+  <div
+    class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200 dark:border-slate-800 space-y-3"
+  >
+    <div class="flex items-center gap-2">
+      <i class="fi fi-rr-shopping-cart text-terra-500"></i>
+      <div>
+        <h2 class="font-extrabold text-sm">
+          Planificador de 3 Comidas y Lista del Súper
+        </h2>
+        <p class="text-[11px] text-slate-400">
+          Plan orientativo según tus metas y presupuesto; revisa cantidades y
+          precios.
+        </p>
+      </div>
+    </div>
+    <div class="grid grid-cols-3 gap-2">
+      <input
+        id="groceryBudget"
+        type="number"
+        placeholder="Presupuesto $"
+        class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 text-center font-bold outline-none"
+      />
+      <input
+        id="groceryDays"
+        type="number"
+        placeholder="Días (ej. 7)"
+        class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 text-center font-bold outline-none"
+      />
+      <input
+        id="groceryStore"
+        type="text"
+        placeholder="Tienda (3B)"
+        class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 text-center font-bold outline-none"
+      />
+    </div>
+    <select
+      id="groceryGoalSelect"
+      class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 outline-none font-semibold"
+    >
+      <option value="Pérdida de grasa, alta proteína y alimentos saciantes">
+        Pérdida de grasa, alta proteína y alimentos saciantes
+      </option>
+      <option value="Hipertrofia muscular y ganancia de fuerza limpia">
+        Hipertrofia muscular y ganancia de fuerza limpia
+      </option>
+      <option value="Recomposición corporal equilibrada">
+        Recomposición corporal equilibrada
+      </option>
+      <option value="Volumen económico">Volumen económico</option>
+    </select>
+    <button
+      id="groceryBtn"
+      onclick="generateGroceryWithGemini()"
+      class="w-full py-2.5 bg-terra-500 hover:bg-terra-600 text-white font-extrabold text-xs rounded-2xl transition"
+    >
+      Generar Semana (3 Comidas con Macros) y Lista del Súper
+    </button>
+
+    <div class="pt-3 space-y-2.5">
+      <div class="flex items-center justify-between">
+        <h3 class="font-extrabold text-xs uppercase text-slate-400">
+          Lista del Súper
+        </h3>
+        <button
+          onclick="clearCheckedGroceries()"
+          class="text-[10px] font-bold text-rose-400 hover:text-rose-500"
+        >
+          Limpiar comprados
+        </button>
+      </div>
+      <div class="flex gap-2">
+        <input
+          id="manualGroceryInput"
+          type="text"
+          onkeydown="if (event.key === 'Enter') addManualGrocery();"
+          placeholder="Agregar artículo manual al súper (ej. 1kg Pechuga, Café)..."
+          class="flex-1 px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 outline-none"
+        />
+        <button
+          onclick="addManualGrocery()"
+          class="px-3.5 py-2 bg-terra-500 text-white rounded-xl font-black text-xs"
+        >
+          +
+        </button>
+      </div>
+      <div id="groceryList" class="space-y-2"></div>
+    </div>
+
+    <div class="pt-4 border-t border-slate-200 dark:border-slate-800">
+      <h3 class="font-extrabold text-xs uppercase text-slate-400 mb-2">
+        Mi Semana (3 Comidas Cuadradas a tus Macros)
+      </h3>
+      <div id="mealPlanContainer" class="space-y-2.5"></div>
+    </div>
+  </div>
+</section>

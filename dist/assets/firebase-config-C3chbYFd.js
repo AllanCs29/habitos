@@ -1,0 +1,1 @@
+export{t as firebaseConfig}from"./firebase-config-BDPCftNc.js";

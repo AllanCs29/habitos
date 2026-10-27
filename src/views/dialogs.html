@@ -1,0 +1,329 @@
+<div
+  aria-label="Formato de actividad"
+  data-modal=""
+  id="taskFormatModal"
+  class="fixed inset-0 z-[95] bg-slate-950/90 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto"
+>
+  <div
+    class="bg-white dark:bg-slate-900 border-2 border-blue-500 w-full max-w-md rounded-3xl p-5 space-y-4 shadow-2xl my-auto"
+  >
+    <div
+      id="alarmBannerBox"
+      class="hidden bg-amber-500/20 border border-amber-400 rounded-2xl p-3 flex items-center justify-between"
+    >
+      <div class="flex items-center gap-2.5">
+        <i class="fi fi-sr-bell-ring text-lg text-amber-400 animate-bounce"></i>
+        <div>
+          <p class="text-xs font-extrabold text-amber-300 uppercase">
+            Es hora de tu actividad
+          </p>
+          <p class="text-[11px] text-amber-100">
+            Registra los avances y capturas para tu PDF.
+          </p>
+        </div>
+      </div>
+      <button
+        data-close=""
+        onclick="stopAlarmSound()"
+        class="px-2.5 py-1 bg-amber-500 text-slate-950 font-bold text-[10px] rounded-lg"
+      >
+        Silenciar
+      </button>
+    </div>
+
+    <div
+      class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2.5"
+    >
+      <div>
+        <span class="text-[10px] font-bold uppercase text-blue-400 block"
+          >Plantilla Individual por Tarea</span
+        >
+        <h3
+          id="formatModalTaskTitle"
+          class="font-extrabold text-sm text-slate-800 dark:text-slate-100"
+        >
+          Actividad
+        </h3>
+      </div>
+      <button
+        onclick="closeTaskFormatModal()"
+        class="text-slate-400 hover:text-rose-500 font-bold text-sm px-2 py-1"
+      >
+        <i class="fi fi-rr-cross-small"></i>
+      </button>
+    </div>
+
+    <div
+      class="space-y-2.5 text-xs max-h-[65vh] overflow-y-auto no-scrollbar pr-1"
+    >
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label
+            class="text-[10px] font-bold uppercase text-slate-400 block mb-1"
+            >Número de Tarea</label
+          >
+          <input
+            id="wfTaskNumber"
+            type="text"
+            placeholder="Ej. 1 / Ticket #402"
+            class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 outline-none font-semibold"
+          />
+        </div>
+        <div>
+          <label
+            class="text-[10px] font-bold uppercase text-slate-400 block mb-1"
+            >Solicita (Líder/Cliente)</label
+          >
+          <input
+            id="wfSolicita"
+            type="text"
+            placeholder="Ej. Lucia"
+            class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 outline-none font-semibold"
+          />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label
+            class="text-[10px] font-bold uppercase text-slate-400 block mb-1"
+            >Fecha de Asignación</label
+          >
+          <input
+            id="wfAssignDate"
+            type="date"
+            class="w-full px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 outline-none font-bold"
+          />
+        </div>
+        <div>
+          <label
+            class="text-[10px] font-bold uppercase text-slate-400 block mb-1"
+            >Fecha Límite</label
+          >
+          <input
+            id="wfDueDate"
+            type="date"
+            class="w-full px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 outline-none font-bold"
+          />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2">
+        <div>
+          <label
+            class="text-[10px] font-bold uppercase text-slate-400 block mb-1"
+            >Hora Inicio</label
+          >
+          <input
+            id="wfStartTime"
+            type="time"
+            class="w-full px-2 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 outline-none text-center font-bold"
+          />
+        </div>
+        <div>
+          <label
+            class="text-[10px] font-bold uppercase text-slate-400 block mb-1"
+            >Hora Fin</label
+          >
+          <input
+            id="wfEndTime"
+            type="time"
+            class="w-full px-2 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 outline-none text-center font-bold"
+          />
+        </div>
+        <div>
+          <label
+            class="text-[10px] font-bold uppercase text-slate-400 block mb-1"
+            >Estatus</label
+          >
+          <select
+            id="wfStatus"
+            class="w-full px-2 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 outline-none font-bold"
+          >
+            <option value="Completado">Completado</option>
+            <option value="En Progreso">En Curso</option>
+            <option value="Pendiente">Pendiente</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1"
+          >Tarea o Actividad (Descripción para el reporte)</label
+        >
+        <textarea
+          id="wfActivityDesc"
+          rows="2"
+          placeholder="Ej. Solicitar junta con PLS, tener proyecto completo, escaneo de documentos..."
+          class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 outline-none resize-none"
+        ></textarea>
+      </div>
+
+      <div>
+        <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1"
+          >Observaciones</label
+        >
+        <input
+          id="wfNotes"
+          type="text"
+          placeholder="Ej. Sin contratiempos / Revisado"
+          class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 outline-none"
+        />
+      </div>
+
+      <div>
+        <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1"
+          >Evidencia (Puntos realizados / Pruebas)</label
+        >
+        <textarea
+          id="wfDeliverable"
+          rows="3"
+          placeholder="1.- Hoy contestó Arlee, adjunto pruebas
+2.- Proyecto completo: BEGEPP2612MONEDEROS..."
+          class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 outline-none resize-none"
+        ></textarea>
+      </div>
+
+      <!-- SUBIDA DE IMÁGENES DE EVIDENCIA PARA EL PDF -->
+      <div
+        class="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2"
+      >
+        <div class="flex justify-between items-center">
+          <span
+            class="text-[10px] font-extrabold uppercase text-emerald-400 flex items-center gap-1.5"
+          >
+            <i class="fi fi-rr-camera"></i>
+            <span>Imágenes de Evidencia (PDF)</span>
+          </span>
+          <label
+            class="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-[10px] font-bold cursor-pointer flex items-center gap-1"
+          >
+            <i class="fi fi-rr-plus-small"></i>
+            <span>Adjuntar Capturas</span>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onchange="handleTaskEvidenceUpload(event)"
+              class="hidden"
+            />
+          </label>
+        </div>
+        <div id="wfEvidenceGallery" class="grid grid-cols-3 gap-2 pt-1"></div>
+      </div>
+    </div>
+
+    <div
+      class="flex gap-2 pt-2 border-t border-slate-200 dark:border-slate-800"
+    >
+      <button
+        onclick="saveTaskWorkFormat()"
+        class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-1.5"
+      >
+        <i class="fi fi-rr-disk"></i>
+        <span>Guardar Formato</span>
+      </button>
+      <button
+        onclick="exportSingleTaskFromModalPDF()"
+        class="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-1.5"
+      >
+        <i class="fi fi-rr-file-pdf"></i>
+        <span>Bajar PDF</span>
+      </button>
+    </div>
+  </div>
+</div>
+<div
+  aria-label="Detalle"
+  data-modal=""
+  id="demoModal"
+  class="fixed inset-0 z-[95] bg-slate-950/85 backdrop-blur-sm hidden flex items-center justify-center p-4"
+>
+  <div
+    class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-md rounded-3xl p-5 space-y-4 shadow-2xl relative"
+  >
+    <div
+      class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2.5"
+    >
+      <h3
+        id="modalExerciseTitle"
+        class="font-bold text-sm text-slate-800 dark:text-slate-100"
+      >
+        Demostración Visual
+      </h3>
+      <button
+        data-close=""
+        onclick="closeDemoModal()"
+        class="text-slate-400 hover:text-rose-500 font-bold text-sm px-2 py-1 rounded-lg"
+      >
+        <i class="fi fi-rr-cross-small"></i>
+      </button>
+    </div>
+    <div
+      id="modalExerciseContent"
+      class="text-xs space-y-3 max-h-[75vh] overflow-y-auto no-scrollbar"
+    ></div>
+    <button
+      onclick="closeDemoModal()"
+      class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow-sm transition"
+    >
+      Cerrar Demostración
+    </button>
+  </div>
+</div>
+<div
+  aria-label="Vista previa del reporte"
+  data-modal=""
+  id="pdfPreviewModal"
+  class="fixed inset-0 z-[130] bg-slate-950/90 backdrop-blur-md hidden flex flex-col items-center justify-start p-3 sm:p-6 overflow-y-auto"
+>
+  <div
+    class="w-full max-w-[800px] bg-slate-900 border border-slate-700 rounded-2xl p-3.5 mb-3 flex flex-wrap items-center justify-between gap-2 sticky top-0 z-10 shadow-2xl"
+  >
+    <div class="flex items-center gap-2.5">
+      <div
+        class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black"
+      >
+        <i class="fi fi-rr-file-pdf"></i>
+      </div>
+      <div>
+        <h3 class="text-xs sm:text-sm font-black text-white">
+          Vista Previa del Reporte Ejecutivo PDF
+        </h3>
+        <p id="pdfPreviewStatusSub" class="text-[10px] text-slate-400">
+          Diseño corporativo limpio con evidencias e historial.
+        </p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button
+        onclick="triggerDirectHtml2PdfDownload()"
+        id="btnConfirmPdfDownload"
+        class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black flex items-center gap-1.5 shadow"
+      >
+        <i class="fi fi-rr-download"></i> <span>Descargar Archivo .PDF</span>
+      </button>
+      <button
+        onclick="printExecutivePdfWindow()"
+        class="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5"
+      >
+        <i class="fi fi-rr-print"></i> <span>Imprimir / Guardar PDF</span>
+      </button>
+      <button
+        data-close=""
+        onclick="closePdfPreviewModal()"
+        class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-rose-600 text-slate-300 hover:text-white text-xs font-bold"
+      >
+        ✕
+      </button>
+    </div>
+  </div>
+  <div
+    class="w-full max-w-[800px] overflow-x-auto rounded-2xl shadow-2xl border border-slate-300 bg-white"
+  >
+    <div
+      id="pdfPrintWrapper"
+      class="w-[760px] mx-auto bg-white text-slate-900 p-6 font-sans"
+    ></div>
+  </div>
+</div>

@@ -1,0 +1,293 @@
+<section id="tab-settings" class="space-y-5 hidden">
+  <div class="surface settings-card">
+    <div class="panel-heading">
+      <h2>Tu cuenta</h2>
+      <span id="firebaseAuthStatus" class="subtle-badge">Espacio local</span>
+    </div>
+    <p class="help-copy">
+      Tus registros se guardan en este dispositivo. Inicia sesión para
+      sincronizarlos entre tus equipos.
+    </p>
+    <div id="authLoggedOutBox" class="space-y-3">
+      <label for="authEmail">Correo electrónico</label
+      ><input
+        id="authEmail"
+        type="email"
+        autocomplete="username"
+        placeholder="tu@correo.com"
+      /><label for="authPass">Contraseña</label
+      ><input
+        id="authPass"
+        type="password"
+        autocomplete="current-password"
+        placeholder="Tu contraseña"
+      />
+      <div class="button-row">
+        <button class="primary-action" onclick="loginWithFirebase()">
+          Iniciar sesión</button
+        ><button class="secondary-action" onclick="registerWithFirebase()">
+          Crear cuenta
+        </button>
+      </div>
+      <button class="text-action" onclick="resetPassword()">
+        Olvidé mi contraseña
+      </button>
+    </div>
+    <div id="authLoggedInBox" class="hidden space-y-3">
+      <p id="authUserEmail"></p>
+      <div class="button-row">
+        <button class="primary-action" onclick="forceCloudSyncNow()">
+          Sincronizar ahora</button
+        ><button class="secondary-action" onclick="logoutFirebase()">
+          Cerrar sesión
+        </button>
+      </div>
+      <button
+        id="importGuestButton"
+        class="text-action"
+        onclick="importGuestIntoAccount()"
+      >
+        Importar mis registros del espacio local</button
+      ><button
+        class="text-action"
+        onclick="copyTextSafe(runtimeUid(), 'UID copiado')"
+      >
+        Copiar mi UID para configurar la IA
+      </button>
+    </div>
+    <details>
+      <summary>Conexión de Firebase</summary>
+      <p class="help-copy">
+        Se conserva tu proyecto original. Cambia estos datos solo si decides
+        usar otro proyecto.
+      </p>
+      <textarea
+        id="firebaseConfigInput"
+        rows="6"
+        spellcheck="false"
+        aria-label="Configuración pública de Firebase"
+      ></textarea
+      ><button class="secondary-action" onclick="saveFirebaseConfig()">
+        Guardar conexión y recargar
+      </button>
+    </details>
+  </div>
+  <div class="surface settings-card">
+    <span class="eyebrow">ASISTENCIA INTELIGENTE</span>
+    <h2>IA a tu medida</h2>
+    <p class="help-copy">
+      La clave de Gemini se configura en el servidor. Puedes seguir registrando
+      tus hábitos y actividades manualmente sin IA.
+    </p>
+    <label for="modelSelect">Modelo</label
+    ><select id="modelSelect">
+      <option value="gemini-3.8-flash">Gemini 3.8 Flash · equilibrado</option>
+      <option value="gemini-3.5-flash-lite">
+        Gemini 3.5 Flash-Lite · ligero
+      </option>
+      <option value="gemini-4-argon">
+        Gemini 4 Argon · análisis complejo
+      </option></select
+    ><label for="thinkingLevelSelect">Profundidad del análisis</label
+    ><select id="thinkingLevelSelect">
+      <option value="LOW">Ágil</option>
+      <option value="MEDIUM">Equilibrada</option>
+      <option value="HIGH">Detallada</option>
+    </select>
+    <div class="button-row">
+      <button class="primary-action" onclick="saveSettings()">
+        Guardar preferencias</button
+      ><button
+        id="verifyModelBtn"
+        class="secondary-action"
+        onclick="verifyActiveModelConnection()"
+      >
+        Probar conexión
+      </button>
+    </div>
+    <p
+      id="modelVerificationResultBox"
+      class="help-copy hidden"
+      role="status"
+    ></p>
+  </div>
+  <div class="surface settings-card">
+    <h2>Perfil y metas</h2>
+    <p id="profileSummaryCard" class="help-copy"></p>
+    <button class="secondary-action" onclick="openOnboardingEdit()">
+      Editar perfil
+    </button>
+    <details>
+      <summary>Solicitar una propuesta de metas</summary>
+      <p class="help-copy">
+        Los datos de esta solicitud se enviarán a Gemini. La propuesta es
+        orientativa y podrás revisarla antes de aplicarla.
+      </p>
+      <div class="form-grid">
+        <input
+          id="calcWeight"
+          type="number"
+          placeholder="Peso (kg)"
+          min="20"
+          max="400"
+        /><input
+          id="calcHeight"
+          type="number"
+          placeholder="Altura (cm)"
+          min="80"
+          max="250"
+        /><input
+          id="calcAge"
+          type="number"
+          placeholder="Edad"
+          min="13"
+          max="110"
+        /><select id="calcActivity">
+          <option>Sedentaria</option>
+          <option>Ligera</option>
+          <option selected>Moderada</option>
+          <option>Intensa</option></select
+        ><select id="calcGoalSelect">
+          <option>Recomposición corporal</option>
+          <option>Pérdida de grasa</option>
+          <option>Ganancia muscular</option>
+          <option>Volumen</option></select
+        ><input
+          id="calcMedical"
+          placeholder="Restricciones que quieres considerar"
+        />
+      </div>
+      <button class="secondary-action" onclick="calculateMacrosWithGemini()">
+        Solicitar propuesta
+      </button>
+    </details>
+  </div>
+  <div class="surface settings-card">
+    <h2>Recordatorios</h2>
+    <p class="help-copy">
+      Los avisos locales funcionan con la app abierta. Para recibir avisos con
+      la app cerrada, configura ntfy y el programador del servidor siguiendo la
+      documentación.
+    </p>
+    <div class="button-row">
+      <button
+        id="btnEnableNotifications"
+        class="secondary-action"
+        onclick="enableBrowserNotifications()"
+      >
+        Habilitar avisos locales</button
+      ><button
+        class="secondary-action"
+        onclick="downloadMasterNativeAlarmsICS()"
+      >
+        Exportar al calendario
+      </button>
+    </div>
+    <label for="streakReminderTimeInput">Hora del recordatorio diario</label
+    ><input
+      id="streakReminderTimeInput"
+      type="time"
+      value="20:00"
+      onchange="saveStreakReminderTime(this.value)"
+    />
+    <details>
+      <summary>Avisos con la app cerrada</summary>
+      <p class="help-copy">
+        Usa un canal protegido en ntfy.sh. El token se guardará en el servidor y
+        las notificaciones no incluirán detalles personales.
+      </p>
+      <label for="ntfyTopicInput">Canal protegido</label
+      ><input id="ntfyTopicInput" placeholder="Nombre del canal" /><button
+        class="text-action"
+        onclick="autoGenerateNtfyTopic()"
+      >
+        Generar un nombre aleatorio</button
+      ><label for="ntfyTokenInput">Token de ntfy</label
+      ><input
+        id="ntfyTokenInput"
+        type="password"
+        autocomplete="off"
+        placeholder="Se guardará en el servidor"
+      />
+      <div class="button-row">
+        <button class="secondary-action" onclick="saveNtfyTopicConfig()">
+          Guardar conexión</button
+        ><button
+          class="secondary-action"
+          onclick="scheduleCloudPushTestIn10Sec()"
+        >
+          Enviar prueba
+        </button>
+      </div>
+      <div class="button-row">
+        <button
+          id="btnSyncAllCloudPush"
+          class="primary-action"
+          onclick="syncAllAlarmsToCloudPushNow()"
+        >
+          Actualizar recordatorios</button
+        ><button class="text-action" onclick="disableReminders()">
+          Desactivar avisos del servidor
+        </button>
+      </div>
+      <p id="cloudPushSyncStatusBadge" class="help-copy" role="status">
+        Sin verificar
+      </p>
+      <button class="text-action" onclick="copyNtfyTopic()">Copiar canal</button
+      ><button class="text-action" onclick="openNtfyDeepLink()">
+        Abrir ntfy
+      </button>
+    </details>
+  </div>
+  <div class="surface settings-card">
+    <h2>Tus datos</h2>
+    <p class="help-copy">
+      Los respaldos incluyen tus registros y la configuración pública de
+      Firebase. No incluyen claves privadas.
+    </p>
+    <div class="button-row">
+      <button class="secondary-action" onclick="exportBackupJSON()">
+        Exportar respaldo</button
+      ><label class="secondary-action file-label"
+        >Importar respaldo<input
+          type="file"
+          accept="application/json,.json"
+          onchange="importBackupJSON(event)"
+          class="hidden"
+      /></label>
+    </div>
+    <button class="text-action" onclick="rescueLegacyLocalData()">
+      Recuperar datos de la versión anterior</button
+    ><button class="text-action" onclick="restoreFromCloudBackup()">
+      Importar respaldo anterior de la cuenta
+    </button>
+    <details>
+      <summary>Reiniciar espacio local</summary>
+      <div id="factoryResetConfirmBox">
+        <p class="help-copy">
+          El espacio de invitado se vaciará. Tu cuenta de Firebase y el respaldo
+          de migración se conservarán.
+        </p>
+        <button class="danger-action" onclick="executeFactoryReset()">
+          Reiniciar espacio local
+        </button>
+      </div>
+    </details>
+  </div>
+  <div class="surface settings-card">
+    <h2>Instalar en tu dispositivo</h2>
+    <p class="help-copy">
+      Accede desde tu pantalla de inicio. El registro local funciona sin
+      conexión una vez cargada la aplicación; la IA y la sincronización
+      necesitan internet.
+    </p>
+    <button
+      id="btnInstallPwaApp"
+      class="secondary-action"
+      onclick="installPwaAppPrompt()"
+    >
+      Instalar aplicación
+    </button>
+    <p class="version-label">Control TCC Studio · versión 2.0.0</p>
+  </div>
+</section>

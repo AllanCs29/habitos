@@ -1,0 +1,95 @@
+<section id="tab-today" class="today-layout">
+  <div class="welcome-panel">
+    <div>
+      <span class="eyebrow">TU ESPACIO PERSONAL</span>
+      <h2 id="todayGreeting">Tu día, a tu ritmo.</h2>
+      <p>No tienes que hacerlo todo. Empieza con el siguiente paso.</p>
+      <button class="primary-action" onclick="switchTab('habits')">
+        Ver mis hábitos <span aria-hidden="true">↗</span>
+      </button>
+    </div>
+    <div class="welcome-art" aria-hidden="true">
+      <div class="art-orbit orbit-one"></div>
+      <div class="art-orbit orbit-two"></div>
+      <div class="art-plant">
+        <svg viewBox="0 0 180 180">
+          <path
+            d="M90 145V70"
+            stroke="currentColor"
+            stroke-width="5"
+            fill="none"
+          />
+          <path
+            d="M90 110C43 112 39 77 40 65c36 0 54 18 50 45Z"
+            fill="currentColor"
+            opacity=".75"
+          />
+          <path
+            d="M90 86c-4-39 22-56 52-58 0 31-16 61-52 58Z"
+            fill="currentColor"
+          />
+          <path d="M64 145h52l-8 26H72Z" fill="currentColor" opacity=".4" />
+        </svg>
+      </div>
+      <span class="art-chip">PASO A PASO</span>
+    </div>
+  </div>
+  <div class="today-metrics">
+    <button
+      class="metric-card"
+      onclick="
+        switchTab('habits');
+        switchHabitSubView('stats');
+      "
+    >
+      <span>Constancia</span><strong id="todayConsistency">—</strong
+      ><small>En los días programados</small></button
+    ><button class="metric-card" onclick="switchTab('nutrition')">
+      <span>Alimentación</span><strong id="todayNutrition">0 kcal</strong
+      ><small>Registradas en esta fecha</small></button
+    ><button class="metric-card" onclick="switchTab('nutrition')">
+      <span>Agua</span><strong id="todayWater">0.0 L</strong
+      ><small>Cada vaso cuenta</small>
+    </button>
+  </div>
+  <div class="today-columns">
+    <article class="surface today-habits-panel">
+      <div class="panel-heading">
+        <div>
+          <span class="eyebrow">LO ESENCIAL</span>
+          <h3>Tus hábitos</h3>
+        </div>
+        <span id="todayProgress" class="subtle-badge">0 de 0</span>
+      </div>
+      <div class="progress-track"><span id="todayProgressBar"></span></div>
+      <div id="todayHabits"></div>
+      <button class="text-action" onclick="switchTab('habits')">
+        Ver todos los hábitos <span aria-hidden="true">→</span>
+      </button>
+    </article>
+    <div class="today-side">
+      <article class="surface agenda-preview">
+        <span class="eyebrow">TU AGENDA</span>
+        <div class="agenda-symbol" aria-hidden="true">↗</div>
+        <h3 id="todayNextTask">Tu agenda está despejada</h3>
+        <p>Reserva espacio para lo que importa.</p>
+        <button class="text-action" onclick="switchTab('focus')">
+          Organizar mi día →
+        </button>
+      </article>
+      <article class="pause-panel">
+        <span class="eyebrow">TAMBIÉN ES PROGRESO</span>
+        <h3>Haz una pausa.</h3>
+        <p>Un minuto para respirar y volver a empezar.</p>
+        <button
+          onclick="
+            switchTab('habits');
+            switchHabitSubView('sos');
+          "
+        >
+          Tomarme un minuto <span aria-hidden="true">↗</span>
+        </button>
+      </article>
+    </div>
+  </div>
+</section>

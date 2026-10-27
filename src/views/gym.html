@@ -1,0 +1,148 @@
+<section id="tab-gym" class="space-y-4 hidden">
+  <div
+    class="bg-white dark:bg-slate-900 rounded-3xl p-4 shadow-sm border border-slate-200 dark:border-slate-800 flex items-center justify-between"
+  >
+    <div>
+      <span class="text-[10px] font-bold uppercase text-slate-400 block"
+        >Descanso entre series</span
+      >
+      <span
+        id="gymTimerDisplay"
+        class="text-2xl font-black font-mono text-emerald-500"
+        >00:00</span
+      >
+    </div>
+    <div class="flex gap-1.5">
+      <button
+        onclick="startGymRestTimer(60)"
+        class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-xs font-bold rounded-xl"
+      >
+        60s
+      </button>
+      <button
+        onclick="startGymRestTimer(90)"
+        class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-xs font-bold rounded-xl"
+      >
+        90s
+      </button>
+      <button
+        onclick="startGymRestTimer(120)"
+        class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-xs font-bold rounded-xl"
+      >
+        2m
+      </button>
+      <button
+        onclick="stopGymRestTimer()"
+        class="px-3 py-1.5 bg-rose-500/10 text-rose-400 text-xs font-bold rounded-xl"
+      >
+        Parar
+      </button>
+    </div>
+  </div>
+
+  <div
+    class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200 dark:border-slate-800 space-y-3"
+  >
+    <h2 class="font-extrabold text-sm">Generador IA de Rutina Semanal</h2>
+    <div class="grid grid-cols-3 gap-2">
+      <input
+        id="gymWeight"
+        type="number"
+        placeholder="Peso (kg)"
+        class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 text-center font-bold outline-none"
+      />
+      <input
+        id="gymHeight"
+        type="number"
+        placeholder="Altura (cm)"
+        class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 text-center font-bold outline-none"
+      />
+      <input
+        id="gymDays"
+        type="number"
+        placeholder="Días/Sem"
+        class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 text-center font-bold outline-none"
+      />
+    </div>
+    <select
+      id="gymGoalSelect"
+      class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 outline-none font-semibold"
+    >
+      <option value="Pérdida de grasa abdominal y definición">
+        Pérdida de grasa abdominal y definición
+      </option>
+      <option value="Hipertrofia y ganancia de masa muscular">
+        Hipertrofia y ganancia de masa muscular
+      </option>
+      <option value="Recomposición corporal">
+        Recomposición corporal (Grasa a músculo)
+      </option>
+      <option value="Volumen (Aumento de peso y fuerza)">
+        Volumen (Aumento de peso y fuerza)
+      </option>
+    </select>
+    <div class="grid grid-cols-2 gap-2">
+      <button
+        id="gymBtn"
+        onclick="generateGymRoutineWithGemini()"
+        class="py-2.5 bg-blue-600 text-white font-bold text-xs rounded-xl"
+      >
+        Generar con IA
+      </button>
+      <button
+        onclick="exportToCalendar()"
+        class="py-2.5 bg-emerald-500/15 text-emerald-400 font-bold text-xs rounded-xl border border-emerald-500/30"
+      >
+        Bajar ICS
+      </button>
+    </div>
+  </div>
+
+  <div
+    class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200 dark:border-slate-800"
+  >
+    <div class="flex justify-between items-center mb-2">
+      <h2 class="font-extrabold text-sm" id="currentGymDayTitle">
+        Entrenamiento de Hoy
+      </h2>
+      <button
+        onclick="toggleNewExerciseForm()"
+        class="text-xs bg-blue-600 text-white px-3 py-1 rounded-xl font-bold"
+      >
+        + Ejercicio
+      </button>
+    </div>
+    <div
+      id="gymDayFocusBadge"
+      class="mb-3 inline-block px-3 py-1 rounded-xl bg-blue-500/10 text-blue-400 font-bold text-xs"
+    >
+      Enfoque: Sin rutina asignada
+    </div>
+    <div
+      id="newExerciseForm"
+      class="hidden mb-3 p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 space-y-2"
+    >
+      <input
+        id="manualExerciseName"
+        type="text"
+        placeholder="Ej. Sentadilla con barra (4x10)..."
+        class="w-full px-3 py-1.5 text-xs rounded-xl bg-white dark:bg-slate-900 outline-none"
+      />
+      <div class="flex gap-2">
+        <button
+          onclick="addGymExercise()"
+          class="flex-1 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-xl"
+        >
+          Guardar
+        </button>
+        <button
+          onclick="toggleNewExerciseForm()"
+          class="py-1.5 px-3 bg-slate-300 dark:bg-slate-700 text-xs font-bold rounded-xl"
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+    <div id="gymRoutineList" class="space-y-3"></div>
+  </div>
+</section>

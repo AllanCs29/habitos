@@ -1,0 +1,212 @@
+<section id="tab-habits" class="space-y-4 pb-14 hidden">
+  <div
+    class="fixed-bottom-dock grid grid-cols-3 gap-1.5 bg-white/95 dark:bg-slate-900/95 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs font-bold"
+  >
+    <button
+      onclick="switchHabitSubView('today')"
+      id="hsub-today"
+      class="py-2 rounded-xl bg-terra-500 text-white"
+    >
+      Hábitos Hoy
+    </button>
+    <button
+      onclick="switchHabitSubView('stats')"
+      id="hsub-stats"
+      class="py-2 rounded-xl text-slate-400"
+    >
+      Progreso
+    </button>
+    <button
+      onclick="switchHabitSubView('sos')"
+      id="hsub-sos"
+      class="py-2 rounded-xl text-slate-400"
+    >
+      Pausa y bitácora
+    </button>
+  </div>
+
+  <div id="habitViewToday" class="space-y-4">
+    <div
+      class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 flex items-center justify-between"
+    >
+      <div>
+        <h3 id="habitsDoneSummaryTitle" class="text-base font-black">
+          0 de 0 hechos hoy
+        </h3>
+        <p class="text-xs text-slate-400">
+          Marca tus hábitos diarios para mantener tu racha.
+        </p>
+      </div>
+      <div
+        class="w-12 h-12 rounded-full border-4 border-terra-500 flex items-center justify-center font-black text-xs text-terra-500"
+        id="habitsDoneRatioCircle"
+      >
+        0/0
+      </div>
+    </div>
+
+    <div
+      class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3"
+    >
+      <div class="flex gap-2">
+        <input
+          id="newHabitInput"
+          type="text"
+          onkeydown="if (event.key === 'Enter') addHabit();"
+          placeholder="Por ejemplo: leer 10 minutos"
+          class="flex-1 px-3.5 py-2 text-xs rounded-2xl bg-slate-100 dark:bg-slate-800 outline-none"
+        />
+        <button
+          onclick="addHabit()"
+          class="bg-terra-500 text-white px-4 py-2 rounded-2xl font-black text-xs"
+        >
+          +
+        </button>
+      </div>
+      <div class="form-grid">
+        <select id="habitFrequency" aria-label="Frecuencia">
+          <option value="daily">Todos los días</option>
+          <option value="weekdays">Lunes a viernes</option>
+          <option value="weekend">Fin de semana</option></select
+        ><input
+          id="habitTarget"
+          type="number"
+          min="1"
+          max="10000"
+          value="1"
+          aria-label="Cantidad objetivo"
+        /><input
+          id="habitUnit"
+          placeholder="Unidad: vasos, minutos…"
+          aria-label="Unidad del objetivo"
+        />
+      </div>
+      <div id="habitsList" class="space-y-3 pt-1"></div>
+    </div>
+  </div>
+
+  <div id="habitViewStats" class="space-y-4 hidden">
+    <div class="grid grid-cols-2 gap-3">
+      <div
+        class="bg-white dark:bg-slate-900 rounded-3xl p-4 border border-slate-200 dark:border-slate-800"
+      >
+        <span
+          class="text-[10px] font-bold uppercase text-terra-500 flex items-center gap-1"
+        >
+          <i class="fi fi-sr-flame"></i> <span>Racha Actual</span>
+        </span>
+        <span id="statCurrentStreak" class="text-2xl font-black mt-1 block"
+          >0 días</span
+        >
+      </div>
+      <div
+        class="bg-white dark:bg-slate-900 rounded-3xl p-4 border border-slate-200 dark:border-slate-800"
+      >
+        <span
+          class="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-1"
+        >
+          <i class="fi fi-rr-trophy"></i> <span>Cumplimiento Global</span>
+        </span>
+        <span id="statGlobalPct" class="text-2xl font-black mt-1 block"
+          >0%</span
+        >
+      </div>
+    </div>
+
+    <div
+      class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 space-y-3"
+    >
+      <h3 class="text-xs font-extrabold uppercase text-slate-400">
+        Cumplimiento por Hábito
+      </h3>
+      <div id="habitStatsBars" class="space-y-3"></div>
+    </div>
+
+    <div
+      class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 space-y-3"
+    >
+      <h3 class="text-xs font-extrabold uppercase text-slate-400">
+        Mapa de Constancia
+      </h3>
+      <div id="habitHeatmapGrid" class="grid grid-cols-10 gap-1.5"></div>
+    </div>
+  </div>
+
+  <div id="habitViewSos" class="space-y-4 hidden">
+    <div
+      class="bg-gradient-to-r from-amber-500/20 to-emerald-500/20 rounded-3xl p-5 border border-amber-500/30 space-y-3"
+    >
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="font-bold text-sm text-amber-400">
+            Una pausa de 60 segundos
+          </h2>
+          <p class="text-[11px] text-slate-300">
+            Usa esta guía visual antes de ceder a un impulso.
+          </p>
+        </div>
+        <button
+          onclick="toggleBreathingExercise()"
+          id="breatheBtn"
+          class="px-3.5 py-1.5 bg-amber-500 text-slate-900 font-extrabold text-xs rounded-xl"
+        >
+          Iniciar
+        </button>
+      </div>
+      <div
+        id="breatheBox"
+        class="hidden py-6 flex flex-col items-center justify-center space-y-3"
+      >
+        <div
+          class="w-20 h-20 rounded-full bg-emerald-500/30 border-2 border-emerald-400 flex items-center justify-center breathe-active"
+        >
+          <span
+            id="breatheInstruction"
+            class="text-[11px] font-extrabold text-emerald-200 text-center px-1"
+            >Inhala 4s</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 space-y-3"
+    >
+      <h2 class="font-extrabold text-sm">Bitácora TCC de Impulsos</h2>
+      <select
+        id="impulseCategory"
+        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 outline-none font-semibold"
+      >
+        <option value="Ansiedad Alimenticia / Antojo">
+          Ansiedad Alimenticia / Antojo
+        </option>
+        <option value="Tic / Impulso Físico">Tic / Impulso Físico</option>
+        <option value="Procrastinación / Bloqueo">
+          Procrastinación / Bloqueo
+        </option>
+        <option value="Impulso Financiero / Gasto">
+          Impulso Financiero / Gasto
+        </option>
+      </select>
+      <input
+        id="impulseTrigger"
+        type="text"
+        placeholder="Gatillo (ej. Estrés laboral a las 6pm)..."
+        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 outline-none"
+      />
+      <input
+        id="impulseAction"
+        type="text"
+        placeholder="Acción alternativa (ej. Tomé agua fría y respiré)..."
+        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 outline-none"
+      />
+      <button
+        onclick="addImpulseLog()"
+        class="w-full py-2.5 bg-amber-500 text-slate-900 font-extrabold text-xs rounded-xl"
+      >
+        Guardar en mi bitácora
+      </button>
+      <div id="impulseLogsList" class="space-y-2 pt-2"></div>
+    </div>
+  </div>
+</section>

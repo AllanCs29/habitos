@@ -1,0 +1,454 @@
+<section id="tab-finance" class="space-y-4 hidden">
+  <div class="surface balance-entry">
+    <label for="availableBalanceInput">Saldo que tienes disponible ahora</label>
+    <p class="help-copy">
+      Indica el dinero disponible para este periodo. Actualízalo al recibir un
+      ingreso o hacer un gasto.
+    </p>
+    <div class="button-row">
+      <input
+        id="availableBalanceInput"
+        type="number"
+        min="0"
+        step="0.01"
+        placeholder="Por ejemplo: 3500"
+      /><button class="secondary-action" onclick="saveAvailableBalance()">
+        Actualizar saldo
+      </button>
+    </div>
+  </div>
+
+  <!-- TABLERO DE PAZ FINANCIERA (SIEMPRE VISIBLE ARRIBA) -->
+  <div
+    class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border-2 border-emerald-500/35 space-y-4 card-minimal-anim"
+  >
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <div>
+        <div class="flex items-center gap-2">
+          <span
+            class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-400"
+            >🛡️ Escudo Anti-Presión Financiera</span
+          >
+          <span
+            id="financePeaceSemaphoreBadge"
+            class="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400"
+            >En Control</span
+          >
+        </div>
+        <h2 class="text-base sm:text-lg font-black mt-0.5">
+          Mis Cobros, Deudas y Referencia diaria
+        </h2>
+        <p id="nextPaydayCountdownText" class="text-[11px] text-slate-400">
+          Calcula cuánto apartar para tus pagos y cuánto puedes gastar por día
+          como referencia.
+        </p>
+      </div>
+      <button
+        onclick="downloadMasterNativeAlarmsICS()"
+        class="px-3 py-2 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px] font-extrabold flex items-center gap-1.5 shrink-0"
+      >
+        <i class="fi fi-rr-calendar-clock"></i>
+        <span>Alarmas de Pago (.ICS)</span>
+      </button>
+    </div>
+
+    <!-- 4 KPIs Financieros -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+      <div
+        class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-emerald-500/25"
+      >
+        <span class="text-[10px] font-bold uppercase text-slate-400 block"
+          >Ingresos del Mes</span
+        >
+        <span
+          id="finKpiTotalIncome"
+          class="text-base sm:text-lg font-black text-emerald-400"
+          >$0</span
+        >
+        <span
+          id="finKpiNextIncomeSub"
+          class="text-[10px] text-slate-400 block truncate"
+          >Próximo cobro: --</span
+        >
+      </div>
+      <div
+        class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-rose-500/25"
+      >
+        <span class="text-[10px] font-bold uppercase text-slate-400 block"
+          >Deudas + Gastos</span
+        >
+        <span
+          id="finKpiTotalObligations"
+          class="text-base sm:text-lg font-black text-rose-400"
+          >$0</span
+        >
+        <span
+          id="finKpiDebtCountSub"
+          class="text-[10px] text-slate-400 block truncate"
+          >0 pagos pendientes</span
+        >
+      </div>
+      <div
+        class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-sky-500/25"
+      >
+        <span class="text-[10px] font-bold uppercase text-slate-400 block"
+          >Liquidez Libre Real</span
+        >
+        <span
+          id="finKpiFreeCash"
+          class="text-base sm:text-lg font-black text-sky-400"
+          >$0</span
+        >
+        <span class="text-[10px] text-slate-400 block truncate"
+          >Después de pagos</span
+        >
+      </div>
+      <div class="p-3 rounded-2xl bg-indigo-500/15 border border-indigo-500/35">
+        <span class="text-[10px] font-extrabold uppercase text-indigo-300 block"
+          >✨ Referencia diaria</span
+        >
+        <span
+          id="finKpiSafeDailySpend"
+          class="text-base sm:text-lg font-black text-indigo-300"
+          >$0 / día</span
+        >
+        <span
+          id="finKpiDaysUntilPaySub"
+          class="text-[10px] text-indigo-300/80 block truncate"
+          >Sin tocar tus deudas</span
+        >
+      </div>
+    </div>
+
+    <!-- Barra de Distribución del Dinero -->
+    <div class="space-y-1">
+      <div class="flex justify-between text-[10px] font-bold text-slate-400">
+        <span id="finBarLabelUsed">Comprometido: 0%</span>
+        <span id="finBarLabelFree">Libre: 100%</span>
+      </div>
+      <div
+        class="w-full bg-slate-200 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden flex"
+      >
+        <div
+          id="finBarDebtsSeg"
+          class="bg-rose-500 h-full transition-all duration-500"
+          style="width: 0%"
+        ></div>
+        <div
+          id="finBarExpensesSeg"
+          class="bg-amber-400 h-full transition-all duration-500"
+          style="width: 0%"
+        ></div>
+        <div
+          id="finBarFreeSeg"
+          class="bg-emerald-500 h-full transition-all duration-500"
+          style="width: 100%"
+        ></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BARRA FIJA INFERIOR DE FINANZAS -->
+  <div
+    class="fixed-bottom-dock grid grid-cols-3 gap-1.5 bg-white/95 dark:bg-slate-900/95 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs font-extrabold shadow-sm"
+  >
+    <button
+      onclick="switchFinanceSubTab('cashflow')"
+      id="finsub-cashflow"
+      class="py-2 px-2 rounded-xl bg-terra-500 text-white shadow-sm transition flex items-center justify-center gap-1.5"
+    >
+      <i class="fi fi-rr-coins text-xs"></i>
+      <span class="truncate">Cobros &amp; Gastos</span>
+    </button>
+    <button
+      onclick="switchFinanceSubTab('debts')"
+      id="finsub-debts"
+      class="py-2 px-2 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-center gap-1.5"
+    >
+      <i class="fi fi-rr-credit-card text-xs"></i>
+      <span class="truncate">Deudas &amp; Fechas</span>
+      <span
+        id="financeUrgentDebtsBadge"
+        class="hidden px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black"
+        >0</span
+      >
+    </button>
+    <button
+      onclick="switchFinanceSubTab('peaceplan')"
+      id="finsub-peaceplan"
+      class="py-2 px-2 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-center gap-1.5"
+    >
+      <i class="fi fi-rr-shield-check text-xs"></i>
+      <span class="truncate">Plan Anti-Presión</span>
+    </button>
+  </div>
+
+  <!-- SUB-VISTA FINANZAS 1: CUÁNDO Y CUÁNTO COBRO + GASTOS -->
+  <div id="financeSubView-cashflow" class="space-y-4 subview-anim-enter">
+    <div
+      class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3.5"
+    >
+      <div>
+        <span
+          class="text-[10px] font-extrabold uppercase text-emerald-400 block"
+          >💰 Calendario de Entradas de Dinero</span
+        >
+        <h3 class="font-extrabold text-sm">¿Cuándo y cuánto cobras?</h3>
+        <p class="text-[11px] text-slate-400">
+          Registra tus quincenas, pagos o bonos. Con un clic en "¡Ya cobré!" se
+          actualiza automáticamente a tu siguiente fecha de pago.
+        </p>
+      </div>
+
+      <div
+        class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs"
+      >
+        <input
+          type="text"
+          id="finIncomeNameInput"
+          placeholder="Concepto (ej. Quincena Nómina)"
+          class="col-span-2 sm:col-span-1 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-semibold outline-none"
+        />
+        <input
+          type="number"
+          id="finIncomeAmountInput"
+          placeholder="Monto ($)"
+          class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold text-emerald-400 outline-none"
+        />
+        <select
+          id="finIncomeFreqSelect"
+          class="px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none"
+        >
+          <option value="Quincenal">Quincenal (15 días)</option>
+          <option value="Mensual">Mensual</option>
+          <option value="Semanal">Semanal</option>
+          <option value="Único">Cobro Único</option>
+        </select>
+        <input
+          type="date"
+          id="finIncomeDateInput"
+          class="px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none"
+          title="Próxima fecha de cobro"
+        />
+        <button
+          onclick="addFinanceIncome()"
+          class="col-span-2 sm:col-span-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs transition shadow-sm"
+        >
+          + Guardar Cobro
+        </button>
+      </div>
+
+      <div id="financeIncomesList" class="space-y-2"></div>
+    </div>
+
+    <!-- Gastos Fijos y Variables -->
+    <div
+      class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3.5"
+    >
+      <div class="flex items-center justify-between">
+        <div>
+          <span
+            class="text-[10px] font-extrabold uppercase text-amber-400 block"
+            >🧾 Registro de Salidas</span
+          >
+          <h3 class="font-extrabold text-sm">Gastos Fijos y del Día a Día</h3>
+        </div>
+        <span
+          id="financeExpensesTotalBadge"
+          class="text-xs font-black text-amber-400 bg-amber-500/15 px-3 py-1 rounded-xl"
+          >Total: $0</span
+        >
+      </div>
+
+      <div
+        class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs"
+      >
+        <input
+          type="text"
+          id="finExpenseNameInput"
+          onkeydown="if (event.key === 'Enter') addFinanceExpense();"
+          placeholder="Gasto (ej. Renta, Internet, Súper, Uber...)"
+          class="col-span-2 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-semibold outline-none"
+        />
+        <input
+          type="number"
+          id="finExpenseAmountInput"
+          onkeydown="if (event.key === 'Enter') addFinanceExpense();"
+          placeholder="Monto ($)"
+          class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold text-amber-400 outline-none"
+        />
+        <select
+          id="finExpenseCategorySelect"
+          class="px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none"
+        >
+          <option value="Fijo Necesario">🏠 Fijo Necesario</option>
+          <option value="Comida/Súper">🛒 Comida / Súper</option>
+          <option value="Transporte">🚗 Transporte</option>
+          <option value="Gustos/Hormiga">☕ Gusto / Hormiga</option>
+        </select>
+        <button
+          onclick="addFinanceExpense()"
+          class="col-span-2 sm:col-span-1 py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition shadow-sm"
+        >
+          + Gasto
+        </button>
+      </div>
+
+      <div
+        id="financeExpensesList"
+        class="space-y-2 max-h-80 overflow-y-auto"
+      ></div>
+    </div>
+  </div>
+
+  <!-- SUB-VISTA FINANZAS 2: MIS DEUDAS Y FECHAS LÍMITE DE PAGO -->
+  <div id="financeSubView-debts" class="space-y-4 hidden subview-anim-enter">
+    <div
+      class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3.5"
+    >
+      <div>
+        <span class="text-[10px] font-extrabold uppercase text-rose-400 block"
+          >💳 Control de Tarjetas, Préstamos y Fechas de Pago</span
+        >
+        <h3 class="font-extrabold text-sm">
+          Mis Deudas y Fechas Límite (Cero Intereses)
+        </h3>
+        <p class="text-[11px] text-slate-400">
+          Ordenadas por urgencia de vencimiento. Al marcar una deuda como pagada
+          este mes, se descuenta automáticamente de tu saldo total.
+        </p>
+      </div>
+
+      <div
+        class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2.5 text-xs"
+      >
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <input
+            type="text"
+            id="finDebtNameInput"
+            placeholder="Nombre deuda (ej. Tarjeta Nu, BBVA, Crédito...)"
+            class="sm:col-span-2 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-semibold outline-none"
+          />
+          <select
+            id="finDebtPrioritySelect"
+            class="px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none"
+          >
+            <option value="Alta (Interés Alto)">
+              🔥 Prioridad Alta (Interés Caro)
+            </option>
+            <option value="Media (Meses sin Intereses)">
+              ⚡ Media (MSI / Fijo)
+            </option>
+            <option value="Baja (Sin interés)">🌱 Baja (Sin interés)</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 items-end">
+          <div>
+            <label
+              class="text-[9px] font-bold uppercase text-slate-400 block mb-0.5"
+              >Deuda Total ($)</label
+            >
+            <input
+              type="number"
+              id="finDebtTotalInput"
+              placeholder="Ej. 12000"
+              class="w-full px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none"
+            />
+          </div>
+          <div>
+            <label
+              class="text-[9px] font-bold uppercase text-slate-400 block mb-0.5"
+              >Pago del Mes ($)</label
+            >
+            <input
+              type="number"
+              id="finDebtMinPayInput"
+              placeholder="Ej. 1800"
+              class="w-full px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold text-rose-400 outline-none"
+            />
+          </div>
+          <div>
+            <label
+              class="text-[9px] font-bold uppercase text-slate-400 block mb-0.5"
+              >Día Corte (opc)</label
+            >
+            <input
+              type="number"
+              id="finDebtCutDayInput"
+              min="1"
+              max="31"
+              placeholder="Ej. 15"
+              class="w-full px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none"
+            />
+          </div>
+          <div>
+            <label
+              class="text-[9px] font-bold uppercase text-slate-400 block mb-0.5"
+              >Fecha Límite Pago</label
+            >
+            <input
+              type="date"
+              id="finDebtDueDateInput"
+              class="w-full px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold text-amber-400 outline-none"
+            />
+          </div>
+          <button
+            onclick="addFinanceDebt()"
+            class="col-span-2 sm:col-span-1 py-2 px-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs transition shadow-sm"
+          >
+            + Guardar Deuda
+          </button>
+        </div>
+      </div>
+
+      <div id="financeDebtsList" class="space-y-2.5"></div>
+    </div>
+  </div>
+
+  <!-- SUB-VISTA FINANZAS 3: PLANIFICADOR ANTI-PRESIÓN (QUÉ PAGAR CON CADA QUINCENA + ASESOR IA) -->
+  <div
+    id="financeSubView-peaceplan"
+    class="space-y-4 hidden subview-anim-enter"
+  >
+    <div
+      class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-4"
+    >
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <span
+            class="text-[10px] font-extrabold uppercase text-indigo-400 block"
+            >🧘 Estratega Anti-Estrés Financiero</span
+          >
+          <h3 class="font-extrabold text-sm">
+            ¿Qué deuda pagar con cada cobro para no sentir presión?
+          </h3>
+          <p class="text-[11px] text-slate-400">
+            Cruza tus fechas de cobro con tus fechas límite de pago y genera tu
+            plan paso a paso con IA.
+          </p>
+        </div>
+        <button
+          onclick="generateFinancePeacePlanWithAI()"
+          id="btnGeneratePeacePlanAI"
+          class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs shadow-md transition flex items-center gap-1.5"
+        >
+          <i class="fi fi-rr-sparkles"></i>
+          <span>Generar Plan Anti-Presión con IA</span>
+        </button>
+      </div>
+
+      <div id="financePaycheckAllocationBox" class="space-y-2.5"></div>
+
+      <div
+        id="financeAiPeacePlanOutput"
+        class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-indigo-500/25 text-xs leading-relaxed space-y-2"
+      >
+        <p class="text-slate-400">
+          Presiona <strong>"Generar Plan Anti-Presión con IA"</strong> para que
+          el asesor analice tus cobros, deudas y gastos y proponga opciones para
+          organizar tu quincena.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>

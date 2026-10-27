@@ -1,0 +1,691 @@
+<section id="tab-nutrition" class="space-y-4 pb-14 hidden">
+  <div id="nutSubView-macros" class="space-y-4 subview-anim-enter">
+    <div
+      class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-4"
+    >
+      <div class="flex justify-between items-center">
+        <div>
+          <span
+            class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block"
+            >Registro de comidas</span
+          >
+          <h2 class="text-lg font-black tracking-tight">
+            Contador de calorías y macros
+          </h2>
+        </div>
+        <button
+          onclick="
+            document.getElementById('goalsEditBox').classList.toggle('hidden')
+          "
+          class="text-[11px] font-bold text-terra-500 bg-terra-500/10 px-3 py-1.5 rounded-xl flex items-center gap-1.5"
+        >
+          <i class="fi fi-rr-sliders-h"></i>
+          <span>Metas (<span id="metaKcalLabel">2100</span> kcal)</span>
+        </button>
+      </div>
+
+      <div
+        id="goalsEditBox"
+        class="hidden p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2.5"
+      >
+        <div class="flex justify-between items-center">
+          <span class="text-[10px] font-bold uppercase text-slate-400"
+            >Ajustar Metas Diarias y Objetivo</span
+          >
+          <button
+            onclick="openOnboardingEdit()"
+            class="text-[10px] text-blue-500 font-bold underline"
+          >
+            Asistente de Perfil
+          </button>
+        </div>
+        <div>
+          <label class="text-[10px] text-slate-400 block mb-0.5 font-bold"
+            >Tipo de Meta Nutricional (Rige cómo el Chef IA ajusta tus
+            calorías)</label
+          >
+          <select
+            id="nutritionGoalModeSelect"
+            onchange="updateNutritionGoalMode(this.value)"
+            class="w-full px-2.5 py-1.5 text-xs rounded-xl bg-white dark:bg-slate-900 font-bold outline-none"
+          >
+            <option value="deficit">
+              Bajar grasa corporal / Definición (Prioriza proteína; calorías
+              pueden quedar cortas)
+            </option>
+            <option value="recomp">
+              Recomposición corporal (Cumplir proteína y acercarse a kcal meta)
+            </option>
+            <option value="hypertrophy">
+              Hipertrofia muscular limpia (Obligatorio llegar a kcal y macros)
+            </option>
+            <option value="bulk">
+              Volumen y fuerza máxima (Superávit: nunca quedar corto en kcal ni
+              macros)
+            </option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-0.5 font-bold"
+              >Meta Kcal</label
+            >
+            <input
+              id="targetKcalInput"
+              type="number"
+              placeholder="2100"
+              onchange="updateTargets()"
+              class="w-full px-2 py-1.5 text-xs rounded-xl bg-white dark:bg-slate-900 font-bold text-center outline-none"
+            />
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-0.5 font-bold"
+              >Meta Agua (ml)</label
+            >
+            <input
+              id="targetWaterInput"
+              type="number"
+              placeholder="4000"
+              onchange="updateTargets()"
+              class="w-full px-2 py-1.5 text-xs rounded-xl bg-white dark:bg-slate-900 font-bold text-center outline-none"
+            />
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label
+              class="text-[10px] text-rose-400 block mb-0.5 font-bold text-center"
+              >Proteína (g)</label
+            >
+            <input
+              id="targetProtInput"
+              type="number"
+              placeholder="170"
+              onchange="updateTargets()"
+              class="w-full px-2 py-1 text-xs rounded-xl bg-white dark:bg-slate-900 font-bold text-center outline-none"
+            />
+          </div>
+          <div>
+            <label
+              class="text-[10px] text-amber-400 block mb-0.5 font-bold text-center"
+              >Carbos (g)</label
+            >
+            <input
+              id="targetCarbInput"
+              type="number"
+              placeholder="160"
+              onchange="updateTargets()"
+              class="w-full px-2 py-1 text-xs rounded-xl bg-white dark:bg-slate-900 font-bold text-center outline-none"
+            />
+          </div>
+          <div>
+            <label
+              class="text-[10px] text-emerald-400 block mb-0.5 font-bold text-center"
+              >Grasas (g)</label
+            >
+            <input
+              id="targetFatInput"
+              type="number"
+              placeholder="85"
+              onchange="updateTargets()"
+              class="w-full px-2 py-1 text-xs rounded-xl bg-white dark:bg-slate-900 font-bold text-center outline-none"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between gap-4 py-2">
+        <div
+          class="relative w-28 h-28 flex items-center justify-center shrink-0"
+        >
+          <svg class="w-28 h-28 transform -rotate-90">
+            <circle
+              cx="56"
+              cy="56"
+              r="46"
+              stroke="currentColor"
+              stroke-width="10"
+              class="text-slate-100 dark:text-slate-800 fill-none"
+            />
+            <circle
+              id="mainKcalRing"
+              cx="56"
+              cy="56"
+              r="46"
+              stroke="currentColor"
+              stroke-width="10"
+              stroke-dasharray="289"
+              stroke-dashoffset="289"
+              stroke-linecap="round"
+              class="text-terra-500 fill-none transition-all duration-500"
+            />
+          </svg>
+          <div
+            class="absolute inset-0 flex flex-col items-center justify-center"
+          >
+            <span id="kcalConsumedBig" class="text-xl font-black leading-none"
+              >0</span
+            >
+            <span
+              id="kcalTargetSmall"
+              class="text-[10px] text-slate-400 font-bold mt-0.5"
+              >/ 2100 kcal</span
+            >
+          </div>
+        </div>
+
+        <div class="flex-1 space-y-1.5">
+          <div>
+            <span
+              id="goalRuleBadge"
+              class="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400 inline-block mb-1"
+              >Meta: Déficit (Grasa)</span
+            >
+            <span class="text-[11px] text-slate-400 font-semibold block"
+              >Disponible para cerrar el día</span
+            >
+            <span
+              id="kcalRemainingBig"
+              class="text-2xl font-black text-terra-500"
+              >2100 kcal</span
+            >
+            <p
+              id="remainingMacrosSummary"
+              class="text-[11px] text-slate-400 leading-snug"
+            ></p>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="space-y-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs"
+      >
+        <div>
+          <div class="flex justify-between font-bold mb-1">
+            <span
+              >Proteínas
+              <span
+                id="protRemLabel"
+                class="text-[10px] text-terra-500 font-normal"
+              ></span
+            ></span>
+            <span id="protText" class="text-slate-500 dark:text-slate-300"
+              >0 / 170 g</span
+            >
+          </div>
+          <div
+            class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden"
+          >
+            <div
+              id="protLinearBar"
+              class="h-full bg-terra-500 transition-all duration-500"
+              style="width: 0%"
+            ></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between font-bold mb-1">
+            <span
+              >Carbohidratos
+              <span
+                id="carbRemLabel"
+                class="text-[10px] text-amber-500 font-normal"
+              ></span
+            ></span>
+            <span id="carbText" class="text-slate-500 dark:text-slate-300"
+              >0 / 160 g</span
+            >
+          </div>
+          <div
+            class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden"
+          >
+            <div
+              id="carbLinearBar"
+              class="h-full bg-amber-500 transition-all duration-500"
+              style="width: 0%"
+            ></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between font-bold mb-1">
+            <span
+              >Grasas
+              <span
+                id="fatRemLabel"
+                class="text-[10px] text-emerald-500 font-normal"
+              ></span
+            ></span>
+            <span id="fatText" class="text-slate-500 dark:text-slate-300"
+              >0 / 85 g</span
+            >
+          </div>
+          <div
+            class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden"
+          >
+            <div
+              id="fatLinearBar"
+              class="h-full bg-emerald-500 transition-all duration-500"
+              style="width: 0%"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ESCÁNER DE ALIMENTOS IA (INTEGRADO EN LA VISTA PRINCIPAL JUNTO AL CONTADOR) -->
+    <div id="nutSubView-scanner" class="space-y-4 subview-anim-enter">
+      <div
+        class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3"
+      >
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-2">
+            <i class="fi fi-rr-camera text-terra-500"></i>
+            <h2 class="font-extrabold text-sm">Foto del plato / Escáner IA</h2>
+          </div>
+          <span
+            id="aiModelBadge"
+            class="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-300 px-2 py-0.5 rounded-full font-mono"
+            >gemini-3.8-live-extended-thinking</span
+          >
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+          <select
+            id="mealTypeTagSelect"
+            class="col-span-1 px-2.5 py-2.5 text-xs rounded-2xl bg-slate-100 dark:bg-slate-800 font-bold outline-none"
+          >
+            <option value="Desayuno">Desayuno</option>
+            <option value="Comida">Comida</option>
+            <option value="Cena">Cena</option>
+            <option value="Snack">Snack</option>
+          </select>
+          <input
+            id="aiFoodInput"
+            type="text"
+            onkeydown="
+              if (event.key === 'Enter') {
+                event.preventDefault();
+                analyzeFoodWithGemini();
+              }
+            "
+            placeholder="Describe tu plato (ej. 200g bistec con arroz)..."
+            class="col-span-2 px-3.5 py-2.5 text-xs rounded-2xl bg-slate-100 dark:bg-slate-800 outline-none"
+          />
+        </div>
+
+        <div
+          id="photoPreviewCard"
+          class="hidden bg-slate-950 border-2 border-terra-500 rounded-2xl p-3 flex items-center gap-3"
+        >
+          <img
+            id="photoThumbnail"
+            src=""
+            alt="Plato"
+            class="w-16 h-16 object-cover rounded-xl border border-terra-500 shrink-0"
+          />
+          <div class="flex-1 min-w-0">
+            <span
+              class="text-[10px] font-extrabold text-terra-500 uppercase block"
+              >Foto del plato lista</span
+            >
+            <p
+              id="photoFileName"
+              class="text-xs text-white truncate font-medium"
+            ></p>
+          </div>
+          <button
+            onclick="clearUploadedPhoto()"
+            class="px-2.5 py-1.5 bg-rose-600 text-white rounded-lg text-[10px] font-bold"
+          >
+            Quitar
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <label
+            id="uploadPhotoLabel"
+            class="py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-2xl text-center cursor-pointer transition flex items-center justify-center gap-1.5"
+          >
+            <i class="fi fi-rr-picture"></i>
+            <span>Sacar / Subir Foto</span>
+            <input
+              type="file"
+              accept="image/*"
+              id="aiFoodImage"
+              onchange="handleImageUpload(event)"
+              class="hidden"
+            />
+          </label>
+          <button
+            id="aiFoodBtn"
+            onclick="analyzeFoodWithGemini()"
+            class="py-2.5 bg-terra-500 hover:bg-terra-600 text-white font-extrabold text-xs rounded-2xl shadow-sm transition flex items-center justify-center gap-1.5"
+          >
+            <i class="fi fi-rr-magic-wand"></i>
+            <span>Calcular con IA</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMIDAS DE HOY (CON OPCIÓN DE REGISTRO Y EDICIÓN MANUAL SIN GASTAR TOKENS) -->
+    <div id="nutSubView-mealsWrap" class="space-y-4">
+      <div
+        class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3"
+      >
+        <div class="flex justify-between items-center gap-2">
+          <div>
+            <h2 class="font-extrabold text-sm">Comidas registradas hoy</h2>
+            <p id="loggedMealTypesStatus" class="text-[10px] text-slate-400">
+              Sin comidas registradas
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              onclick="toggleManualMealBox()"
+              class="px-2.5 py-1 rounded-xl bg-terra-500/15 text-terra-500 text-[10px] font-extrabold"
+            >
+              + Manual
+            </button>
+            <button
+              onclick="clearTodayMeals()"
+              class="text-[10px] text-rose-500 font-bold"
+            >
+              Limpiar Día
+            </button>
+          </div>
+        </div>
+
+        <div
+          id="manualMealFormBox"
+          class="hidden p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-terra-500/30 space-y-2 text-xs subview-anim-enter"
+        >
+          <div class="flex items-center justify-between">
+            <span
+              id="manualMealFormTitle"
+              class="text-[10px] font-extrabold uppercase text-terra-500"
+              >Registro / Edición Rápida de Comida</span
+            >
+            <button
+              onclick="cancelManualMealEdit()"
+              class="text-[10px] text-slate-400 hover:text-rose-500 font-bold"
+            >
+              Cerrar
+            </button>
+          </div>
+          <input
+            id="manualMealNameInput"
+            type="text"
+            placeholder="Ej. Desayuno: 2 scoops proteína + avena"
+            class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none"
+          />
+          <div class="grid grid-cols-4 gap-1.5">
+            <div>
+              <label
+                class="text-[9px] text-slate-400 font-bold block text-center mb-0.5"
+                >Kcal</label
+              >
+              <input
+                id="manualMealKcalInput"
+                type="number"
+                placeholder="350"
+                class="w-full px-2 py-1.5 rounded-xl bg-white dark:bg-slate-900 font-bold text-center outline-none"
+              />
+            </div>
+            <div>
+              <label
+                class="text-[9px] text-rose-400 font-bold block text-center mb-0.5"
+                >Prot (g)</label
+              >
+              <input
+                id="manualMealProtInput"
+                type="number"
+                placeholder="45"
+                class="w-full px-2 py-1.5 rounded-xl bg-white dark:bg-slate-900 font-bold text-center outline-none"
+              />
+            </div>
+            <div>
+              <label
+                class="text-[9px] text-amber-400 font-bold block text-center mb-0.5"
+                >Carbs (g)</label
+              >
+              <input
+                id="manualMealCarbInput"
+                type="number"
+                placeholder="30"
+                class="w-full px-2 py-1.5 rounded-xl bg-white dark:bg-slate-900 font-bold text-center outline-none"
+              />
+            </div>
+            <div>
+              <label
+                class="text-[9px] text-emerald-400 font-bold block text-center mb-0.5"
+                >Grasa (g)</label
+              >
+              <input
+                id="manualMealFatInput"
+                type="number"
+                placeholder="6"
+                class="w-full px-2 py-1.5 rounded-xl bg-white dark:bg-slate-900 font-bold text-center outline-none"
+              />
+            </div>
+          </div>
+          <button
+            onclick="saveManualMealEntry()"
+            class="w-full py-2 bg-terra-500 hover:bg-terra-600 text-white font-extrabold rounded-xl shadow-sm"
+          >
+            Guardar Platillo
+          </button>
+        </div>
+
+        <div id="mealsList" class="space-y-2"></div>
+      </div>
+    </div>
+
+    <!-- HIDRATACIÓN (INTEGRADA EN LA MISMA VISTA PRINCIPAL) -->
+    <div id="nutSubView-waterWrap" class="space-y-4">
+      <div
+        class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 flex items-center gap-4"
+      >
+        <div
+          class="relative w-14 h-20 bg-slate-100 dark:bg-slate-800 rounded-b-2xl border-2 border-t-0 border-sky-400 overflow-hidden flex flex-col justify-end shrink-0"
+        >
+          <div
+            id="waterLiquid"
+            class="w-full bg-sky-500 transition-all duration-500"
+            style="height: 0%"
+          ></div>
+          <div
+            class="absolute inset-0 flex items-center justify-center text-[11px] font-black text-slate-700 dark:text-white"
+          >
+            <span id="waterPercentText">0%</span>
+          </div>
+        </div>
+        <div class="flex-1">
+          <div class="flex justify-between items-center mb-2">
+            <h2 class="font-extrabold text-sm">Hidratación</h2>
+            <span id="waterText" class="text-sm font-black text-sky-500"
+              >0.00 L</span
+            >
+          </div>
+          <div class="grid grid-cols-4 gap-1.5">
+            <button
+              onclick="addWater(250)"
+              class="py-1.5 bg-sky-500/10 text-sky-500 rounded-xl text-xs font-bold"
+            >
+              +250
+            </button>
+            <button
+              onclick="addWater(500)"
+              class="py-1.5 bg-sky-500/10 text-sky-500 rounded-xl text-xs font-bold"
+            >
+              +500
+            </button>
+            <button
+              onclick="addWater(1000)"
+              class="py-1.5 bg-sky-500 text-white rounded-xl text-xs font-bold"
+            >
+              +1L
+            </button>
+            <button
+              onclick="addWater(-250)"
+              class="py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-xl text-xs font-bold"
+            >
+              -250
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- CHEF IA INTELIGENTE ORIENTADO A COMPLETAR MACROS Y META -->
+  <div id="nutSubView-chef" class="space-y-4 hidden subview-anim-enter">
+    <div
+      class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border-2 border-emerald-500/30 space-y-3"
+    >
+      <div class="flex items-start justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <i class="fi fi-rr-hat-chef text-emerald-500 text-base"></i>
+          <div>
+            <h2 class="font-extrabold text-sm">
+              Chef IA: Cuadrador Exacto de Macros
+            </h2>
+            <p class="text-[11px] text-slate-400">
+              Sugiere porciones y macros aproximados según tus registros y
+              metas.
+            </p>
+          </div>
+        </div>
+        <button
+          onclick="autoSelectRemainingMeals()"
+          class="px-2.5 py-1 rounded-xl bg-emerald-500/15 text-emerald-400 font-bold text-[10px] shrink-0"
+        >
+          Auto-detectar faltantes
+        </button>
+      </div>
+
+      <!-- TARJETA EN VIVO DE PRESUPUESTO DE MACROS PARA EL CHEF -->
+      <div
+        id="chefMacroBudgetBanner"
+        class="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-[11px] space-y-1"
+      ></div>
+
+      <div>
+        <label
+          class="text-[10px] font-bold uppercase text-emerald-500 block mb-1"
+          >¿Cuentas con alguna condición médica, alergia o restricción?
+          (Personalizado)</label
+        >
+        <input
+          id="fridgeMedicalCondition"
+          type="text"
+          onchange="updateMedicalCondition(this.value)"
+          placeholder="Ej. Ninguna / Resistencia a la insulina / Hipertensión / Diabetes / Sin lactosa..."
+          class="w-full px-3.5 py-2 text-xs rounded-2xl bg-slate-100 dark:bg-slate-800 outline-none"
+        />
+      </div>
+
+      <div>
+        <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1"
+          >Ingredientes disponibles en tu refri o alacena (o lo que tienes a la
+          mano)</label
+        >
+        <textarea
+          id="fridgeIngredients"
+          rows="2"
+          placeholder="Ej. Pechuga de pollo, huevo, claras, arroz, tortillas, aguacate, atún, avena, queso panela, yogurt griego..."
+          class="w-full px-3.5 py-2 text-xs rounded-2xl bg-slate-100 dark:bg-slate-800 outline-none resize-none"
+        ></textarea>
+      </div>
+
+      <div class="space-y-1.5">
+        <div class="flex justify-between items-center">
+          <span class="text-[10px] font-bold uppercase text-slate-400"
+            >¿Qué comidas quieres que arme con tus macros?</span
+          >
+          <button
+            onclick="selectAllThreeMealsForChef()"
+            class="text-[10px] text-terra-500 font-extrabold underline"
+          >
+            Pedir las 3 comidas del día
+          </button>
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-[11px]">
+          <label
+            class="flex items-center justify-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2.5 py-2 rounded-xl cursor-pointer font-bold"
+          >
+            <input
+              type="checkbox"
+              id="planBreakfast"
+              onchange="renderChefMacroBanner()"
+              class="accent-emerald-500"
+            />
+            <span>Desayuno</span>
+          </label>
+          <label
+            class="flex items-center justify-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2.5 py-2 rounded-xl cursor-pointer font-bold"
+          >
+            <input
+              type="checkbox"
+              id="planLunch"
+              onchange="renderChefMacroBanner()"
+              class="accent-emerald-500"
+            />
+            <span>Comida</span>
+          </label>
+          <label
+            class="flex items-center justify-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2.5 py-2 rounded-xl cursor-pointer font-bold"
+          >
+            <input
+              type="checkbox"
+              id="planDinner"
+              checked
+              onchange="renderChefMacroBanner()"
+              class="accent-emerald-500"
+            />
+            <span>Cena</span>
+          </label>
+        </div>
+      </div>
+
+      <button
+        id="fridgeBtn"
+        onclick="recommendFromFridge()"
+        class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-2xl shadow-md transition flex items-center justify-center gap-2"
+      >
+        <i class="fi fi-rr-magic-wand"></i>
+        <span>Diseñar Recetas para Cumplir mis Macros</span>
+      </button>
+      <div id="fridgeRecommendations" class="space-y-2.5 pt-1"></div>
+    </div>
+  </div>
+
+  <!-- BARRA FIJA INFERIOR DE NUTRICIÓN -->
+  <div
+    class="fixed-bottom-dock grid grid-cols-3 gap-1 bg-white/95 dark:bg-slate-900/95 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 text-[11px] font-extrabold"
+  >
+    <button
+      onclick="switchNutritionSubTab('macros')"
+      id="nsub-macros"
+      class="py-2 px-2 rounded-xl bg-terra-500 text-white shadow-sm transition flex items-center justify-center gap-1.5"
+    >
+      <i class="fi fi-rr-utensils text-xs"></i>
+      <span class="truncate">Calorías &amp; Día</span>
+    </button>
+    <button
+      onclick="switchNutritionSubTab('scanner')"
+      id="nsub-scanner"
+      class="py-2 px-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-center gap-1.5"
+    >
+      <i class="fi fi-rr-camera text-xs"></i>
+      <span class="truncate">Foto IA &amp; Agua</span>
+    </button>
+    <button
+      onclick="switchNutritionSubTab('chef')"
+      id="nsub-chef"
+      class="py-2 px-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-center gap-1.5"
+    >
+      <i class="fi fi-rr-hat-chef text-xs"></i>
+      <span class="truncate">Chef Macros</span>
+    </button>
+  </div>
+</section>

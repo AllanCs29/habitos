@@ -1,0 +1,829 @@
+<section id="tab-focus" class="space-y-4 hidden">
+  <!-- TARJETA RESUMEN EJECUTIVO DEL DÍA LABORAL -->
+  <div
+    class="bg-white dark:bg-slate-900 rounded-3xl p-4 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3 card-minimal-anim"
+  >
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div
+          class="w-10 h-10 rounded-2xl bg-blue-500/15 text-blue-400 flex items-center justify-center text-base shrink-0"
+        >
+          <i class="fi fi-rr-briefcase"></i>
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5">
+            <span
+              class="text-[10px] font-extrabold uppercase tracking-wider text-blue-400"
+              >Hub Laboral Anti-Olvidos</span
+            >
+            <span
+              id="workShiftStatusBadge"
+              class="text-[9px] font-black px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400"
+              >09:00 - 18:00</span
+            >
+          </div>
+          <h2 class="text-sm sm:text-base font-black truncate">
+            Agenda, Correo/Whats (Tickets &amp; Sesiones) y PDF
+          </h2>
+        </div>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <button
+          onclick="sendDailyWorkBriefToWhatsApp()"
+          class="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-extrabold flex items-center gap-1 shadow-sm"
+          title="Enviar resumen del trabajo a mi WhatsApp"
+        >
+          <i class="fi fi-rr-paper-plane"></i> <span>A mi Whats</span>
+        </button>
+        <button
+          onclick="downloadMasterNativeAlarmsICS()"
+          class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[10px] font-extrabold flex items-center gap-1"
+          title="Sincronizar alarmas en el calendario/reloj del celular"
+        >
+          <i class="fi fi-rr-calendar-clock"></i> <span>Exportar alarmas</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-2 text-center">
+      <div
+        onclick="
+          switchFocusSubTab('inbox');
+          filterWorkInbox('ticket');
+        "
+        class="cursor-pointer p-2 rounded-2xl bg-rose-500/10 border border-rose-500/25"
+      >
+        <span class="text-[9px] font-extrabold uppercase text-rose-400 block"
+          >🎫 Tickets Abiertos</span
+        >
+        <span
+          id="summaryOpenTicketsCount"
+          class="text-sm font-black text-rose-400"
+          >0</span
+        >
+      </div>
+      <div
+        onclick="
+          switchFocusSubTab('inbox');
+          filterWorkInbox('session');
+        "
+        class="cursor-pointer p-2 rounded-2xl bg-sky-500/10 border border-sky-500/25"
+      >
+        <span class="text-[9px] font-extrabold uppercase text-sky-400 block"
+          >📹 Sesiones Hoy</span
+        >
+        <span
+          id="summaryTodaySessionsCount"
+          class="text-sm font-black text-sky-400"
+          >0</span
+        >
+      </div>
+      <div
+        onclick="switchFocusSubTab('tasks')"
+        class="cursor-pointer p-2 rounded-2xl bg-amber-500/10 border border-amber-500/25"
+      >
+        <span class="text-[9px] font-extrabold uppercase text-amber-400 block"
+          >📋 Tareas PDF</span
+        >
+        <span
+          id="summaryPendingTasksCount"
+          class="text-sm font-black text-amber-400"
+          >0</span
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- BARRA FIJA INFERIOR DE TRABAJO -->
+  <div
+    class="fixed-bottom-dock grid grid-cols-3 gap-1.5 bg-white/95 dark:bg-slate-900/95 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs font-extrabold shadow-sm"
+  >
+    <button
+      onclick="switchFocusSubTab('agenda')"
+      id="fsub-agenda"
+      class="py-2 px-2 rounded-xl bg-terra-500 text-white shadow-sm transition flex items-center justify-center gap-1.5"
+    >
+      <i class="fi fi-rr-calendar-clock text-xs"></i>
+      <span class="truncate">Agenda &amp; Horario</span>
+    </button>
+    <button
+      onclick="switchFocusSubTab('inbox')"
+      id="fsub-inbox"
+      class="py-2 px-2 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-center gap-1.5"
+    >
+      <i class="fi fi-rr-envelope text-xs"></i>
+      <span class="truncate">Correo &amp; Whats</span>
+      <span
+        id="focusInboxBadgeCount"
+        class="hidden px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black"
+        >0</span
+      >
+    </button>
+    <button
+      onclick="switchFocusSubTab('tasks')"
+      id="fsub-tasks"
+      class="py-2 px-2 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-center gap-1.5"
+    >
+      <i class="fi fi-rr-file-pdf text-xs"></i>
+      <span class="truncate">Tareas &amp; PDF</span>
+    </button>
+  </div>
+
+  <!-- SUB-SECCIÓN 1: AGENDA DIARIA POR HORARIOS Y BLOQUES DE TRABAJO -->
+  <div id="focusSubView-agenda" class="space-y-4 subview-anim-enter">
+    <div
+      class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3.5"
+    >
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <span class="text-[10px] font-extrabold uppercase text-sky-400 block"
+            >Planificador Diario por Bloques</span
+          >
+          <h3 class="font-extrabold text-sm">
+            Mi Horario de Trabajo y Agenda del Día
+          </h3>
+          <p class="text-[11px] text-slate-400">
+            Mete tu horario laboral, agrega tareas manuales por hora o deja que
+            la IA acomode tus tickets, sesiones y pendientes.
+          </p>
+        </div>
+        <button
+          onclick="autoOrganizeDayScheduleWithAI()"
+          id="btnAutoScheduleAI"
+          class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-black shadow transition flex items-center gap-1.5"
+        >
+          <i class="fi fi-rr-magic-wand"></i>
+          <span>Auto-Agendar Día con IA</span>
+        </button>
+      </div>
+
+      <!-- Configuración de Horario de Trabajo -->
+      <div
+        class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 grid grid-cols-2 sm:grid-cols-4 gap-2 items-end text-xs"
+      >
+        <div>
+          <label
+            class="text-[10px] font-bold uppercase text-slate-400 block mb-1"
+            >Entrada Trabajo</label
+          >
+          <input
+            type="time"
+            id="workStartHourInput"
+            value="09:00"
+            onchange="saveWorkHoursConfig()"
+            class="w-full px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none"
+          />
+        </div>
+        <div>
+          <label
+            class="text-[10px] font-bold uppercase text-slate-400 block mb-1"
+            >Salida Trabajo</label
+          >
+          <input
+            type="time"
+            id="workEndHourInput"
+            value="18:00"
+            onchange="saveWorkHoursConfig()"
+            class="w-full px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none"
+          />
+        </div>
+        <button
+          onclick="importPendingTasksAndTicketsToSchedule()"
+          class="py-2 px-2.5 rounded-xl bg-blue-500/15 text-blue-400 border border-blue-500/30 font-extrabold text-[11px] hover:bg-blue-500/25 transition"
+        >
+          📥 Traer Tickets y Tareas
+        </button>
+        <button
+          onclick="clearCompletedScheduleBlocks()"
+          class="py-2 px-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-[11px] transition"
+        >
+          Limpiar Terminados
+        </button>
+      </div>
+
+      <!-- Agregar Bloque Manual a la Agenda -->
+      <div
+        class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 space-y-2"
+      >
+        <span class="text-[10px] font-extrabold uppercase text-slate-400 block"
+          >+ Agregar Bloque o Tarea Manual a tu Agenda de Hoy</span
+        >
+        <div class="grid grid-cols-2 sm:grid-cols-6 gap-2 text-xs">
+          <input
+            type="time"
+            id="schedBlockStart"
+            value="09:00"
+            class="px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none"
+            title="Hora inicio"
+          />
+          <input
+            type="time"
+            id="schedBlockEnd"
+            value="10:00"
+            class="px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none"
+            title="Hora fin"
+          />
+          <select
+            id="schedBlockType"
+            class="px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none"
+          >
+            <option value="ticket">🎫 Ticket / Bug</option>
+            <option value="session">📹 Sesión / Junta</option>
+            <option value="task">📌 Tarea / Formato</option>
+            <option value="break">☕ Comida / Pausa</option>
+          </select>
+          <input
+            type="text"
+            id="schedBlockTitle"
+            onkeydown="if (event.key === 'Enter') addManualScheduleBlock();"
+            placeholder="Descripción de la actividad, sesión o ticket..."
+            class="col-span-2 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-semibold outline-none"
+          />
+          <button
+            onclick="addManualScheduleBlock()"
+            class="py-2 px-3 rounded-xl bg-terra-500 hover:bg-terra-600 text-white font-black text-xs shadow-sm transition"
+          >
+            + Agendar
+          </button>
+        </div>
+      </div>
+
+      <!-- Línea de Tiempo del Día -->
+      <div id="dailyScheduleTimeline" class="space-y-2.5 pt-1"></div>
+    </div>
+  </div>
+
+  <!-- SUB-SECCIÓN 2: CONEXIÓN DE CORREO & WHATSAPP LABORAL (SOLO TRABAJO: TICKETS, SESIONES Y PENDIENTES) -->
+  <div id="focusSubView-inbox" class="space-y-4 hidden subview-anim-enter">
+    <div
+      class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-4"
+    >
+      <div>
+        <span
+          class="text-[10px] font-extrabold uppercase text-emerald-400 block"
+          >Sincronizador Inteligente de Correo y WhatsApp</span
+        >
+        <h3 class="font-extrabold text-sm">
+          Detector de Tickets, Sesiones y Pendientes (Solo Trabajo)
+        </h3>
+        <p class="text-[11px] text-slate-400">
+          Conecta tu correo y número o pega cualquier correo/mensaje de WhatsApp
+          o captura: la IA ignora pláticas personales y ordena únicamente tus
+          Tickets, Sesiones y Tareas del trabajo.
+        </p>
+      </div>
+
+      <!-- CONECTOR API WHATSAPP BIDIRECCIONAL (GREEN-API + CALLMEBOT) Y FILTRO POR PERSONA/GRUPO -->
+      <div
+        class="p-4 rounded-2xl bg-emerald-500/5 border-2 border-emerald-500/30 space-y-3 text-xs"
+      >
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <span
+              class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-black"
+              >📲</span
+            >
+            <div>
+              <span
+                class="text-[10px] font-black uppercase text-emerald-400 block"
+                >API Recomendada: Green-API (Lectura de Grupos + Envío
+                Directo)</span
+              >
+              <h4 class="font-extrabold text-xs">
+                Conexión Directa con tu WhatsApp y Grupo de Trabajo
+              </h4>
+            </div>
+          </div>
+          <span
+            id="waApiStatusBadge"
+            class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-400"
+            >Sin vincular</span
+          >
+        </div>
+
+        <!-- Filtro Inteligente de tus Asignaciones y Tickets -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <div>
+            <label
+              class="text-[10px] font-bold uppercase text-emerald-400 block mb-1"
+              >👤 Mi Nombre/Alias (Solo lo que me pidan a mí)</label
+            >
+            <input
+              type="text"
+              id="workAliasFilterInput"
+              placeholder="Ej. Allan, @Allan, Ing..."
+              onchange="saveWorkContactSyncConfig()"
+              class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none border border-emerald-500/30"
+            />
+          </div>
+          <div>
+            <label
+              class="text-[10px] font-bold uppercase text-slate-400 block mb-1"
+              >🎫 Palabras Clave / Tickets</label
+            >
+            <input
+              type="text"
+              id="workKeywordsConfigInput"
+              placeholder="Ej. ticket, folio, urgente, junta, apoyo..."
+              onchange="saveWorkContactSyncConfig()"
+              class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-semibold outline-none border border-slate-200 dark:border-slate-700"
+            />
+          </div>
+          <div>
+            <label
+              class="text-[10px] font-bold uppercase text-slate-400 block mb-1"
+              >📱 Mi Número WhatsApp (Código país + núm)</label
+            >
+            <input
+              type="tel"
+              id="workPhoneConfigInput"
+              placeholder="Ej. 5215512345678"
+              onchange="saveWorkContactSyncConfig()"
+              class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none border border-slate-200 dark:border-slate-700"
+            />
+          </div>
+        </div>
+
+        <!-- Credenciales API (Desplegable limpio para no saturar la vista) -->
+        <details
+          class="bg-white/70 dark:bg-slate-900/80 rounded-2xl p-3 border border-slate-200 dark:border-slate-800"
+        >
+          <summary
+            class="font-extrabold text-[11px] cursor-pointer text-emerald-400 flex items-center justify-between"
+          >
+            <span
+              >⚙️ Configurar Credenciales API de WhatsApp (Green-API /
+              CallMeBot) y Correo</span
+            >
+            <span class="text-[10px] underline">Abrir / Editar</span>
+          </summary>
+          <div
+            class="mt-3 space-y-2.5 pt-2 border-t border-slate-200 dark:border-slate-800"
+          >
+            <p class="text-[10px] text-slate-400 leading-relaxed">
+              •
+              <strong
+                >Green-API (Recomendada, gratuita en
+                <code>green-api.com</code>)</strong
+              >: Vinculas tu WhatsApp con QR y te da un
+              <code>idInstance</code> y <code>apiTokenInstance</code>. Permite
+              <strong>leer mensajes de tu Grupo de Trabajo/Contactos</strong> y
+              <strong>enviarte mensajes automáticos</strong>.<br />
+              • <strong>CallMeBot (Opcional)</strong>: Si solo quieres recibir
+              WhatsApps automáticos sin instancia QR, pon tu
+              <code>CallMeBot API Key</code>.
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div>
+                <label
+                  class="text-[9px] font-bold uppercase text-slate-400 block mb-0.5"
+                  >Green-API idInstance</label
+                >
+                <input
+                  type="text"
+                  id="greenApiIdInput"
+                  placeholder="Ej. 7103948572"
+                  onchange="saveWorkContactSyncConfig()"
+                  class="w-full px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 font-mono text-[11px] outline-none"
+                />
+              </div>
+              <div>
+                <label
+                  class="text-[9px] font-bold uppercase text-slate-400 block mb-0.5"
+                  >Green-API apiTokenInstance</label
+                >
+                <input
+                  type="password"
+                  id="greenApiTokenInput"
+                  placeholder="Tu token de Green-API..."
+                  onchange="saveWorkContactSyncConfig()"
+                  class="w-full px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 font-mono text-[11px] outline-none"
+                />
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end">
+              <div class="sm:col-span-2">
+                <label
+                  class="text-[9px] font-bold uppercase text-slate-400 block mb-0.5"
+                  >Grupo de Trabajo o Contacto a Leer (Selecciona o escribe
+                  ID)</label
+                >
+                <div class="flex gap-1.5">
+                  <select
+                    id="greenApiChatsDropdown"
+                    onchange="selectGreenApiChat(this.value)"
+                    class="flex-1 px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-[11px] font-bold outline-none"
+                  >
+                    <option value="">
+                      Todos mis mensajes entrantes recientes
+                    </option>
+                  </select>
+                  <button
+                    onclick="fetchWhatsAppChatsListViaAPI()"
+                    class="px-2.5 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-extrabold shrink-0"
+                  >
+                    Cargar Grupos
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label
+                  class="text-[9px] font-bold uppercase text-slate-400 block mb-0.5"
+                  >ID Chat / Grupo Manual</label
+                >
+                <input
+                  type="text"
+                  id="greenApiChatIdInput"
+                  placeholder="Ej. 120363...@g.us"
+                  onchange="saveWorkContactSyncConfig()"
+                  class="w-full px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 font-mono text-[11px] outline-none"
+                />
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+              <div>
+                <label
+                  class="text-[9px] font-bold uppercase text-slate-400 block mb-0.5"
+                  >CallMeBot API Key (Envío rápido opcional)</label
+                >
+                <input
+                  type="password"
+                  id="callMeBotKeyInput"
+                  placeholder="Ej. 1234567"
+                  onchange="saveWorkContactSyncConfig()"
+                  class="w-full px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 font-mono text-[11px] outline-none"
+                />
+              </div>
+              <div>
+                <label
+                  class="text-[9px] font-bold uppercase text-slate-400 block mb-0.5"
+                  >📧 Mi Correo Laboral</label
+                >
+                <input
+                  type="email"
+                  id="workEmailConfigInput"
+                  placeholder="ejemplo@empresa.com"
+                  onchange="saveWorkContactSyncConfig()"
+                  class="w-full px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-[11px] outline-none"
+                />
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <!-- Botones de Acción Directa por API -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+          <button
+            onclick="syncIncomingWhatsAppMessagesViaAPI()"
+            id="btnPullWhatsApi"
+            class="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-sm transition flex items-center justify-center gap-1.5"
+          >
+            <i class="fi fi-rr-refresh"></i>
+            <span>Leer Grupo/Contactos por API y Filtrar Mis Tareas</span>
+          </button>
+          <button
+            onclick="sendWhatsAppDirectViaAPI()"
+            id="btnSendWhatsApi"
+            class="py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs shadow-sm transition flex items-center justify-center gap-1.5"
+          >
+            <i class="fi fi-rr-paper-plane"></i>
+            <span>Enviarme Pendientes y Tickets por API a mi Whats</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Escáner IA de Correos, Mensajes de WhatsApp y Capturas -->
+      <div
+        class="p-4 rounded-2xl bg-blue-500/5 border border-blue-500/30 space-y-3"
+      >
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <span
+            class="text-xs font-black text-blue-400 flex items-center gap-1.5"
+          >
+            <i class="fi fi-rr-sparkles"></i>
+            <span>Pegar Correos / Mensajes de WhatsApp o Subir Captura</span>
+          </span>
+          <div class="flex items-center gap-2">
+            <label
+              class="cursor-pointer px-2.5 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px] font-extrabold flex items-center gap-1"
+              title="Subir archivo .txt de chat exportado de WhatsApp"
+            >
+              <i class="fi fi-rr-document"></i>
+              <span>Chat .TXT</span>
+              <input
+                type="file"
+                id="workInboxTxtInput"
+                accept=".txt"
+                class="hidden"
+                onchange="handleWhatsAppTxtFileUpload(event)"
+              />
+            </label>
+            <label
+              class="cursor-pointer px-2.5 py-1.5 rounded-xl bg-blue-500/15 text-blue-400 border border-blue-500/30 text-[10px] font-extrabold flex items-center gap-1"
+            >
+              <i class="fi fi-rr-camera"></i>
+              <span>Foto de Correo/Whats</span>
+              <input
+                type="file"
+                id="workInboxImageInput"
+                accept="image/*"
+                class="hidden"
+                onchange="handleWorkInboxImageUpload(event)"
+              />
+            </label>
+            <span
+              id="workInboxImageBadge"
+              class="hidden text-[10px] font-extrabold text-emerald-400"
+              >✓ Captura lista</span
+            >
+          </div>
+        </div>
+
+        <textarea
+          id="rawWorkInboxPaste"
+          rows="3"
+          placeholder="Pega aquí correos del trabajo, mensajes de WhatsApp de tu jefa/equipo o alertas de tickets. La IA filtrará solo lo laboral y lo separará en Tickets, Sesiones y Pendientes con hora..."
+          class="w-full p-3 rounded-xl bg-white dark:bg-slate-900 text-xs outline-none border border-slate-200 dark:border-slate-700"
+        ></textarea>
+
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <button
+            onclick="loadSampleWorkEmailsAndWhats()"
+            class="text-[11px] font-bold text-slate-400 hover:text-blue-400 underline"
+          >
+            Cargar ejemplo de Correo + WhatsApp laboral
+          </button>
+          <button
+            onclick="extractWorkItemsWithAI(true)"
+            id="btnScanWorkInboxAI"
+            class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-md transition flex items-center gap-1.5"
+          >
+            <i class="fi fi-rr-bolt"></i>
+            <span>Extraer Tickets/Sesiones y Sincronizar Agenda</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Registro Manual Rápido de Ticket / Sesión / Pendiente -->
+      <div
+        class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-2"
+      >
+        <span class="text-[10px] font-extrabold uppercase text-slate-400 block"
+          >+ Agregar Ticket, Sesión o Pendiente Manualmente</span
+        >
+        <div class="grid grid-cols-2 sm:grid-cols-6 gap-2 text-xs">
+          <select
+            id="manualWorkItemCategory"
+            class="px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none"
+          >
+            <option value="ticket">🎫 Ticket</option>
+            <option value="session">📹 Sesión / Junta</option>
+            <option value="task">📌 Pendiente</option>
+          </select>
+          <input
+            type="text"
+            id="manualWorkItemCode"
+            placeholder="Folio (ej. TK-104)"
+            class="px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-semibold outline-none"
+          />
+          <input
+            type="text"
+            id="manualWorkItemTitle"
+            onkeydown="if (event.key === 'Enter') addManualWorkInboxItem();"
+            placeholder="Asunto del ticket, sesión o correo..."
+            class="col-span-2 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 font-semibold outline-none"
+          />
+          <input
+            type="time"
+            id="manualWorkItemTime"
+            value="11:00"
+            class="px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 font-bold outline-none"
+          />
+          <button
+            onclick="addManualWorkInboxItem()"
+            class="py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs transition"
+          >
+            + Guardar
+          </button>
+        </div>
+      </div>
+
+      <!-- Filtros por Categoría + Envío a WhatsApp y Correo -->
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex flex-wrap gap-1.5">
+          <button
+            onclick="filterWorkInbox('all')"
+            id="winbox-filter-all"
+            class="px-3 py-1.5 rounded-xl text-[11px] font-black bg-terra-500 text-white"
+          >
+            Todos
+          </button>
+          <button
+            onclick="filterWorkInbox('ticket')"
+            id="winbox-filter-ticket"
+            class="px-3 py-1.5 rounded-xl text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-400"
+          >
+            🎫 Tickets
+          </button>
+          <button
+            onclick="filterWorkInbox('session')"
+            id="winbox-filter-session"
+            class="px-3 py-1.5 rounded-xl text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-400"
+          >
+            📹 Sesiones
+          </button>
+          <button
+            onclick="filterWorkInbox('task')"
+            id="winbox-filter-task"
+            class="px-3 py-1.5 rounded-xl text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-400"
+          >
+            📌 Pendientes
+          </button>
+        </div>
+        <div class="flex gap-1.5">
+          <button
+            onclick="sendDailyWorkBriefToWhatsApp()"
+            class="px-2.5 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px] font-extrabold"
+          >
+            📲 Mandar a mi Whats
+          </button>
+          <button
+            onclick="sendDailyWorkBriefToEmail()"
+            class="px-2.5 py-1.5 rounded-xl bg-blue-500/15 text-blue-400 border border-blue-500/30 text-[10px] font-extrabold"
+          >
+            📧 Mandar a mi Correo
+          </button>
+        </div>
+      </div>
+
+      <!-- Lista de Elementos Laborales Extraídos -->
+      <div id="workInboxItemsList" class="space-y-2.5"></div>
+    </div>
+  </div>
+
+  <!-- SUB-SECCIÓN 3: TAREAS OFICIALES, POMODORO Y GENERADOR PDF (100% PRESERVADO) -->
+  <div id="focusSubView-tasks" class="space-y-4 hidden subview-anim-enter">
+    <div
+      class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 flex items-center justify-between"
+    >
+      <div>
+        <span
+          id="pomoStatusBadge"
+          class="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-full font-bold"
+          >Deep Focus 25m</span
+        >
+        <div
+          id="pomoDisplay"
+          class="text-3xl font-black font-mono text-blue-500 mt-1"
+        >
+          25:00
+        </div>
+      </div>
+      <div class="flex gap-1.5">
+        <button
+          onclick="togglePomodoro()"
+          id="pomoStartBtn"
+          class="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl"
+        >
+          Iniciar
+        </button>
+        <button
+          onclick="setPomodoroMode(25, 'Enfoque 25m')"
+          class="px-2.5 py-2 bg-slate-100 dark:bg-slate-800 text-xs font-bold rounded-xl"
+        >
+          25m
+        </button>
+        <button
+          onclick="setPomodoroMode(5, 'Descanso 5m')"
+          class="px-2.5 py-2 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-xl"
+        >
+          5m
+        </button>
+      </div>
+    </div>
+
+    <div
+      class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3"
+    >
+      <div class="flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <i class="fi fi-rr-briefcase text-blue-500"></i>
+          <div>
+            <h2 class="font-extrabold text-sm">
+              Actividades de Trabajo y Alarmas
+            </h2>
+            <p class="text-[11px] text-slate-400">
+              Agrega tus tareas, adjunta capturas y genera tu PDF oficial.
+            </p>
+          </div>
+        </div>
+        <button
+          onclick="enableBrowserNotifications()"
+          id="notifPermBtn"
+          class="text-[10px] bg-blue-500/15 text-blue-400 px-2.5 py-1 rounded-xl font-bold flex items-center gap-1"
+        >
+          <i class="fi fi-rr-bell"></i> <span>Alertas</span>
+        </button>
+      </div>
+
+      <div class="space-y-2">
+        <input
+          id="newTaskInput"
+          type="text"
+          placeholder="Tarea o actividad (ej. Solicitar junta con PLS / Escaneo de documentos)..."
+          class="w-full px-3.5 py-2.5 text-xs rounded-2xl bg-slate-100 dark:bg-slate-800 outline-none"
+        />
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-0.5"
+              >Hora Alarma</label
+            >
+            <input
+              id="newTaskTime"
+              type="time"
+              class="w-full px-2 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 outline-none font-bold"
+            />
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-0.5"
+              >Solicita</label
+            >
+            <input
+              id="newTaskSolicita"
+              type="text"
+              placeholder="Ej. Lucia"
+              class="w-full px-2.5 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 outline-none"
+            />
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-0.5"
+              >Núm. / Folio</label
+            >
+            <input
+              id="newTaskProject"
+              type="text"
+              placeholder="Ej. Tarea 1"
+              class="w-full px-2.5 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 outline-none"
+            />
+          </div>
+        </div>
+        <button
+          onclick="addTask()"
+          class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs rounded-2xl transition"
+        >
+          + Agregar Actividad Laboral
+        </button>
+      </div>
+
+      <div id="tasksList" class="space-y-2.5 pt-2"></div>
+    </div>
+
+    <!-- PANEL DE EXPORTACIÓN A PLANTILLA PDF OFICIAL -->
+    <div
+      class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border-2 border-blue-500/30 space-y-3"
+    >
+      <div class="flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <i class="fi fi-rr-file-pdf text-blue-400"></i>
+          <div>
+            <h2 class="font-extrabold text-sm text-blue-400">
+              Generar PDF (Plantilla Individual por Tarea)
+            </h2>
+            <p class="text-[11px] text-slate-400">
+              Genera el documento con tabla oficial y fotos de evidencia.
+            </p>
+          </div>
+        </div>
+        <span
+          id="workReportCountBadge"
+          class="text-[10px] font-bold bg-blue-500/15 text-blue-400 px-2.5 py-1 rounded-full"
+          >0 tareas</span
+        >
+      </div>
+
+      <div class="grid grid-cols-1 gap-2">
+        <button
+          onclick="downloadOfficialTasksPDF()"
+          class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs rounded-2xl shadow-lg transition flex items-center justify-center gap-2"
+        >
+          <i class="fi fi-rr-download"></i>
+          <span>Descargar PDF Oficial de Tareas Seleccionadas</span>
+        </button>
+        <div class="grid grid-cols-2 gap-2">
+          <button
+            onclick="copyWorkFormatReport()"
+            class="py-2 bg-slate-100 dark:bg-slate-800 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5"
+          >
+            <i class="fi fi-rr-copy-alt"></i> <span>Copiar Texto</span>
+          </button>
+          <button
+            onclick="downloadWorkFormatCSV()"
+            class="py-2 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5"
+          >
+            <i class="fi fi-rr-file-excel"></i> <span>Bajar Excel (CSV)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,342 @@
+<section id="tab-tutor" class="space-y-3.5 pb-10 hidden">
+  <!-- 1. TARJETA SUPERIOR BIEN PROPORCIONADA (SIN HUECOS NI TEXTO APLASTADO) -->
+  <div
+    class="bg-white dark:bg-slate-900 rounded-3xl p-4 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3 card-minimal-anim"
+  >
+    <div class="flex items-center justify-between gap-2">
+      <div class="min-w-0 flex-1">
+        <span
+          class="text-[10px] font-extrabold uppercase tracking-wider text-terra-500 block"
+          >Academia Interactiva Multi-Materia</span
+        >
+        <h2
+          class="text-base sm:text-lg font-black tracking-tight flex items-center gap-2 truncate"
+        >
+          <i class="fi fi-rr-graduation-cap text-terra-500 shrink-0"></i>
+          <span class="truncate">Tu Profe Personal IA</span>
+        </h2>
+      </div>
+      <div class="flex items-center gap-1.5 shrink-0">
+        <span
+          id="tutorStreakBadge"
+          onclick="
+            triggerStreakCelebration(
+              '🔥 Racha de Estudio Activa',
+              'Se incrementa 1 vez por cada día calendario estudiado',
+            )
+          "
+          class="cursor-pointer text-[11px] font-black bg-terra-500/15 text-terra-500 px-2.5 py-1 rounded-xl inline-flex items-center gap-1 whitespace-nowrap"
+          title="Racha por día calendario estudiado"
+        >
+          <i class="fi fi-sr-flame"></i> <span>0d racha</span>
+        </span>
+        <span
+          id="tutorXpBadge"
+          class="text-[11px] font-black bg-amber-500/15 text-amber-400 px-2.5 py-1 rounded-xl inline-flex items-center gap-1 whitespace-nowrap"
+        >
+          <i class="fi fi-sr-star"></i> <span>0 XP</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- SUBTÍTULO Y PROGRESO DE LA MATERIA EN LÍNEA COMPLETA PARA NO APLASTAR EL TÍTULO -->
+    <div
+      class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-slate-100/80 dark:bg-slate-800/60 text-[11px]"
+    >
+      <span class="text-slate-400 font-semibold truncate"
+        >Progreso en materia activa:</span
+      >
+      <span
+        id="tutorProgressBadge"
+        class="text-slate-700 dark:text-slate-200 font-extrabold truncate max-w-[210px]"
+        >0 lecciones</span
+      >
+    </div>
+
+    <!-- SELECTOR DE MATERIAS GUARDADAS (TRUNCADO LIMPIO PARA NOMBRES LARGOS) -->
+    <div class="space-y-2 pt-1 border-t border-slate-100 dark:border-slate-800">
+      <div class="flex items-center justify-between gap-2">
+        <span class="text-[10px] font-extrabold uppercase text-slate-400"
+          >Tus Materias (Toca para cambiar)</span
+        >
+        <button
+          onclick="toggleNewSubjectBox()"
+          class="text-[10px] font-extrabold text-terra-500 bg-terra-500/10 hover:bg-terra-500/20 px-2.5 py-1 rounded-lg flex items-center gap-1 shrink-0"
+        >
+          <i class="fi fi-rr-plus-small"></i> <span>Nueva Materia</span>
+        </button>
+      </div>
+
+      <div
+        id="tutorSubjectPills"
+        class="flex gap-2 overflow-x-auto no-scrollbar py-0.5"
+      ></div>
+
+      <!-- CAJA PARA CREAR UNA MATERIA NUEVA DESDE LECCIÓN 1 -->
+      <div
+        id="newSubjectCreatorBox"
+        class="hidden p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-terra-500/40 space-y-2 subview-anim-enter"
+      >
+        <span class="text-[10px] font-extrabold uppercase text-terra-500 block"
+          >Agregar Nueva Materia (Inicia en Lección #1)</span
+        >
+        <div class="grid grid-cols-1 gap-2">
+          <input
+            id="newSubjectNameInput"
+            type="text"
+            placeholder="Ej. Cálculo / Python / Inglés / Investigación de Operaciones..."
+            class="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-slate-900 font-bold outline-none"
+          />
+          <div class="flex gap-2">
+            <button
+              onclick="createNewTutorSubject()"
+              class="flex-1 py-2 bg-terra-500 text-white font-extrabold text-xs rounded-xl"
+            >
+              Crear e Ir a Lección 1
+            </button>
+            <button
+              onclick="toggleNewSubjectBox()"
+              class="px-3 py-2 bg-slate-300 dark:bg-slate-700 text-xs font-bold rounded-xl"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BANNER INTERACTIVO DE CANDADO / PASO DE NIVEL -->
+    <div
+      id="tutorLevelGateBanner"
+      onclick="handleLevelGateBannerClick()"
+      class="cursor-pointer hover:border-terra-500 flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-2xl bg-terra-500/10 border border-terra-500/30 text-[11px] transition"
+    >
+      <span
+        id="tutorGateStatusLabel"
+        class="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 truncate"
+        >Siguiente nivel:</span
+      >
+      <span
+        id="tutorNextLessonBtnLabel"
+        class="font-black text-terra-500 bg-terra-500/15 px-2.5 py-1 rounded-lg whitespace-nowrap shrink-0"
+        >Generar Lección #1</span
+      >
+    </div>
+
+    <div class="grid grid-cols-2 gap-2">
+      <button
+        id="tutorLessonBtn"
+        onclick="startTutorSession('lesson')"
+        class="py-2.5 bg-gradient-to-r from-terra-500 to-amber-500 hover:from-terra-600 hover:to-amber-600 text-white font-black text-xs rounded-2xl shadow-md transition flex items-center justify-center gap-1.5"
+      >
+        <i class="fi fi-rr-play-alt"></i>
+        <span>Darme Clase + Examen</span>
+      </button>
+      <button
+        id="tutorReviewBtn"
+        onclick="startTutorSession('review')"
+        class="py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs rounded-2xl shadow-md transition flex items-center justify-center gap-1.5"
+      >
+        <i class="fi fi-rr-check-circle"></i>
+        <span>Revisar Tarea/Código</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. BARRA MULTITAREA ESTÁTICA ARRIBA (COMO EN HÁBITOS, FIJA EN EL FLUJO SUPERIOR Y SIN IRSE HASTA ABAJO) -->
+  <div
+    id="tutorBottomMultitaskDock"
+    class="fixed-bottom-dock bg-white/95 dark:bg-slate-900/95 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm grid grid-cols-4 gap-1 text-[11px] font-extrabold"
+  >
+    <button
+      onclick="switchTutorSubTab('map')"
+      id="tbottom-map"
+      class="py-2 px-1.5 rounded-xl flex items-center justify-center gap-1.5 bg-terra-500 text-white shadow-sm transition"
+    >
+      <i class="fi fi-sr-map-marker-home text-xs"></i>
+      <span class="truncate">Mapa</span>
+    </button>
+    <button
+      onclick="switchTutorSubTab('lesson')"
+      id="tbottom-lesson"
+      class="py-2 px-1.5 rounded-xl flex items-center justify-center gap-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+    >
+      <i class="fi fi-rr-book-open-cover text-xs"></i>
+      <span class="truncate">Clase</span>
+    </button>
+    <button
+      onclick="switchTutorSubTab('practice')"
+      id="tbottom-practice"
+      class="py-2 px-1.5 rounded-xl flex items-center justify-center gap-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+    >
+      <i class="fi fi-rr-laptop-code text-xs"></i>
+      <span id="tbottomPracticeLabel" class="truncate">Práctica</span>
+    </button>
+    <button
+      onclick="switchTutorSubTab('exam')"
+      id="tbottom-exam"
+      class="py-2 px-1.5 rounded-xl flex items-center justify-center gap-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition relative"
+    >
+      <i class="fi fi-rr-trophy text-xs"></i>
+      <span class="truncate">Examen</span>
+      <span
+        id="tbottomExamDot"
+        class="hidden w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0"
+      ></span>
+    </button>
+  </div>
+
+  <!-- SUB-SECCIÓN 1: MAPA DE SAGA CANDY CRUSH + CONFIGURACIÓN DE MATERIA + ALERTA DE RACHA -->
+  <div id="tutorSubView-map" class="space-y-3.5 subview-anim-enter">
+    <!-- MAPA DE NIVELES ESTILO CANDY CRUSH BIEN CENTRADO -->
+    <div
+      class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border-2 border-amber-500/30 space-y-3 candy-map-bg card-minimal-anim"
+    >
+      <div class="flex items-start justify-between gap-2">
+        <div class="flex items-start gap-2 min-w-0 flex-1">
+          <i
+            class="fi fi-sr-map-marker-home text-amber-400 text-base mt-0.5 shrink-0"
+          ></i>
+          <div class="min-w-0 flex-1">
+            <h3
+              class="font-extrabold text-sm leading-snug break-words"
+              id="candyMapSubjectTitle"
+            >
+              Mapa de Niveles
+            </h3>
+            <p class="text-[10px] text-slate-400 mt-0.5">
+              Toca cualquier lección desbloqueada para abrirla o repasar.
+            </p>
+          </div>
+        </div>
+        <span
+          id="candyMapStarsCount"
+          class="text-xs font-black text-amber-400 bg-amber-500/15 px-2.5 py-1 rounded-xl whitespace-nowrap shrink-0"
+          >★ 0</span
+        >
+      </div>
+      <div id="tutorCandyMapContainer" class="py-2 overflow-hidden"></div>
+    </div>
+
+    <!-- AJUSTES DE LA MATERIA ACTIVA Y APUNTES -->
+    <div
+      class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3 card-minimal-anim"
+    >
+      <div class="flex items-center justify-between">
+        <span class="text-[10px] font-extrabold uppercase text-slate-400"
+          >Configuración de la Materia Activa</span
+        >
+        <span class="text-[10px] text-terra-500 font-bold"
+          >Personaliza tu clase</span
+        >
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+        <div>
+          <label
+            class="text-[10px] font-bold uppercase text-slate-400 block mb-1"
+            >Nombre de Materia Activa</label
+          >
+          <input
+            id="tutorSubjectInput"
+            type="text"
+            placeholder="Ej. Inglés / Python / Matemáticas"
+            onchange="saveTutorConfig()"
+            class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold outline-none"
+          />
+        </div>
+        <div>
+          <label
+            class="text-[10px] font-bold uppercase text-slate-400 block mb-1"
+            >Tu Nivel en esta Materia</label
+          >
+          <select
+            id="tutorLevelSelect"
+            onchange="saveTutorConfig()"
+            class="w-full px-2.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold outline-none"
+          >
+            <option value="Desde Cero (Principiante Absoluto)">
+              Desde 0 (Principiante)
+            </option>
+            <option value="Básico (A1/A2 - Fundamentos)">
+              Básico (Fundamentos)
+            </option>
+            <option value="Intermedio (B1/B2 - Práctico)">
+              Intermedio (Práctico)
+            </option>
+            <option value="Avanzado (C1/Senior)">Avanzado</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1"
+          >Objetivo o Tema Específico para la clase</label
+        >
+        <input
+          id="tutorGoalInput"
+          type="text"
+          placeholder="Ej. Dominar método Simplex / Derivadas / Verbos en pasado..."
+          onchange="saveTutorConfig()"
+          class="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 outline-none"
+        />
+      </div>
+
+      <div
+        class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2.5"
+      >
+        <div class="flex justify-between items-center">
+          <span
+            class="text-[10px] font-extrabold uppercase text-blue-400 flex items-center gap-1.5"
+          >
+            <i class="fi fi-rr-clip"></i>
+            <span>Tus Apuntes, Tarea o Código (Opcional)</span>
+          </span>
+          <label
+            class="px-2.5 py-1 bg-blue-500/15 text-blue-400 border border-blue-500/30 rounded-lg text-[10px] font-bold cursor-pointer flex items-center gap-1 shrink-0"
+          >
+            <i class="fi fi-rr-camera"></i>
+            <span>Foto de Apuntes</span>
+            <input
+              type="file"
+              accept="image/*"
+              id="tutorImageInput"
+              onchange="handleTutorImageUpload(event)"
+              class="hidden"
+            />
+          </label>
+        </div>
+        <textarea
+          id="tutorNotesInput"
+          rows="2"
+          placeholder="Pega aquí tu código, problema matemático, ejercicio a revisar o duda..."
+          class="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-slate-900 outline-none resize-none font-mono"
+        ></textarea>
+
+        <div
+          id="tutorPhotoPreviewBox"
+          class="hidden flex items-center justify-between bg-slate-900 p-2 rounded-xl border border-blue-500/40"
+        >
+          <div class="flex items-center gap-2">
+            <img
+              id="tutorPhotoThumb"
+              src=""
+              class="w-10 h-10 object-cover rounded-lg"
+            />
+            <span class="text-[11px] text-blue-300 font-bold"
+              >Foto de apunte cargada</span
+            >
+          </div>
+          <button
+            onclick="clearTutorPhoto()"
+            class="text-[10px] bg-rose-600 text-white px-2 py-1 rounded font-bold"
+          >
+            Quitar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENEDOR DINÁMICO DE LA LECCIÓN (CLASE, PRÁCTICA/IDE/FÓRMULAS, EXAMEN) -->
+  <div id="tutorLessonContainer" class="space-y-3.5 hidden"></div>
+</section>

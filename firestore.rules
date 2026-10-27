@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function owns(uid) { return request.auth != null && request.auth.uid == uid; }
+    // Compatibility: the legacy document remains available to its owner.
+    match /tcc_users/{uid} {
+      allow read, write: if owns(uid);
+      match /v2_records/{recordId} {
+        allow read, delete: if owns(uid);
+        allow create, update: if owns(uid)
+          && request.resource.data.keys().hasOnly(['key','path','order','deleted','opId','updatedAt','value'])
+          && request.resource.data.keys().hasAll(['key','path','order','deleted','opId','updatedAt'])
+          && request.resource.data.key is string
+          && request.resource.data.path is list
+          && request.resource.data.path.size() > 0
+          && request.resource.data.path.size() <= 6
+          && request.resource.data.deleted is bool
+          && request.resource.data.opId is string
+          && request.resource.data.updatedAt == request.time;
+      }
+    }
+    // Integrations, quota and reminders: Admin SDK only.
+    match /tcc_private/{document=**} { allow read, write: if false; }
+    match /{document=**} { allow read, write: if false; }
+  }
+}
